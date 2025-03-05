@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { supabase } from '@/lib/supabase';
 
@@ -97,47 +96,83 @@ export const profileAPI = {
 // Content APIs
 export const contentAPI = {
   getFeatureContent: async () => {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero:generos(*))
-      `)
-      .eq('status', 'ativo')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('conteudos')
+        .select(`
+          *,
+          generos:conteudo_generos(genero:generos(*))
+        `)
+        .eq('status', 'ativo')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (error) throw error;
       
-    if (error) throw error;
-    return data;
+      // Adding proper error logging
+      if (!data) {
+        console.warn('No featured content found');
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching featured content:', error);
+      return null;
+    }
   },
   
   getTrendingContent: async (limit = 10) => {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero:generos(*))
-      `)
-      .eq('status', 'ativo')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('conteudos')
+        .select(`
+          *,
+          generos:conteudo_generos(genero:generos(*))
+        `)
+        .eq('status', 'ativo')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+        
+      if (error) throw error;
       
-    if (error) throw error;
-    return data || [];
+      // Ensure we always return an array of ContentItem objects
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching trending content:', error);
+      return [];
+    }
   },
   
   getContentByGenre: async (genreId: string, limit = 10) => {
-    const { data, error } = await supabase
-      .from('conteudo_generos')
-      .select(`
-        conteudo:conteudos(*)
-      `)
-      .eq('genero_id', genreId)
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('conteudo_generos')
+        .select(`
+          conteudo:conteudos(*)
+        `)
+        .eq('genero_id', genreId)
+        .limit(limit);
+        
+      if (error) throw error;
       
-    if (error) throw error;
-    return data?.map(item => item.conteudo) || [];
+      // Flatten and type-check the response to ensure we have a valid ContentItem array
+      if (!data || !Array.isArray(data)) {
+        console.warn(`No content found for genre ${genreId}`);
+        return [];
+      }
+      
+      // Properly extract and flatten the content items
+      const contentItems = data
+        .map(item => item.conteudo)
+        .filter(item => item && typeof item === 'object' && 'id' in item);
+      
+      return contentItems;
+    } catch (error) {
+      console.error(`Error fetching content for genre ${genreId}:`, error);
+      return [];
+    }
   },
   
   getContentById: async (contentId: string) => {

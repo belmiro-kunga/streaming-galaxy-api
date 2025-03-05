@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -58,7 +57,7 @@ const Home = () => {
         const contentGenres: { [key: string]: ContentItem[] } = {};
         for (const genre of genresData.slice(0, 8)) {
           const content = await contentAPI.getContentByGenre(genre.id, 10);
-          contentGenres[genre.id] = content;
+          contentGenres[genre.id] = Array.isArray(content) ? content.filter(item => !!item) as ContentItem[] : [];
         }
         setContentByGenre(contentGenres);
 
@@ -91,35 +90,46 @@ const Home = () => {
     setActiveTab(value);
   };
 
-  // Helper function to render content cards
   const renderContentCards = (content: ContentItem[]) => {
-    return content.map((item) => (
-      <motion.div
-        key={item.id}
-        whileHover={{ scale: 1.05, zIndex: 10 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex-shrink-0 w-48 md:w-56 lg:w-64 rounded-md overflow-hidden shadow-lg transition-all duration-300 cursor-pointer"
-      >
-        <Link to={`/watch/${item.id}`}>
-          <div className="relative">
-            <img 
-              src={`https://source.unsplash.com/random/300x450?movie,${item.titulo}`} 
-              alt={item.titulo}
-              className="w-full h-48 md:h-56 lg:h-64 object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
-              <h3 className="text-white font-medium truncate">{item.titulo}</h3>
-              <div className="flex items-center text-xs text-gray-300 mt-1">
-                <span className="bg-yellow-600 text-white px-1 py-0.5 rounded text-xs mr-2">
-                  {item.classificacao_etaria}
-                </span>
-                <span>{item.ano_lancamento}</span>
+    if (!Array.isArray(content)) {
+      console.error('Content is not an array:', content);
+      return null;
+    }
+    
+    return content.map((item) => {
+      if (!item || typeof item !== 'object' || !item.id) {
+        console.error('Invalid content item:', item);
+        return null;
+      }
+      
+      return (
+        <motion.div
+          key={item.id}
+          whileHover={{ scale: 1.05, zIndex: 10 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex-shrink-0 w-48 md:w-56 lg:w-64 rounded-md overflow-hidden shadow-lg transition-all duration-300 cursor-pointer"
+        >
+          <Link to={`/watch/${item.id}`}>
+            <div className="relative">
+              <img 
+                src={`https://source.unsplash.com/random/300x450?movie,${item.titulo}`} 
+                alt={item.titulo}
+                className="w-full h-48 md:h-56 lg:h-64 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                <h3 className="text-white font-medium truncate">{item.titulo}</h3>
+                <div className="flex items-center text-xs text-gray-300 mt-1">
+                  <span className="bg-yellow-600 text-white px-1 py-0.5 rounded text-xs mr-2">
+                    {item.classificacao_etaria}
+                  </span>
+                  <span>{item.ano_lancamento}</span>
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
-      </motion.div>
-    ));
+          </Link>
+        </motion.div>
+      );
+    }).filter(Boolean);
   };
 
   return (
