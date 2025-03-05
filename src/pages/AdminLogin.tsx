@@ -57,7 +57,12 @@ const AdminLogin = () => {
         }
       }
 
-      // Se não entrou pelo modo de teste, tenta Supabase
+      // Se não entrou pelo modo de teste, tenta autenticar com Supabase
+      if (!supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') {
+        console.error("Supabase auth methods not available");
+        throw new Error("Serviço de autenticação não está disponível no momento.");
+      }
+
       // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,

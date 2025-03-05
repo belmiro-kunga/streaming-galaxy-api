@@ -9,12 +9,13 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 let supabase: any;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables - using mock client');
-    // Create a mock client that doesn't throw errors when methods are called
+    console.warn('Missing Supabase environment variables - using mock client');
+    // Create a more comprehensive mock client that doesn't throw errors when methods are called
     supabase = {
         auth: {
             getUser: async () => ({ data: { user: null }, error: null }),
             signOut: async () => ({ error: null }),
+            signInWithPassword: async () => ({ data: { user: null }, error: new Error("Mock authentication") }),
         },
         // Add other commonly used methods as needed
     };
