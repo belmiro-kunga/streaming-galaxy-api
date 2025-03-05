@@ -271,26 +271,28 @@ const Login = () => {
                     Criar conta
                   </button>
                 </p>
-              ) : view === 'signup' ? (
-                <p>
-                  Já tem uma conta?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setView('login')}
-                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                  >
-                    Fazer login
-                  </button>
-                </p>
               ) : (
                 <p>
-                  <button
-                    type="button"
-                    onClick={() => setView('login')}
-                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                  >
-                    Voltar para o login
-                  </button>
+                  {view === 'signup' ? (
+                    <>
+                      Já tem uma conta?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setView('login')}
+                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                      >
+                        Fazer login
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setView('login')}
+                      className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                    >
+                      Voltar para o login
+                    </button>
+                  )}
                 </p>
               )}
             </div>
