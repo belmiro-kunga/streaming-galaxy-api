@@ -17,6 +17,8 @@ import ProfileManagement from "./pages/ProfileManagement";
 import SubscriptionPlans from "./pages/SubscriptionPlans";
 import UserSettingsPage from "./pages/UserSettingsPage";
 import PaymentUpload from "./pages/PaymentUpload";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,11 @@ function App() {
               <Route path="/subscription-plans" element={<SubscriptionPlans />} />
               <Route path="/user-settings" element={<UserSettingsPage />} />
               <Route path="/payment-upload" element={<PaymentUpload />} />
+              
+              {/* Admin routes */}
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>

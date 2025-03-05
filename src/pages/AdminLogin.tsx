@@ -1,18 +1,15 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Lock, X } from 'lucide-react';
+import { Mail, ArrowRight, Lock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
-type AuthView = 'login' | 'reset-password';
-
-const Login = () => {
-  const [view, setView] = useState<AuthView>('login');
+const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,22 +21,24 @@ const Login = () => {
     setLoading(true);
 
     try {
-      if (view === 'login') {
+      // Mock authentication - In production, this would be an actual API call
+      if (email === 'admin@cineplay.com' && password === 'admin123') {
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/admin-dashboard');
           toast({
             title: "Login realizado com sucesso!",
-            description: "Bem-vindo de volta à CinePlay.",
-          });
-        }, 1000);
-      } else if (view === 'reset-password') {
-        setTimeout(() => {
-          toast({
-            title: "Email enviado!",
-            description: "Verifique seu email para redefinir sua senha.",
+            description: "Bem-vindo ao painel administrativo.",
           });
           setLoading(false);
-          setView('login');
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          toast({
+            title: "Falha na autenticação",
+            description: "Email ou senha incorretos.",
+            variant: "destructive",
+          });
+          setLoading(false);
         }, 1000);
       }
     } catch (error) {
@@ -62,13 +61,14 @@ const Login = () => {
       >
         <Card className="border-gray-800 bg-black/70 backdrop-blur-sm shadow-xl">
           <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-2">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
             <CardTitle className="text-2xl font-bold tracking-tight text-white">
-              {view === 'login' && 'Entrar na CinePlay'}
-              {view === 'reset-password' && 'Recuperar senha'}
+              Área Administrativa
             </CardTitle>
             <CardDescription className="text-gray-400">
-              {view === 'login' && 'Entre com sua conta para acessar o conteúdo'}
-              {view === 'reset-password' && 'Enviaremos um link para redefinir sua senha'}
+              Acesso restrito ao painel administrativo
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -85,42 +85,31 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="seu@email.com"
+                    placeholder="admin@cineplay.com"
                     required
                   />
                 </div>
               </div>
               
-              {view !== 'reset-password' && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-200">
-                      Senha
-                    </Label>
-                    {view === 'login' && (
-                      <button
-                        type="button"
-                        onClick={() => setView('reset-password')}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Esqueceu a senha?
-                      </button>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="********"
-                      required
-                    />
-                  </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-200">
+                    Senha
+                  </Label>
                 </div>
-              )}
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
               
               <Button
                 type="submit"
@@ -133,38 +122,26 @@ const Login = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Processando...
+                    Autenticando...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center">
-                    {view === 'login' && 'Entrar'}
-                    {view === 'reset-password' && 'Enviar link de recuperação'}
+                    Entrar
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 )}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-wrap items-center justify-center">
-            <div className="text-center text-sm text-gray-400">
-              <p>
-                Acesso restrito apenas para assinantes
-              </p>
-            </div>
+          <CardFooter className="text-center text-sm text-gray-400">
+            <p className="w-full">
+              Área restrita para funcionários autorizados
+            </p>
           </CardFooter>
         </Card>
-        
-        <div className="mt-4 text-center">
-          <Link 
-            to="/"
-            className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center"
-          >
-            <X className="mr-1 h-4 w-4" /> Cancelar e voltar
-          </Link>
-        </div>
       </motion.div>
     </div>
   );
 };
 
-export default Login;
+export default AdminLogin;
