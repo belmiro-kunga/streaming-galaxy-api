@@ -3,46 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ProfileManagementComponent from '@/components/ProfileManagement';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const ProfileManagement = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => localStorage.getItem('darkMode') === 'dark' ? 'dark' : 'light'
-  );
-
-  // Check for dark mode at component load
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const shouldUseDarkMode = savedMode 
-      ? savedMode === 'dark' 
-      : prefersDark;
-    
-    if (shouldUseDarkMode) {
-      document.documentElement.classList.add('dark');
-      setTheme('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      setTheme('light');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'light');
-    }
-  };
 
   return (
     <motion.div
