@@ -98,8 +98,8 @@ const Kids = () => {
             </div>
           ) : (
             <ContentRow 
-              items={animationContent || []}
-              onItemClick={(item) => navigate(`/watch/${item.id}`)}
+              title="Animações"
+              content={animationContent || []}
             />
           )}
         </div>
@@ -113,8 +113,8 @@ const Kids = () => {
             </div>
           ) : (
             <ContentRow 
-              items={adventureContent || []}
-              onItemClick={(item) => navigate(`/watch/${item.id}`)}
+              title="Aventuras"
+              content={adventureContent || []}
             />
           )}
         </div>
@@ -128,8 +128,8 @@ const Kids = () => {
             </div>
           ) : (
             <ContentRow 
-              items={recentContent || []}
-              onItemClick={(item) => navigate(`/watch/${item.id}`)}
+              title="Recentes"
+              content={recentContent || []}
             />
           )}
         </div>
