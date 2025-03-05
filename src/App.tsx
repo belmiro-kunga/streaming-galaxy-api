@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,32 +13,38 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Kids from "./pages/Kids";
 import ProfileManagement from "./pages/ProfileManagement";
+import SubscriptionPlans from "./pages/SubscriptionPlans";
+import UserSettingsPage from "./pages/UserSettingsPage";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/watch/:id" element={<Watch />} />
-            <Route path="/api-docs" element={<ApiDocs />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/downloads" element={<Dashboard />} />
-            <Route path="/dashboard/profiles" element={<ProfileManagement />} />
-            <Route path="/kids" element={<Kids />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnimatePresence>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/watch/:id" element={<Watch />} />
+              <Route path="/api-docs" element={<ApiDocs />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/downloads" element={<Dashboard />} />
+              <Route path="/dashboard/profiles" element={<ProfileManagement />} />
+              <Route path="/kids" element={<Kids />} />
+              <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+              <Route path="/user-settings" element={<UserSettingsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AnimatePresence>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

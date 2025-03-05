@@ -87,6 +87,7 @@ export const Header = () => {
                 <TabsTrigger value="movies" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Filmes</TabsTrigger>
                 <TabsTrigger value="series" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Séries</TabsTrigger>
                 <TabsTrigger value="kids" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent" onClick={() => navigate('/kids')}>Kids</TabsTrigger>
+                <TabsTrigger value="price" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent" onClick={() => navigate('/subscription-plans')}>Preço</TabsTrigger>
                 <TabsTrigger value="more" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Mais Conteúdos</TabsTrigger>
               </TabsList>
             </Tabs>
@@ -136,13 +137,13 @@ export const Header = () => {
                 <User className="mr-2 h-4 w-4" />
                 <span>Gerenciar Perfis</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center cursor-pointer">
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/user-settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center cursor-pointer">
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/subscription-plans')}>
                 <CreditCard className="mr-2 h-4 w-4" />
-                <span>Pagamento</span>
+                <span>Planos de Assinatura</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
                 <Gauge className="mr-2 h-4 w-4" />
