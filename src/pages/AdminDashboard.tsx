@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   Users, Package, CreditCard, Settings, BarChart3, 
   FilePenLine, FileText, LogOut, ChevronDown, Bell, Search, Menu,
-  UserPlus, Pencil, Trash, BadgeDollarSign
+  UserPlus, Pencil, Trash, BadgeDollarSign, PackageOpen
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -31,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SubscriptionPlan } from '@/types/api';
+import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
+import { planAPI } from '@/services/planAPI';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -48,50 +50,7 @@ const AdminDashboard = () => {
     { id: "USR-005", name: "Paulo Rodrigues", email: "paulo@email.com", created_at: "2023-11-07", status: "Inativo", subscription: null }
   ]);
   
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([
-    { 
-      id: "plan-1", 
-      nome: "Básico", 
-      descricao: "Acesso a conteúdo em HD", 
-      qualidade_maxima: "HD", 
-      telas_simultaneas: 1, 
-      limite_downloads: 5, 
-      limite_perfis: 1,
-      ciclo_cobranca: "mensal", 
-      ativo: true, 
-      created_at: "2023-01-01", 
-      updated_at: "2023-01-01",
-      precos: [{ plano_id: "plan-1", moeda_codigo: "BRL", preco: 19.90 }]
-    },
-    { 
-      id: "plan-2", 
-      nome: "Premium", 
-      descricao: "Acesso a conteúdo em 4K", 
-      qualidade_maxima: "4K", 
-      telas_simultaneas: 4, 
-      limite_downloads: 20, 
-      limite_perfis: 5,
-      ciclo_cobranca: "mensal", 
-      ativo: true, 
-      created_at: "2023-01-01", 
-      updated_at: "2023-01-01",
-      precos: [{ plano_id: "plan-2", moeda_codigo: "BRL", preco: 39.90 }]
-    },
-    { 
-      id: "plan-3", 
-      nome: "Familiar", 
-      descricao: "Ideal para família", 
-      qualidade_maxima: "4K", 
-      telas_simultaneas: 6, 
-      limite_downloads: 30, 
-      limite_perfis: 6,
-      ciclo_cobranca: "mensal", 
-      ativo: true, 
-      created_at: "2023-01-01", 
-      updated_at: "2023-01-01",
-      precos: [{ plano_id: "plan-3", moeda_codigo: "BRL", preco: 49.90 }]
-    },
-  ]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   
   // User dialog states
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -105,6 +64,20 @@ const AdminDashboard = () => {
   // Delete confirmation dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<any>(null);
+  
+  // Fetch subscription plans
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const data = await planAPI.getAllPlans();
+        setSubscriptionPlans(data);
+      } catch (error) {
+        console.error('Error fetching subscription plans:', error);
+      }
+    };
+    
+    fetchPlans();
+  }, []);
   
   // Mock data for demonstration
   const pendingPayments = [
@@ -281,6 +254,14 @@ const AdminDashboard = () => {
               >
                 <Users className="h-5 w-5" />
                 {sidebarOpen && <span>Usuários</span>}
+              </Button>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "plans" ? "bg-gray-800" : ""}`}
+                onClick={() => setActiveTab("plans")}
+              >
+                <PackageOpen className="h-5 w-5" />
+                {sidebarOpen && <span>Planos</span>}
               </Button>
               <Button
                 variant="ghost"
@@ -572,6 +553,10 @@ const AdminDashboard = () => {
                 </Card>
               </TabsContent>
               
+              <TabsContent value="plans">
+                <SubscriptionPlansManager />
+              </TabsContent>
+              
               <TabsContent value="content">
                 <h2 className="text-2xl font-bold mb-6">Gerenciamento de Conteúdos</h2>
                 <Card className="bg-gray-900 border-gray-800">
@@ -750,7 +735,7 @@ const AdminDashboard = () => {
                   <SelectItem value="">Sem assinatura</SelectItem>
                   {subscriptionPlans.map(plan => (
                     <SelectItem key={plan.id} value={plan.nome}>
-                      {plan.nome} - {plan.precos?.[0]?.preco ? `R$ ${plan.precos[0].preco.toFixed(2)}` : ""}
+                      {plan.nome} - {plan.precos?.[0]?.preco ? `AOA ${plan.precos[0].preco.toLocaleString()}` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -771,7 +756,7 @@ const AdminDashboard = () => {
                       <p>Limite de downloads: {plan.limite_downloads}</p>
                       <p>Limite de perfis: {plan.limite_perfis}</p>
                       <p className="font-medium text-primary">
-                        Preço: {plan.precos?.[0]?.preco ? `R$ ${plan.precos[0].preco.toFixed(2)}` : ""}
+                        Preço: {plan.precos?.[0]?.preco ? `AOA ${plan.precos[0].preco.toLocaleString()}` : ""}
                       </p>
                     </div>
                   );
