@@ -8,6 +8,7 @@ import { Header } from '@/components/ui/Header';
 import { FeaturedContent } from '@/components/ui/FeaturedContent';
 import { ContentRow } from '@/components/ui/ContentRow';
 import { GenreFilter } from '@/components/ui/GenreFilter';
+import { StreamingServicesRow } from '@/components/ui/StreamingServicesRow';
 
 const Home = () => {
   const [featuredContent, setFeaturedContent] = useState<ContentItem | null>(null);
@@ -142,6 +143,9 @@ const Home = () => {
               toggleGenre={toggleGenre} 
             />
           </div>
+
+          {/* Streaming Services Row - Added new component here */}
+          <StreamingServicesRow />
 
           {/* Continue Watching (if available) */}
           {continueWatching.length > 0 && (
