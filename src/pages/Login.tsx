@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Facebook, Google, Mail, ArrowRight, Lock, User, X } from 'lucide-react';
+import { Facebook, Mail, ArrowRight, Lock, User, X } from 'lucide-react';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -24,9 +24,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // This is where you would implement actual authentication logic
       if (view === 'login') {
-        // Simulate login success
         setTimeout(() => {
           navigate('/dashboard');
           toast({
@@ -44,7 +42,6 @@ const Login = () => {
           setLoading(false);
           return;
         }
-        // Simulate signup success
         setTimeout(() => {
           setView('login');
           toast({
@@ -54,7 +51,6 @@ const Login = () => {
           setLoading(false);
         }, 1000);
       } else if (view === 'reset-password') {
-        // Simulate password reset email sent
         setTimeout(() => {
           toast({
             title: "Email enviado!",
@@ -81,7 +77,6 @@ const Login = () => {
       description: "Redirecionando para o provedor de autenticação.",
     });
     
-    // Simulate social login - in a real app, this would redirect to OAuth
     setTimeout(() => {
       navigate('/dashboard');
       setLoading(false);
@@ -243,7 +238,7 @@ const Login = () => {
                     className="h-12 bg-transparent border-gray-700 text-white hover:bg-gray-800"
                     disabled={loading}
                   >
-                    <Google className="mr-2 h-5 w-5 text-red-500" />
+                    <GoogleIcon className="mr-2 h-5 w-5 text-red-500" />
                     Google
                   </Button>
                   <Button 

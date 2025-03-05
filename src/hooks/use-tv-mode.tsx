@@ -16,5 +16,5 @@ export function useTVMode() {
     return () => window.removeEventListener('resize', checkTVMode);
   }, []);
 
-  return isTVMode;
+  return { isTVMode };
 }
