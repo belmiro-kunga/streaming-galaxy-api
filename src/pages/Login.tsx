@@ -97,6 +97,7 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Social login buttons only in login view */}
             {view === 'login' && (
               <div className="grid grid-cols-2 gap-3">
                 <Button 
@@ -118,6 +119,7 @@ const Login = () => {
               </div>
             )}
 
+            {/* Separator only visible in login view */}
             {view === 'login' && (
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -132,6 +134,7 @@ const Login = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name field - only in signup view */}
               {view === 'signup' && (
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium text-gray-200">
@@ -149,6 +152,7 @@ const Login = () => {
                 </div>
               )}
 
+              {/* Email field - in all views */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-gray-200">
                   Email
@@ -167,6 +171,7 @@ const Login = () => {
                 </div>
               </div>
               
+              {/* Password field - not in reset-password view */}
               {view !== 'reset-password' && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -198,6 +203,7 @@ const Login = () => {
                 </div>
               )}
 
+              {/* Confirm password field - only in signup view */}
               {view === 'signup' && (
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-200">
@@ -218,6 +224,7 @@ const Login = () => {
                 </div>
               )}
               
+              {/* Submit button */}
               <Button
                 type="submit"
                 className="w-full h-12 text-base"
