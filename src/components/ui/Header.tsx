@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { ThemeToggle } from './ThemeToggle';
 
 export const Header = () => {
   const isMobile = useMobile();
@@ -94,6 +95,8 @@ export const Header = () => {
         
         {/* User Actions */}
         <div className="flex items-center space-x-4">
+          <ThemeToggle />
+          
           <button 
             className="p-2 text-white" 
             aria-label="Pesquisar" 

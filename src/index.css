@@ -134,13 +134,44 @@
   @apply bg-black/20 border-white/10;
 }
 
-// Additional dark mode transition for smoother mode switching
-html {
-  transition: background-color 0.3s ease;
+/* Smooth theme transition */
+:root {
+  --transition-duration: 0.3s;
 }
 
-body {
-  @apply bg-background text-foreground;
-  font-feature-settings: "rlig" 1, "calt" 1;
-  transition: background-color 0.3s ease, color 0.3s ease;
+html {
+  transition: background-color var(--transition-duration) ease;
+}
+
+body, 
+button, 
+input, 
+select, 
+textarea,
+.card,
+.header,
+.sidebar,
+.navbar {
+  transition: 
+    background-color var(--transition-duration) ease, 
+    color var(--transition-duration) ease,
+    border-color var(--transition-duration) ease,
+    box-shadow var(--transition-duration) ease;
+}
+
+.theme-toggle-icon {
+  @apply transition-transform duration-500;
+}
+
+.dark .theme-toggle-icon {
+  @apply rotate-180;
+}
+
+/* Additional styles for theme-aware content */
+.dark-content-only {
+  @apply hidden dark:block;
+}
+
+.light-content-only {
+  @apply block dark:hidden;
 }
