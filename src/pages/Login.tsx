@@ -320,22 +320,23 @@ const Login = () => {
           
           <CardFooter className="flex flex-wrap items-center justify-center pb-8 pt-2 relative z-10 px-6">
             <div className="text-center text-sm text-violet-200">
-              {view === 'login' ? (
-                <p>
-                  Não tem uma conta?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setView('signup')}
-                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                  >
-                    Criar conta
-                  </button>
-                </p>
-              ) : (
-                // Here's the fix - ensuring we handle both reset-password and signup views correctly
-                <p>
-                  {view === 'signup' ? (
-                    <>
+              {(() => {
+                if (view === 'login') {
+                  return (
+                    <p>
+                      Não tem uma conta?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setView('signup')}
+                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                      >
+                        Criar conta
+                      </button>
+                    </p>
+                  );
+                } else if (view === 'signup') {
+                  return (
+                    <p>
                       Já tem uma conta?{' '}
                       <button
                         type="button"
@@ -344,19 +345,23 @@ const Login = () => {
                       >
                         Fazer login
                       </button>
-                    </>
-                  ) : (
-                    // This is for reset-password view
-                    <button
-                      type="button"
-                      onClick={() => setView('login')}
-                      className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                    >
-                      Voltar para o login
-                    </button>
-                  )}
-                </p>
-              )}
+                    </p>
+                  );
+                } else {
+                  // This is for reset-password view
+                  return (
+                    <p>
+                      <button
+                        type="button"
+                        onClick={() => setView('login')}
+                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                      >
+                        Voltar para o login
+                      </button>
+                    </p>
+                  );
+                }
+              })()}
             </div>
           </CardFooter>
         </Card>
