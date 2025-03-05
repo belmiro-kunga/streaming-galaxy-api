@@ -12,6 +12,8 @@ import ApiDocs from "./pages/ApiDocs";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Kids from "./pages/Kids";
+import ProfileManagement from "./pages/ProfileManagement";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/downloads" element={<Dashboard />} />
+            <Route path="/dashboard/profiles" element={<Dashboard />} />
+            <Route path="/kids" element={<Kids />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>

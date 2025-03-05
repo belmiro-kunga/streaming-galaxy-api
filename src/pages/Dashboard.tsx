@@ -3,17 +3,21 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, Film, TrendingUp, Clock, BookmarkCheck, Download, 
-  Settings, LogOut, Bell, User, Search, Gift, CreditCard
+  Settings, LogOut, Bell, User, Search, Gift, CreditCard, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useTVMode } from '@/hooks/use-tv-mode';
+import ProfileManagement from '@/components/ProfileManagement';
 
 const Dashboard = () => {
   const location = useLocation();
   const isDownloadsPath = location.pathname === '/dashboard/downloads';
-  const [activeTab, setActiveTab] = useState<string>(isDownloadsPath ? 'downloads' : 'home');
+  const isProfilesPath = location.pathname === '/dashboard/profiles';
+  const [activeTab, setActiveTab] = useState<string>(
+    isDownloadsPath ? 'downloads' : isProfilesPath ? 'profiles' : 'home'
+  );
   const { toast } = useToast();
   const { isTVMode } = useTVMode();
   const navigate = useNavigate();
@@ -21,8 +25,10 @@ const Dashboard = () => {
   useEffect(() => {
     if (isDownloadsPath) {
       setActiveTab('downloads');
+    } else if (isProfilesPath) {
+      setActiveTab('profiles');
     }
-  }, [isDownloadsPath]);
+  }, [isDownloadsPath, isProfilesPath]);
   
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -88,7 +94,8 @@ const Dashboard = () => {
                   { icon: <TrendingUp className="h-5 w-5" />, label: 'Populares', id: 'trending' },
                   { icon: <Clock className="h-5 w-5" />, label: 'Histórico', id: 'history' },
                   { icon: <BookmarkCheck className="h-5 w-5" />, label: 'Favoritos', id: 'favorites' },
-                  { icon: <Download className="h-5 w-5" />, label: 'Downloads', id: 'downloads' }
+                  { icon: <Download className="h-5 w-5" />, label: 'Downloads', id: 'downloads' },
+                  { icon: <Users className="h-5 w-5" />, label: 'Perfis', id: 'profiles' }
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -97,6 +104,8 @@ const Dashboard = () => {
                         navigate('/home');
                       } else if (item.id === 'downloads') {
                         navigate('/dashboard/downloads');
+                      } else if (item.id === 'profiles') {
+                        navigate('/dashboard/profiles');
                       } else {
                         handleTabChange(item.id);
                       }
@@ -228,6 +237,10 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
+            )}
+
+            {(activeTab === 'profiles' || isProfilesPath) && (
+              <ProfileManagement />
             )}
 
             {activeTab === 'subscription' && (

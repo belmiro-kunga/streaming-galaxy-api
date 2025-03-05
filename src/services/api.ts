@@ -2,7 +2,7 @@
 // Mock implementation for the API
 // Replace this with actual API calls in production
 
-import { ContentItem, Genre } from '@/types/api';
+import { ContentItem, Genre, Profile, ParentalControl, TimeRestriction } from '@/types/api';
 
 // Helper function to ensure content items have the correct structure
 const validateContentItem = (item: any): ContentItem => {
@@ -158,5 +158,120 @@ export const userInteractionAPI = {
       console.error('Error fetching recommended content:', error);
       return [];
     }
+  }
+};
+
+// Profile management API mock
+export const profileAPI = {
+  // Get user profiles
+  getUserProfiles: async (userId: string): Promise<Profile[]> => {
+    // Mock profiles
+    return [
+      {
+        id: "1",
+        usuario_id: userId,
+        nome: "Usuário Principal",
+        avatar_url: "https://source.unsplash.com/random/100x100?face=1",
+        is_crianca: false,
+        controle_parental: null,
+        created_at: "2023-01-01T00:00:00Z",
+        updated_at: "2023-01-01T00:00:00Z"
+      },
+      {
+        id: "2",
+        usuario_id: userId,
+        nome: "Filho",
+        avatar_url: "https://source.unsplash.com/random/100x100?face=2",
+        is_crianca: true,
+        controle_parental: {
+          perfil_id: "2",
+          classificacao_maxima: "10",
+          restricoes_horario: [
+            {
+              id: "1",
+              perfil_id: "2",
+              dias_semana: "weekdays",
+              hora_inicio: "16:00",
+              hora_fim: "19:00"
+            }
+          ],
+          ativo: true
+        },
+        created_at: "2023-01-02T00:00:00Z",
+        updated_at: "2023-01-02T00:00:00Z"
+      }
+    ];
+  },
+  
+  // Create profile
+  createProfile: async (userId: string, profileData: Partial<Profile>): Promise<Profile> => {
+    // In a real app, this would make an API call to create the profile
+    const newProfile: Profile = {
+      id: Date.now().toString(),
+      usuario_id: userId,
+      nome: profileData.nome || "Novo Perfil",
+      avatar_url: profileData.avatar_url,
+      is_crianca: profileData.is_crianca || false,
+      controle_parental: profileData.is_crianca ? {
+        perfil_id: Date.now().toString(),
+        classificacao_maxima: "10",
+        restricoes_horario: [],
+        ativo: true
+      } : null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    return newProfile;
+  },
+  
+  // Update profile
+  updateProfile: async (profileId: string, profileData: Partial<Profile>): Promise<Profile> => {
+    // In a real app, this would make an API call to update the profile
+    const updatedProfile: Profile = {
+      id: profileId,
+      usuario_id: "user-123",
+      nome: profileData.nome || "Updated Profile",
+      avatar_url: profileData.avatar_url,
+      is_crianca: profileData.is_crianca !== undefined ? profileData.is_crianca : false,
+      controle_parental: profileData.controle_parental,
+      created_at: "2023-01-01T00:00:00Z",
+      updated_at: new Date().toISOString()
+    };
+    
+    return updatedProfile;
+  },
+  
+  // Delete profile
+  deleteProfile: async (profileId: string): Promise<boolean> => {
+    // In a real app, this would make an API call to delete the profile
+    return true;
+  },
+  
+  // Update parental control
+  updateParentalControl: async (profileId: string, settings: ParentalControl): Promise<ParentalControl> => {
+    // In a real app, this would make an API call to update the parental control settings
+    return {
+      ...settings,
+      perfil_id: profileId
+    };
+  },
+  
+  // Add time restriction
+  addTimeRestriction: async (profileId: string, restriction: Omit<TimeRestriction, 'id' | 'perfil_id'>): Promise<TimeRestriction> => {
+    // In a real app, this would make an API call to add a time restriction
+    return {
+      id: Date.now().toString(),
+      perfil_id: profileId,
+      dias_semana: restriction.dias_semana,
+      hora_inicio: restriction.hora_inicio,
+      hora_fim: restriction.hora_fim
+    };
+  },
+  
+  // Remove time restriction
+  removeTimeRestriction: async (restrictionId: string): Promise<boolean> => {
+    // In a real app, this would make an API call to remove a time restriction
+    return true;
   }
 };

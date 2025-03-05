@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, User, LogOut, Settings, CreditCard, Gauge, Home, Download, X } from 'lucide-react';
+import { Search, Bell, User, LogOut, Settings, CreditCard, Gauge, Home, Download, X, Baby } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -85,6 +85,7 @@ export const Header = () => {
                 <TabsTrigger value="all" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent" onClick={() => navigate('/home')}>Início</TabsTrigger>
                 <TabsTrigger value="movies" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Filmes</TabsTrigger>
                 <TabsTrigger value="series" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Séries</TabsTrigger>
+                <TabsTrigger value="kids" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent" onClick={() => navigate('/kids')}>Kids</TabsTrigger>
                 <TabsTrigger value="more" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent">Mais Conteúdos</TabsTrigger>
               </TabsList>
             </Tabs>
@@ -127,6 +128,10 @@ export const Header = () => {
               <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard/profiles')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Gerenciar Perfis</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="flex items-center cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
@@ -172,6 +177,12 @@ export const Header = () => {
               <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
                 <Download className="h-6 w-6 mb-1" />
                 <span className="text-xs">Downloads</span>
+              </Button>
+            </Link>
+            <Link to="/kids">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <Baby className="h-6 w-6 mb-1" />
+                <span className="text-xs">Kids</span>
               </Button>
             </Link>
             <Link to="/dashboard">
