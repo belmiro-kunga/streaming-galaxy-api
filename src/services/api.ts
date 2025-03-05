@@ -49,17 +49,22 @@ export const contentAPI = {
 
   // Get content by genre
   getContentByGenre: async (genreId: string, limit = 10): Promise<ContentItem[]> => {
-    const mockContent = Array(limit).fill(null).map((_, index) => ({
-      id: `genre-${genreId}-${index}`,
-      tipo: index % 2 === 0 ? "filme" : "serie",
-      titulo: `Título Gênero ${genreId} - ${index + 1}`,
-      descricao: `Descrição do conteúdo do gênero ${genreId} número ${index + 1}`,
-      ano_lancamento: 2019 + (index % 5),
-      classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
-      gratuito: index % 4 === 0
-    }));
-    
-    return mockContent.map(validateContentItem);
+    try {
+      const mockContent = Array(limit).fill(null).map((_, index) => ({
+        id: `genre-${genreId}-${index}`,
+        tipo: index % 2 === 0 ? "filme" : "serie",
+        titulo: `${index % 3 === 0 ? 'Filme' : 'Série'} ${genreId} - ${index + 1}`,
+        descricao: `Descrição do conteúdo do gênero ${genreId} número ${index + 1}`,
+        ano_lancamento: 2019 + (index % 5),
+        classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+        gratuito: index % 4 === 0
+      }));
+      
+      return mockContent.map(validateContentItem);
+    } catch (error) {
+      console.error(`Error in getContentByGenre for genre ${genreId}:`, error);
+      return [];
+    }
   },
 
   // Get all genres
@@ -76,13 +81,82 @@ export const contentAPI = {
       { id: "9", nome: "Animação" },
       { id: "10", nome: "Musical" }
     ];
+  },
+  
+  // Get recently added content
+  getRecentContent: async (limit = 10): Promise<ContentItem[]> => {
+    const mockRecent = Array(limit).fill(null).map((_, index) => ({
+      id: `recent-${index}`,
+      tipo: index % 2 === 0 ? "filme" : "serie",
+      titulo: `Lançamento ${index + 1}`,
+      descricao: `Novo conteúdo adicionado recentemente número ${index + 1}`,
+      ano_lancamento: 2023,
+      classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+      gratuito: index % 3 === 0
+    }));
+    
+    return mockRecent.map(validateContentItem);
+  },
+  
+  // Get top rated content
+  getTopRatedContent: async (limit = 10): Promise<ContentItem[]> => {
+    const mockTopRated = Array(limit).fill(null).map((_, index) => ({
+      id: `top-${index}`,
+      tipo: index % 2 === 0 ? "filme" : "serie",
+      titulo: `Top ${index + 1}`,
+      descricao: `Conteúdo melhor avaliado número ${index + 1}`,
+      ano_lancamento: 2018 + (index % 6),
+      classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+      gratuito: index % 3 === 0
+    }));
+    
+    return mockTopRated.map(validateContentItem);
   }
 };
 
 // User interaction API mock
 export const userInteractionAPI = {
   // Get continue watching content
-  getContinueWatching: async (userId: string) => {
-    return []; // Return empty array for now
+  getContinueWatching: async (userId: string): Promise<ContentItem[]> => {
+    try {
+      const mockWatching = Array(5).fill(null).map((_, index) => ({
+        id: `continue-${index}`,
+        tipo: index % 2 === 0 ? "filme" : "serie",
+        titulo: `Continuar assistindo ${index + 1}`,
+        descricao: `Você parou de assistir aqui`,
+        ano_lancamento: 2021 + (index % 3),
+        classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+        gratuito: index % 3 === 0,
+        percentual_assistido: Math.floor(Math.random() * 80) + 10
+      }));
+      
+      return mockWatching.map(item => ({
+        ...validateContentItem(item),
+        percentual_assistido: item.percentual_assistido
+      })) as ContentItem[];
+    } catch (error) {
+      console.error('Error fetching continue watching content:', error);
+      return [];
+    }
+  },
+  
+  // Get recommended for you
+  getRecommendedContent: async (userId: string): Promise<ContentItem[]> => {
+    try {
+      const mockRecommended = Array(10).fill(null).map((_, index) => ({
+        id: `recommended-${index}`,
+        tipo: index % 2 === 0 ? "filme" : "serie",
+        titulo: `Recomendado para você ${index + 1}`,
+        descricao: `Baseado no que você assistiu`,
+        ano_lancamento: 2020 + (index % 4),
+        classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+        gratuito: index % 3 === 0
+      }));
+      
+      return mockRecommended.map(validateContentItem);
+    } catch (error) {
+      console.error('Error fetching recommended content:', error);
+      return [];
+    }
   }
 };

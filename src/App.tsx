@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
+import Watch from "./pages/Watch";
 import ApiDocs from "./pages/ApiDocs";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/watch/:id" element={<Watch />} />
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

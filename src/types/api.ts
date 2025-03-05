@@ -48,6 +48,16 @@ export interface UserSubscription {
   updated_at: string;
 }
 
+export interface ContentItem {
+  id: string;
+  tipo: string;
+  titulo: string;
+  descricao: string;
+  ano_lancamento: number;
+  classificacao_etaria: string;
+  gratuito: boolean;
+}
+
 export interface Content {
   id: string;
   tipo: string;
