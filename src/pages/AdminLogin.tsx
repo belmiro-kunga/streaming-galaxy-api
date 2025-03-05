@@ -17,47 +17,20 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Credenciais temporárias para teste
-  const TEST_ADMIN_EMAIL = 'admin@cineplay.com';
-  const TEST_ADMIN_PASSWORD = 'admin123';
-  const TEST_EDITOR_EMAIL = 'editor@cineplay.com';
-  const TEST_EDITOR_PASSWORD = 'editor123';
-  const TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
-  const TEST_SUPER_ADMIN_PASSWORD = 'super123';
+  // Credenciais de teste já estão definidas em lib/supabase.ts
+  // TEST_ADMIN_EMAIL = 'admin@cineplay.com';
+  // TEST_ADMIN_PASSWORD = 'admin123';
+  // TEST_EDITOR_EMAIL = 'editor@cineplay.com';
+  // TEST_EDITOR_PASSWORD = 'editor123';
+  // TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
+  // TEST_SUPER_ADMIN_PASSWORD = 'super123';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Modo de teste para ambiente de desenvolvimento
-      if (import.meta.env.DEV) {
-        // Verificar credenciais de teste
-        if (email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel administrativo.",
-          });
-          return;
-        } else if (email === TEST_EDITOR_EMAIL && password === TEST_EDITOR_PASSWORD) {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel de edição.",
-          });
-          return;
-        } else if (email === TEST_SUPER_ADMIN_EMAIL && password === TEST_SUPER_ADMIN_PASSWORD) {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel de super administrador.",
-          });
-          return;
-        }
-      }
-
-      // Se não entrou pelo modo de teste, tenta autenticar com Supabase
+      // Verificar se o auth está disponível
       if (!supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') {
         console.error("Supabase auth methods not available");
         throw new Error("Serviço de autenticação não está disponível no momento.");
@@ -72,7 +45,6 @@ const AdminLogin = () => {
       if (error) throw error;
 
       // Check if user has admin role
-      // This assumes you have a user_role field in your user metadata
       const user = data.user;
       const userRole = user?.user_metadata?.role || 'user';
 

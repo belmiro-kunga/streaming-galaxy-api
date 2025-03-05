@@ -70,6 +70,32 @@ export const authAPI = {
     }
   },
 
+  // Admin login
+  adminSignIn: async (email: string, password: string): Promise<{ user: User | null; role: string | null; error: Error | null }> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      const user = data.user;
+      const userRole = user?.user_metadata?.role || 'user';
+
+      // Check if user has admin role
+      if (!['admin', 'editor', 'super_admin'].includes(userRole)) {
+        await supabase.auth.signOut();
+        throw new Error("Você não tem permissão para acessar esta área.");
+      }
+
+      return { user, role: userRole, error: null };
+    } catch (error: any) {
+      console.error('Admin login error:', error);
+      return { user: null, role: null, error };
+    }
+  },
+
   // Sign in with social provider
   signInWithSocialProvider: async (provider: 'facebook' | 'google'): Promise<{ error: Error | null }> => {
     try {
