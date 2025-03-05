@@ -1,229 +1,314 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChevronLeft, Copy, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, Copy, Check } from 'lucide-react';
 
 const ApiDocs = () => {
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedEndpoint, setCopiedEndpoint] = React.useState<string | null>(null);
 
-  const codeBlocks = [
-    {
-      title: "Obter Perfil do Usuário",
-      endpoint: "GET /profiles/me",
-      code: `const response = await api.get('/profiles/me');
-const userData = response.data;
-console.log(userData);`
-    },
-    {
-      title: "Listar Conteúdos",
-      endpoint: "GET /contents",
-      code: `const response = await api.get('/contents', { 
-  params: { 
-    page: 1, 
-    pageSize: 10, 
-    tipo: 'filme'
-  } 
-});
-const contentList = response.data;
-console.log(contentList);`
-    },
-    {
-      title: "Adicionar aos Favoritos",
-      endpoint: "POST /favorites",
-      code: `const response = await api.post('/favorites', { 
-  conteudo_id: '123e4567-e89b-12d3-a456-426614174000'
-});
-const favorite = response.data;
-console.log(favorite);`
-    }
-  ];
-
-  const copyToClipboard = (text: string, index: number) => {
+  const copyToClipboard = (text: string, endpoint: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
+    setCopiedEndpoint(endpoint);
+    setTimeout(() => setCopiedEndpoint(null), 2000);
   };
 
   const endpoints = [
-    { category: "Usuários", path: "/profiles/me", method: "GET", description: "Obter perfil do usuário atual" },
-    { category: "Usuários", path: "/profiles/me", method: "PATCH", description: "Atualizar perfil do usuário" },
-    { category: "Assinaturas", path: "/plans", method: "GET", description: "Listar planos de assinatura" },
-    { category: "Assinaturas", path: "/subscriptions/me", method: "GET", description: "Obter assinatura atual" },
-    { category: "Assinaturas", path: "/subscriptions", method: "POST", description: "Criar nova assinatura" },
-    { category: "Conteúdo", path: "/contents", method: "GET", description: "Listar conteúdos com paginação" },
-    { category: "Conteúdo", path: "/contents/:id", method: "GET", description: "Obter detalhes de um conteúdo" },
-    { category: "Conteúdo", path: "/contents/featured", method: "GET", description: "Listar conteúdos em destaque" },
-    { category: "Episódios", path: "/contents/:id/episodes", method: "GET", description: "Listar episódios de uma série" },
-    { category: "Episódios", path: "/episodes/:id", method: "GET", description: "Obter detalhes de um episódio" },
-    { category: "Interações", path: "/favorites", method: "GET", description: "Listar favoritos do usuário" },
-    { category: "Interações", path: "/favorites", method: "POST", description: "Adicionar conteúdo aos favoritos" },
-    { category: "Interações", path: "/favorites/:id", method: "DELETE", description: "Remover conteúdo dos favoritos" },
-    { category: "Interações", path: "/playback/history", method: "GET", description: "Obter histórico de reprodução" },
-    { category: "Interações", path: "/playback/history", method: "POST", description: "Atualizar progresso de reprodução" },
-    { category: "Downloads", path: "/downloads", method: "GET", description: "Listar downloads do usuário" },
-    { category: "Downloads", path: "/downloads", method: "POST", description: "Criar novo download" },
-    { category: "Dispositivos", path: "/devices", method: "GET", description: "Listar dispositivos registrados" },
-    { category: "Dispositivos", path: "/devices", method: "POST", description: "Registrar novo dispositivo" },
-    { category: "Gêneros", path: "/genres", method: "GET", description: "Listar todos os gêneros" },
-    { category: "Estatísticas", path: "/statistics/me", method: "GET", description: "Obter estatísticas do usuário" },
+    {
+      name: 'perfis_usuario',
+      title: 'Perfis de Usuário',
+      description: 'Obter e atualizar informações do perfil do usuário',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/perfis/me',
+          description: 'Obtém o perfil do usuário atual',
+          example: '{ "id": "uuid", "nome": "João Silva", "fuso_horario": "Africa/Luanda" }'
+        },
+        {
+          method: 'PATCH',
+          endpoint: '/perfis/me',
+          description: 'Atualiza o perfil do usuário atual',
+          body: '{ "nome": "João Silva", "fuso_horario": "Africa/Luanda" }',
+          example: '{ "id": "uuid", "nome": "João Silva", "fuso_horario": "Africa/Luanda" }'
+        }
+      ]
+    },
+    {
+      name: 'planos',
+      title: 'Planos de Assinatura',
+      description: 'Obter informações sobre planos de assinatura disponíveis',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/planos',
+          description: 'Lista todos os planos de assinatura ativos',
+          example: '[{ "id": "uuid", "nome": "Premium", "telas_simultaneas": 4 }]'
+        },
+        {
+          method: 'GET',
+          endpoint: '/assinaturas/me',
+          description: 'Obtém a assinatura ativa do usuário',
+          example: '{ "id": "uuid", "plano_id": "uuid", "data_inicio": "2023-01-01" }'
+        }
+      ]
+    },
+    {
+      name: 'conteudos',
+      title: 'Conteúdos',
+      description: 'Gerenciar conteúdos (filmes, séries, etc.)',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/conteudos',
+          description: 'Lista conteúdos com paginação e filtros',
+          queryParams: '?page=1&pageSize=10&tipo=filme&genero=acao',
+          example: '{ "items": [{ "id": "uuid", "tipo": "filme", "titulo": "Nome do Filme" }], "totalCount": 100 }'
+        },
+        {
+          method: 'GET',
+          endpoint: '/conteudos/{id}',
+          description: 'Obtém detalhes de um conteúdo específico',
+          example: '{ "id": "uuid", "tipo": "filme", "titulo": "Nome do Filme", "descricao": "..." }'
+        },
+        {
+          method: 'GET',
+          endpoint: '/conteudos/{id}/episodios',
+          description: 'Lista episódios de uma série',
+          example: '[{ "id": "uuid", "conteudo_id": "uuid", "numero_temporada": 1, "numero_episodio": 1 }]'
+        }
+      ]
+    },
+    {
+      name: 'favoritos',
+      title: 'Favoritos',
+      description: 'Gerenciar lista de favoritos do usuário',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/favoritos',
+          description: 'Lista todos os conteúdos favoritos do usuário',
+          example: '[{ "id": "uuid", "tipo": "filme", "titulo": "Nome do Filme" }]'
+        },
+        {
+          method: 'POST',
+          endpoint: '/favoritos',
+          description: 'Adiciona um conteúdo aos favoritos',
+          body: '{ "conteudo_id": "uuid" }',
+          example: '{ "usuario_id": "uuid", "conteudo_id": "uuid", "created_at": "2023-01-01T00:00:00Z" }'
+        },
+        {
+          method: 'DELETE',
+          endpoint: '/favoritos/{conteudo_id}',
+          description: 'Remove um conteúdo dos favoritos',
+          example: '{ "success": true }'
+        }
+      ]
+    },
+    {
+      name: 'historico',
+      title: 'Histórico de Reprodução',
+      description: 'Gerenciar histórico de reprodução de conteúdo',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/playback/historico',
+          description: 'Lista o histórico de reprodução do usuário',
+          example: '[{ "id": "uuid", "conteudo_id": "uuid", "posicao_tempo": 1200 }]'
+        },
+        {
+          method: 'POST',
+          endpoint: '/playback/historico',
+          description: 'Atualiza o progresso de reprodução',
+          body: '{ "conteudo_id": "uuid", "posicao_tempo": 1200, "percentual_assistido": 45.5 }',
+          example: '{ "id": "uuid", "conteudo_id": "uuid", "posicao_tempo": 1200 }'
+        }
+      ]
+    },
+    {
+      name: 'downloads',
+      title: 'Downloads',
+      description: 'Gerenciar downloads de conteúdo para visualização offline',
+      methods: [
+        {
+          method: 'GET',
+          endpoint: '/downloads',
+          description: 'Lista todos os downloads do usuário',
+          example: '[{ "id": "uuid", "arquivo_midia_id": "uuid", "status": "concluido" }]'
+        },
+        {
+          method: 'POST',
+          endpoint: '/downloads',
+          description: 'Inicia um novo download',
+          body: '{ "arquivo_midia_id": "uuid", "dispositivo_id": "uuid" }',
+          example: '{ "id": "uuid", "arquivo_midia_id": "uuid", "status": "em_andamento" }'
+        }
+      ]
+    }
   ];
 
-  const categories = [...new Set(endpoints.map(e => e.category))];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white py-16 px-4 md:px-8">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto"
-      >
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Documentação da API</h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Explore a API do Streaming Galaxy para integrar nossos recursos em sua aplicação
-          </p>
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        <div className="mb-8">
+          <Link to="/" className="inline-flex items-center text-white hover:text-gray-300 transition-colors">
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Voltar para Home
+          </Link>
         </div>
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-12">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="examples">Exemplos</TabsTrigger>
-            <TabsTrigger value="reference">Referência</TabsTrigger>
-          </TabsList>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Documentação da API</h1>
+          <p className="text-gray-400 mb-8 text-lg">
+            Explore os endpoints disponíveis na API da Streaming Galaxy
+          </p>
 
-          <TabsContent value="overview" className="max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-lg border border-gray-700/50 mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Introdução</h2>
-                <p className="text-gray-300 mb-4">
-                  A API do Streaming Galaxy permite que desenvolvedores acessem e interajam com nossos dados 
-                  de streaming, incluindo gerenciamento de usuários, conteúdo, assinaturas e muito mais.
-                </p>
-                <p className="text-gray-300 mb-4">
-                  Nossa API segue os princípios RESTful e utiliza JSON para formatação de dados.
-                </p>
-              </div>
-
-              <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-lg border border-gray-700/50 mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Autenticação</h2>
-                <p className="text-gray-300 mb-4">
-                  Todas as solicitações à API devem ser autenticadas usando um token JWT no cabeçalho Authorization:
-                </p>
-                <div className="bg-gray-900 p-4 rounded-md font-mono text-sm mb-4">
-                  Authorization: Bearer seu_token_jwt
+          <Card className="bg-gray-900 border-gray-800 mb-8">
+            <CardHeader>
+              <CardTitle>Visão Geral</CardTitle>
+              <CardDescription className="text-gray-400">
+                A API da Streaming Galaxy é baseada em REST e utiliza autenticação JWT via Supabase.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-2">Base URL</h3>
+                  <code className="bg-gray-800 p-2 rounded block">
+                    https://api.streaming-galaxy.com/v1
+                  </code>
                 </div>
-                <p className="text-gray-300">
-                  Para obter um token, utilize os endpoints de autenticação do Supabase.
-                </p>
-              </div>
-
-              <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-lg border border-gray-700/50">
-                <h2 className="text-2xl font-semibold mb-4">Formato de Resposta</h2>
-                <p className="text-gray-300 mb-4">
-                  Todas as respostas seguem este formato padrão:
-                </p>
-                <div className="bg-gray-900 p-4 rounded-md font-mono text-sm">
-                  {`{
-  "data": { ... }, // Os dados solicitados
-  "status": 200,   // Código de status HTTP
-  "message": "OK"  // Mensagem descritiva
-}`}
+                <div>
+                  <h3 className="font-medium mb-2">Autenticação</h3>
+                  <p className="text-gray-400 mb-2">
+                    Todos os endpoints protegidos exigem um token JWT no cabeçalho de autorização:
+                  </p>
+                  <code className="bg-gray-800 p-2 rounded block">
+                    Authorization: Bearer {"<seu_token_jwt>"}
+                  </code>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Integração com Supabase</h3>
+                  <p className="text-gray-400">
+                    A API está integrada com o Supabase para autenticação, armazenamento de dados e gerenciamento de arquivos.
+                    As políticas de segurança no nível de linha (RLS) garantem que os usuários só possam acessar seus próprios dados.
+                  </p>
                 </div>
               </div>
-            </motion.div>
-          </TabsContent>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="examples">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-3xl mx-auto space-y-8"
-            >
-              {codeBlocks.map((block, index) => (
-                <div key={index} className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg border border-gray-700/50">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold">{block.title}</h3>
-                      <p className="text-gray-400 font-mono text-sm">{block.endpoint}</p>
-                    </div>
-                    <button 
-                      onClick={() => copyToClipboard(block.code, index)}
-                      className="p-2 hover:bg-gray-700 rounded-md transition-colors"
-                      aria-label="Copy code"
-                    >
-                      {copiedIndex === index ? 
-                        <Check className="h-5 w-5 text-green-400" /> : 
-                        <Copy className="h-5 w-5 text-gray-400" />
-                      }
-                    </button>
-                  </div>
-                  <div className="bg-gray-900 p-4 rounded-md font-mono text-sm overflow-x-auto">
-                    <pre>{block.code}</pre>
-                  </div>
-                </div>
+          <Tabs defaultValue={endpoints[0].name} className="w-full">
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-8 bg-gray-900">
+              {endpoints.map(endpoint => (
+                <TabsTrigger 
+                  key={endpoint.name} 
+                  value={endpoint.name}
+                  className="data-[state=active]:bg-gray-800"
+                >
+                  {endpoint.title}
+                </TabsTrigger>
               ))}
-            </motion.div>
-          </TabsContent>
+            </TabsList>
 
-          <TabsContent value="reference">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-4xl mx-auto"
-            >
-              <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg border border-gray-700/50">
-                <h2 className="text-2xl font-semibold mb-6">Referência de Endpoints</h2>
-                
-                <div className="space-y-8">
-                  {categories.map((category) => (
-                    <div key={category} className="space-y-4">
-                      <h3 className="text-xl font-medium text-white mb-4">{category}</h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-gray-700">
-                              <th className="px-4 py-3 text-left text-gray-400 font-medium">Método</th>
-                              <th className="px-4 py-3 text-left text-gray-400 font-medium">Endpoint</th>
-                              <th className="px-4 py-3 text-left text-gray-400 font-medium">Descrição</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {endpoints
-                              .filter(e => e.category === category)
-                              .map((endpoint, index) => (
-                                <tr key={index} className="border-b border-gray-800">
-                                  <td className="px-4 py-3">
-                                    <span className={`inline-block px-2 py-1 rounded text-xs font-medium
-                                      ${endpoint.method === 'GET' ? 'bg-blue-900/50 text-blue-300' : 
-                                        endpoint.method === 'POST' ? 'bg-green-900/50 text-green-300' : 
-                                        endpoint.method === 'PATCH' ? 'bg-yellow-900/50 text-yellow-300' : 
-                                        'bg-red-900/50 text-red-300'}`}>
-                                      {endpoint.method}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 font-mono text-sm">{endpoint.path}</td>
-                                  <td className="px-4 py-3 text-gray-300">{endpoint.description}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
+            {endpoints.map(endpoint => (
+              <TabsContent key={endpoint.name} value={endpoint.name} className="mt-0">
+                <Card className="bg-gray-900 border-gray-800">
+                  <CardHeader>
+                    <CardTitle>{endpoint.title}</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      {endpoint.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {endpoint.methods.map((method, index) => (
+                      <div key={index} className="border border-gray-800 rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-between bg-gray-800 px-4 py-2">
+                          <div className="flex items-center">
+                            <span className={`
+                              inline-block rounded px-2 py-1 text-xs font-medium mr-3
+                              ${method.method === 'GET' ? 'bg-blue-900 text-blue-300' : 
+                                method.method === 'POST' ? 'bg-green-900 text-green-300' : 
+                                method.method === 'PATCH' ? 'bg-yellow-900 text-yellow-300' : 
+                                method.method === 'DELETE' ? 'bg-red-900 text-red-300' : ''}
+                            `}>
+                              {method.method}
+                            </span>
+                            <code className="text-sm">
+                              {method.endpoint}
+                              {method.queryParams && <span className="text-gray-400">{method.queryParams}</span>}
+                            </code>
+                          </div>
+                          <Button 
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(
+                              `${method.method} https://api.streaming-galaxy.com/v1${method.endpoint}`,
+                              method.endpoint
+                            )}
+                            className="h-8 w-8 p-0"
+                          >
+                            {copiedEndpoint === method.endpoint ? 
+                              <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                              <Copy className="h-4 w-4" />
+                            }
+                          </Button>
+                        </div>
+                        <div className="p-4 border-t border-gray-800">
+                          <p className="text-sm text-gray-400 mb-4">{method.description}</p>
+                          
+                          {method.body && (
+                            <div className="mb-4">
+                              <h4 className="text-xs uppercase text-gray-500 mb-2">Request Body</h4>
+                              <ScrollArea className="h-24 rounded bg-gray-800 p-2">
+                                <pre className="text-xs">{method.body}</pre>
+                              </ScrollArea>
+                            </div>
+                          )}
+                          
+                          <h4 className="text-xs uppercase text-gray-500 mb-2">Response</h4>
+                          <ScrollArea className="h-32 rounded bg-gray-800 p-2">
+                            <pre className="text-xs">{method.example}</pre>
+                          </ScrollArea>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))}
+          </Tabs>
+
+          <div className="mt-12 text-center">
+            <p className="text-gray-400 mb-4">
+              Precisa de mais informações? Entre em contato com nossa equipe de suporte.
+            </p>
+            <Button variant="outline">
+              Contato Suporte
+            </Button>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
