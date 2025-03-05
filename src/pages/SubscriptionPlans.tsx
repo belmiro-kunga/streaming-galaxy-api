@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X } from 'lucide-react';
+import { Check, X, CreditCard, Award, Smartphone, Download, MonitorPlay, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/ui/Header';
@@ -34,6 +34,19 @@ const SubscriptionPlans = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  
+  // Check login status - in a real app, this would be from auth context
+  useEffect(() => {
+    // Mock check for logged in status - in a real app, this would come from an auth context
+    const checkLoginStatus = () => {
+      // This is a mock implementation - replace with actual auth logic
+      const hasSession = localStorage.getItem('userSession');
+      setIsLoggedIn(!!hasSession);
+    };
+    
+    checkLoginStatus();
+  }, []);
 
   // Define subscription plans
   const plans: Plan[] = [
@@ -72,26 +85,6 @@ const SubscriptionPlans = () => {
         { name: 'Conteúdo HD', included: true },
         { name: '2 dispositivos', included: true },
         { name: '10 downloads', included: true },
-        { name: 'Cancelamento a qualquer momento', included: true },
-        { name: 'Sem anúncios', included: true },
-        { name: 'Conteúdo Ultra HD', included: false },
-      ]
-    },
-    {
-      id: 'threeweeks',
-      name: 'Plano Três Semanas',
-      description: 'Ideal para períodos médios',
-      price: 1200,
-      currency: 'AOA',
-      cycle: 'por três semanas',
-      devices: 2,
-      downloads: 15,
-      quality: 'HD',
-      color: 'bg-indigo-500',
-      features: [
-        { name: 'Conteúdo HD', included: true },
-        { name: '2 dispositivos', included: true },
-        { name: '15 downloads', included: true },
         { name: 'Cancelamento a qualquer momento', included: true },
         { name: 'Sem anúncios', included: true },
         { name: 'Conteúdo Ultra HD', included: false },
@@ -137,26 +130,6 @@ const SubscriptionPlans = () => {
         { name: 'Sem anúncios', included: true },
         { name: 'Conteúdo exclusivo', included: true },
       ]
-    },
-    {
-      id: 'gold',
-      name: 'Gold',
-      description: 'Experiência premium completa',
-      price: 7500,
-      currency: 'AOA',
-      cycle: 'por mês',
-      devices: 6,
-      downloads: 100,
-      quality: 'Ultra HD + HDR',
-      color: 'bg-yellow-500',
-      features: [
-        { name: 'Conteúdo Ultra HD + HDR', included: true },
-        { name: '6 dispositivos', included: true },
-        { name: '100 downloads', included: true },
-        { name: 'Cancelamento a qualquer momento', included: true },
-        { name: 'Sem anúncios', included: true },
-        { name: 'Todo o conteúdo exclusivo', included: true },
-      ]
     }
   ];
 
@@ -177,17 +150,20 @@ const SubscriptionPlans = () => {
       });
       return;
     }
-
-    toast({
-      title: "Assinatura iniciada",
-      description: "Você será redirecionado para o pagamento.",
-    });
     
-    // In a real app, this would navigate to a payment page
-    // For now, just navigate back to home
-    setTimeout(() => {
-      navigate('/home');
-    }, 2000);
+    const selectedPlanDetails = plans.find(p => p.id === selectedPlan);
+    
+    if (!isLoggedIn) {
+      // Redirect to login page if user is not logged in
+      toast({
+        title: "Login necessário",
+        description: "Faça login para continuar com a assinatura.",
+      });
+      navigate('/login');
+    } else {
+      // Redirect to payment page if user is logged in
+      navigate('/payment-upload', { state: { plan: selectedPlanDetails } });
+    }
   };
 
   return (
@@ -207,7 +183,7 @@ const SubscriptionPlans = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -229,50 +205,58 @@ const SubscriptionPlans = () => {
                 )}
                 
                 <CardHeader>
-                  <div className={`w-12 h-12 rounded-full ${plan.color} mb-4 flex items-center justify-center`}>
-                    <span className="text-white font-bold text-lg">
+                  <div className={`w-16 h-16 rounded-full ${plan.color} mb-4 mx-auto flex items-center justify-center`}>
+                    <span className="text-white font-bold text-xl">
                       {plan.name.charAt(0)}
                     </span>
                   </div>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardTitle className="text-center">{plan.name}</CardTitle>
+                  <p className="text-center text-muted-foreground mt-1">{plan.description}</p>
+                  
+                  <div className="text-center mt-4 mb-2">
+                    <p className="text-4xl font-bold">
+                      {plan.currency} {plan.price.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.cycle}
+                    </p>
+                  </div>
                 </CardHeader>
                 
                 <CardContent>
-                  <div className="mb-6">
-                    <p className="text-3xl font-bold">
-                      {plan.currency} {plan.price.toLocaleString()}
-                      <span className="text-sm font-normal text-muted-foreground ml-1">
-                        {plan.cycle}
-                      </span>
-                    </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                      <Smartphone className="h-5 w-5 text-muted-foreground" />
+                      <span className="flex-1">{plan.devices} {plan.devices === 1 ? 'dispositivo' : 'dispositivos'}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                      <Download className="h-5 w-5 text-muted-foreground" />
+                      <span className="flex-1">{plan.downloads} downloads</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                      <MonitorPlay className="h-5 w-5 text-muted-foreground" />
+                      <span className="flex-1">Qualidade {plan.quality}</span>
+                    </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    {plan.features.map((feature, i) => (
-                      <div key={i} className="flex items-center">
-                        {feature.included ? (
-                          <Check className="h-5 w-5 text-green-500 mr-2" />
-                        ) : (
-                          <X className="h-5 w-5 text-gray-300 mr-2" />
-                        )}
-                        <span className={feature.included ? '' : 'text-muted-foreground'}>
-                          {feature.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 space-y-2">
-                    <Badge variant="outline" className="w-full justify-center py-1">
-                      {plan.devices} {plan.devices === 1 ? 'dispositivo' : 'dispositivos'}
-                    </Badge>
-                    <Badge variant="outline" className="w-full justify-center py-1">
-                      {plan.downloads} downloads
-                    </Badge>
-                    <Badge variant="outline" className="w-full justify-center py-1">
-                      Qualidade {plan.quality}
-                    </Badge>
+                  <div className="mt-6">
+                    <h4 className="font-medium mb-3">O que está incluído:</h4>
+                    <ul className="space-y-2">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-center">
+                          {feature.included ? (
+                            <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                          ) : (
+                            <X className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                          )}
+                          <span className={feature.included ? '' : 'text-muted-foreground'}>
+                            {feature.name}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </CardContent>
                 
@@ -295,12 +279,14 @@ const SubscriptionPlans = () => {
             size="lg" 
             onClick={handleSubscribe}
             disabled={!selectedPlan}
-            className="px-8"
+            className="px-8 py-6 text-lg"
           >
+            <CreditCard className="mr-2 h-5 w-5" />
             Assinar Agora
           </Button>
           <p className="mt-4 text-sm text-muted-foreground">
             Você pode cancelar sua assinatura a qualquer momento.
+            {!isLoggedIn && " É necessário fazer login para continuar."}
           </p>
         </div>
       </div>

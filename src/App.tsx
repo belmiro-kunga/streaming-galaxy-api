@@ -16,6 +16,7 @@ import Kids from "./pages/Kids";
 import ProfileManagement from "./pages/ProfileManagement";
 import SubscriptionPlans from "./pages/SubscriptionPlans";
 import UserSettingsPage from "./pages/UserSettingsPage";
+import PaymentUpload from "./pages/PaymentUpload";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ function App() {
               <Route path="/kids" element={<Kids />} />
               <Route path="/subscription-plans" element={<SubscriptionPlans />} />
               <Route path="/user-settings" element={<UserSettingsPage />} />
+              <Route path="/payment-upload" element={<PaymentUpload />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>
