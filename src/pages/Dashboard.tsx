@@ -39,6 +39,8 @@ const Dashboard = () => {
     
     if (tab === 'home') {
       navigate('/home');
+    } else if (tab === 'settings') {
+      navigate('/user-settings');
     }
   };
 
@@ -137,6 +139,8 @@ const Dashboard = () => {
                     onClick={() => {
                       if (item.id === 'logout') {
                         window.location.href = '/login';
+                      } else if (item.id === 'settings') {
+                        navigate('/user-settings');
                       } else {
                         handleTabChange(item.id);
                       }
