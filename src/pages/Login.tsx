@@ -29,7 +29,7 @@ const Login = () => {
           navigate('/dashboard');
           toast({
             title: "Login realizado com sucesso!",
-            description: "Bem-vindo de volta à Streaming Galaxy.",
+            description: "Bem-vindo de volta à CinePlay.",
           });
         }, 1000);
       } else if (view === 'signup') {
@@ -94,7 +94,7 @@ const Login = () => {
         <Card className="border-gray-800 bg-black/70 backdrop-blur-sm shadow-xl">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold tracking-tight text-white">
-              {view === 'login' && 'Entrar na Streaming Galaxy'}
+              {view === 'login' && 'Entrar na CinePlay'}
               {view === 'signup' && 'Criar uma conta'}
               {view === 'reset-password' && 'Recuperar senha'}
             </CardTitle>

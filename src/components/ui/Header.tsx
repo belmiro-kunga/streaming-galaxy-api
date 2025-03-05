@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Bell, Menu, User, LogOut, Settings, CreditCard, Gauge, Home, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,12 +11,13 @@ import { useMobile } from '@/hooks/use-mobile';
 export const Header = () => {
   const isMobile = useMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4 bg-gradient-to-b from-black/90 to-transparent">
       <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="text-[#E50914] font-bold text-2xl mr-8">STREAMGALAXY</Link>
+        <Link to="/" className="text-[#E50914] font-bold text-2xl mr-8">CINEPLAY</Link>
         
         {/* Navigation Tabs - Centered for desktop */}
         {!isMobile && (
@@ -61,7 +62,7 @@ export const Header = () => {
                 <span>Usuário</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-gray-700" />
-              <DropdownMenuItem className="flex items-center cursor-pointer">
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
@@ -73,12 +74,12 @@ export const Header = () => {
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Pagamento</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center cursor-pointer">
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
                 <Gauge className="mr-2 h-4 w-4" />
                 <span>Dashboard</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-700" />
-              <DropdownMenuItem className="flex items-center cursor-pointer text-red-500">
+              <DropdownMenuItem className="flex items-center cursor-pointer text-red-500" onClick={() => navigate('/login')}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
@@ -91,10 +92,12 @@ export const Header = () => {
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-black/90 p-2 border-t border-gray-800 z-50">
           <div className="flex justify-around items-center">
-            <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-              <Home className="h-6 w-6 mb-1" />
-              <span className="text-xs">Início</span>
-            </Button>
+            <Link to="/home">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <Home className="h-6 w-6 mb-1" />
+                <span className="text-xs">Início</span>
+              </Button>
+            </Link>
             <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
               <Search className="h-6 w-6 mb-1" />
               <span className="text-xs">Busca</span>
@@ -103,10 +106,12 @@ export const Header = () => {
               <Download className="h-6 w-6 mb-1" />
               <span className="text-xs">Downloads</span>
             </Button>
-            <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-              <User className="h-6 w-6 mb-1" />
-              <span className="text-xs">Perfil</span>
-            </Button>
+            <Link to="/dashboard">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <User className="h-6 w-6 mb-1" />
+                <span className="text-xs">Perfil</span>
+              </Button>
+            </Link>
           </div>
         </div>
       )}

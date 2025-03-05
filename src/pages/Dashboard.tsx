@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -51,7 +50,7 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-black/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/home" className="text-2xl font-bold">Streaming Galaxy</Link>
+          <Link to="/home" className="text-2xl font-bold">CinePlay</Link>
           
           <div className="flex items-center space-x-4">
             <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
@@ -148,7 +147,7 @@ const Dashboard = () => {
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
                       <div>
                         <h2 className="text-2xl font-bold mb-2">Olá, Usuário!</h2>
-                        <p className="text-gray-300">Bem-vindo de volta à Streaming Galaxy</p>
+                        <p className="text-gray-300">Bem-vindo de volta à CinePlay</p>
                       </div>
                       <Button className="mt-4 md:mt-0" size="lg">
                         <Gift className="mr-2 h-5 w-5" />
