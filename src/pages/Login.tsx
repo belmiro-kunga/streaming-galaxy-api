@@ -76,7 +76,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-950 to-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-950 to-gray-900 p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ const Login = () => {
         <Card className="border-violet-800 bg-black/60 backdrop-blur-md shadow-xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent pointer-events-none"></div>
           
-          <CardHeader className="space-y-2 text-center relative z-10">
+          <CardHeader className="space-y-3 text-center relative z-10 px-6 pt-8 pb-2">
             <CardTitle className="text-3xl font-bold tracking-tight text-white">
               {view === 'login' && 'Bem-vindo à CinePlay'}
               {view === 'reset-password' && 'Recuperar senha'}
@@ -99,10 +99,10 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-6 p-6 relative z-10">
+          <CardContent className="space-y-6 px-8 py-6 relative z-10">
             {/* Social login buttons only in login view */}
             {view === 'login' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <Button 
                   variant="outline" 
                   className="h-12 w-full bg-blue-600 border-0 hover:bg-blue-700 text-white font-medium"
@@ -129,7 +129,7 @@ const Login = () => {
 
             {/* Separator only visible in login view */}
             {view === 'login' && (
-              <div className="relative my-2">
+              <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <Separator className="w-full bg-violet-700/50" />
                 </div>
@@ -144,8 +144,8 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name field - only in signup view */}
               {view === 'signup' && (
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium text-violet-100">
+                <div className="space-y-2.5">
+                  <Label htmlFor="name" className="text-sm font-medium text-violet-100 block mb-1.5">
                     Nome completo
                   </Label>
                   <Input
@@ -161,8 +161,8 @@ const Login = () => {
               )}
 
               {/* Email field - in all views */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-violet-100">
+              <div className="space-y-2.5">
+                <Label htmlFor="email" className="text-sm font-medium text-violet-100 block mb-1.5">
                   Email
                 </Label>
                 <div className="relative">
@@ -181,8 +181,8 @@ const Login = () => {
               
               {/* Password field - not in reset-password view */}
               {view !== 'reset-password' && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between mb-1.5">
                     <Label htmlFor="password" className="text-sm font-medium text-violet-100">
                       Senha
                     </Label>
@@ -213,8 +213,8 @@ const Login = () => {
 
               {/* Confirm password field - only in signup view */}
               {view === 'signup' && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-violet-100">
+                <div className="space-y-2.5">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-violet-100 block mb-1.5">
                     Confirmar Senha
                   </Label>
                   <div className="relative">
@@ -235,7 +235,7 @@ const Login = () => {
               {/* Submit button */}
               <Button
                 type="submit"
-                className="w-full h-12 text-base bg-violet-600 hover:bg-violet-700 transition-colors mt-2"
+                className="w-full h-12 text-base bg-violet-600 hover:bg-violet-700 transition-colors mt-6"
                 disabled={loading}
               >
                 {loading ? (
@@ -258,7 +258,7 @@ const Login = () => {
             </form>
           </CardContent>
           
-          <CardFooter className="flex flex-wrap items-center justify-center pb-6 pt-0 relative z-10">
+          <CardFooter className="flex flex-wrap items-center justify-center pb-8 pt-2 relative z-10 px-6">
             <div className="text-center text-sm text-violet-200">
               {view === 'login' ? (
                 <p>
@@ -297,7 +297,7 @@ const Login = () => {
           </CardFooter>
         </Card>
         
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <Link 
             to="/"
             className="text-sm text-violet-300 hover:text-white transition-colors inline-flex items-center"
