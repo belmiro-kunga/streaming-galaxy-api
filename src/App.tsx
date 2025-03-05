@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/downloads" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>

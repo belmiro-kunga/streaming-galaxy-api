@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, Film, TrendingUp, Clock, BookmarkCheck, Download, 
   Settings, LogOut, Bell, User, Search, Gift, CreditCard
@@ -11,9 +11,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useTVMode } from '@/hooks/use-tv-mode';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const location = useLocation();
+  const isDownloadsPath = location.pathname === '/dashboard/downloads';
+  const [activeTab, setActiveTab] = useState<string>(isDownloadsPath ? 'downloads' : 'home');
   const { toast } = useToast();
   const { isTVMode } = useTVMode();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (isDownloadsPath) {
+      setActiveTab('downloads');
+    }
+  }, [isDownloadsPath]);
   
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -21,9 +30,12 @@ const Dashboard = () => {
       title: `${tab.charAt(0).toUpperCase() + tab.slice(1)}`,
       description: `Você está na seção ${tab}.`
     });
+    
+    if (tab === 'home') {
+      navigate('/home');
+    }
   };
 
-  // Mock user subscription data
   const userSubscription = {
     plan: 'Premium',
     startDate: '2023-07-15',
@@ -32,14 +44,12 @@ const Dashboard = () => {
     status: 'Ativo'
   };
 
-  // Mock watch history
   const watchHistory = [
     { id: '1', title: 'O Gambito da Rainha', progress: 75, image: 'https://via.placeholder.com/300x170' },
     { id: '2', title: 'Stranger Things', progress: 40, image: 'https://via.placeholder.com/300x170' },
     { id: '3', title: 'Breaking Bad', progress: 90, image: 'https://via.placeholder.com/300x170' }
   ];
 
-  // Mock downloads
   const downloads = [
     { id: '1', title: 'Black Mirror', size: '1.2 GB', expiresIn: '15 dias', image: 'https://via.placeholder.com/300x170' },
     { id: '2', title: 'The Crown', size: '950 MB', expiresIn: '30 dias', image: 'https://via.placeholder.com/300x170' }
@@ -47,7 +57,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      {/* Header */}
       <header className="bg-black/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/home" className="text-2xl font-bold">CinePlay</Link>
@@ -69,7 +78,6 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
         <aside className="md:w-64 flex-shrink-0 space-y-1">
           <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="p-3">
@@ -84,7 +92,15 @@ const Dashboard = () => {
                 ].map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => handleTabChange(item.id)}
+                    onClick={() => {
+                      if (item.id === 'home') {
+                        navigate('/home');
+                      } else if (item.id === 'downloads') {
+                        navigate('/dashboard/downloads');
+                      } else {
+                        handleTabChange(item.id);
+                      }
+                    }}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
                       activeTab === item.id
                         ? 'bg-primary/20 text-primary'
@@ -131,7 +147,6 @@ const Dashboard = () => {
           </Card>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1">
           <motion.div
             key={activeTab}
@@ -195,7 +210,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {activeTab === 'downloads' && (
+            {(activeTab === 'downloads' || isDownloadsPath) && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4">Seus Downloads</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
