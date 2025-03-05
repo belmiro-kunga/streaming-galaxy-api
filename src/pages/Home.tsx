@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -47,7 +48,7 @@ const Home = () => {
 
         // Get trending content
         const trending = await contentAPI.getTrendingContent(20);
-        setTrendingContent(trending);
+        setTrendingContent(Array.isArray(trending) ? trending : []);
 
         // Get all genres
         const genresData = await contentAPI.getAllGenres();
@@ -56,8 +57,34 @@ const Home = () => {
         // Get content by genre
         const contentGenres: { [key: string]: ContentItem[] } = {};
         for (const genre of genresData.slice(0, 8)) {
-          const content = await contentAPI.getContentByGenre(genre.id, 10);
-          contentGenres[genre.id] = Array.isArray(content) ? content.filter(item => !!item) as ContentItem[] : [];
+          try {
+            const content = await contentAPI.getContentByGenre(genre.id, 10);
+            // Handle potential array of arrays or non-conforming data
+            if (Array.isArray(content)) {
+              // If it's an array of arrays, flatten it and filter out invalid items
+              const flattenedContent = Array.isArray(content[0]) 
+                ? content.flat()
+                : content;
+              
+              // Ensure each item has the required properties of ContentItem
+              contentGenres[genre.id] = flattenedContent.filter((item): item is ContentItem => {
+                return item && 
+                  typeof item === 'object' && 
+                  'id' in item && 
+                  'tipo' in item && 
+                  'titulo' in item && 
+                  'descricao' in item && 
+                  'ano_lancamento' in item && 
+                  'classificacao_etaria' in item && 
+                  'gratuito' in item;
+              });
+            } else {
+              contentGenres[genre.id] = [];
+            }
+          } catch (error) {
+            console.error(`Error fetching content for genre ${genre.nome}:`, error);
+            contentGenres[genre.id] = [];
+          }
         }
         setContentByGenre(contentGenres);
 
