@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -21,51 +22,38 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Mock authentication with different admin roles
-      // In production, this would be an actual API call with proper role verification
-      if (email === 'admin@cineplay.com' && password === 'admin123') {
-        setTimeout(() => {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel administrativo.",
-          });
-          setLoading(false);
-        }, 1000);
-      } else if (email === 'editor@cineplay.com' && password === 'editor123') {
-        setTimeout(() => {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel de edição.",
-          });
-          setLoading(false);
-        }, 1000);
-      } else if (email === 'super@cineplay.com' && password === 'super123') {
-        setTimeout(() => {
-          navigate('/admin-dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo ao painel de super administrador.",
-          });
-          setLoading(false);
-        }, 1000);
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Check if user has admin role
+      // This assumes you have a user_role field in your user metadata
+      const user = data.user;
+      const userRole = user?.user_metadata?.role || 'user';
+
+      if (['admin', 'editor', 'super_admin'].includes(userRole)) {
+        navigate('/admin-dashboard');
+        toast({
+          title: "Login realizado com sucesso!",
+          description: `Bem-vindo ao painel ${userRole === 'admin' ? 'administrativo' : userRole === 'editor' ? 'de edição' : 'de super administrador'}.`,
+        });
       } else {
-        setTimeout(() => {
-          toast({
-            title: "Falha na autenticação",
-            description: "Email ou senha incorretos.",
-            variant: "destructive",
-          });
-          setLoading(false);
-        }, 1000);
+        // Sign out if not an admin role
+        await supabase.auth.signOut();
+        throw new Error("Você não tem permissão para acessar esta área.");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Admin authentication error:", error);
       toast({
-        title: "Erro de autenticação",
-        description: "Ocorreu um erro. Tente novamente.",
+        title: "Falha na autenticação",
+        description: error.message || "Email ou senha incorretos.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -97,7 +85,7 @@ const AdminLogin = () => {
                   Email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -117,7 +105,7 @@ const AdminLogin = () => {
                   </Label>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
                   <Input
                     id="password"
                     type="password"

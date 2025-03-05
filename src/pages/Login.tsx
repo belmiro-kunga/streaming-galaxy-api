@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/lib/supabase';
 
 type AuthView = 'login' | 'reset-password' | 'signup';
 
@@ -28,51 +29,108 @@ const Login = () => {
 
     try {
       if (view === 'login') {
-        setTimeout(() => {
-          navigate('/dashboard');
-          toast({
-            title: "Login realizado com sucesso!",
-            description: "Bem-vindo de volta à CinePlay.",
-          });
-        }, 1000);
+        // Login with Supabase
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        // Successful login
+        navigate('/dashboard');
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Bem-vindo de volta à CinePlay.",
+        });
       } else if (view === 'reset-password') {
-        setTimeout(() => {
+        // Reset password with Supabase
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Email enviado!",
+          description: "Verifique seu email para redefinir sua senha.",
+        });
+        setLoading(false);
+        setView('login');
+      } else if (view === 'signup') {
+        // Verify passwords match
+        if (password !== confirmPassword) {
           toast({
-            title: "Email enviado!",
-            description: "Verifique seu email para redefinir sua senha.",
+            title: "Erro na criação da conta",
+            description: "As senhas não coincidem.",
+            variant: "destructive",
           });
           setLoading(false);
+          return;
+        }
+
+        // Create account with Supabase
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        // Check if email confirmation is required
+        if (data.user?.identities?.length === 0) {
+          toast({
+            title: "Verifique seu email",
+            description: "Enviamos um link de confirmação para seu email.",
+          });
           setView('login');
-        }, 1000);
-      } else if (view === 'signup') {
-        // Simulate account creation
-        setTimeout(() => {
+        } else {
           navigate('/dashboard');
           toast({
             title: "Conta criada com sucesso!",
             description: "Bem-vindo à CinePlay.",
           });
-        }, 1000);
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         title: "Erro de autenticação",
-        description: "Ocorreu um erro. Tente novamente.",
+        description: error.message || "Ocorreu um erro. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: 'facebook' | 'google') => {
     setLoading(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-      toast({
-        title: `Login com ${provider} realizado com sucesso!`,
-        description: "Bem-vindo à CinePlay.",
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
       });
-    }, 1000);
+
+      if (error) throw error;
+      
+      // The redirect happens automatically, but we'll show loading state
+    } catch (error: any) {
+      console.error(`${provider} login error:`, error);
+      toast({
+        title: `Erro ao fazer login com ${provider}`,
+        description: error.message || "Ocorreu um erro. Tente novamente.",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
   };
 
   return (
@@ -106,7 +164,8 @@ const Login = () => {
                 <Button 
                   variant="outline" 
                   className="h-12 w-full bg-blue-600 border-0 hover:bg-blue-700 text-white font-medium"
-                  onClick={() => handleSocialLogin('Facebook')}
+                  onClick={() => handleSocialLogin('facebook')}
+                  disabled={loading}
                 >
                   <Facebook className="mr-2 h-5 w-5 text-white" />
                   Facebook
@@ -114,7 +173,8 @@ const Login = () => {
                 <Button 
                   variant="outline" 
                   className="h-12 w-full bg-red-500 border-0 hover:bg-red-600 text-white font-medium"
-                  onClick={() => handleSocialLogin('Google')}
+                  onClick={() => handleSocialLogin('google')}
+                  disabled={loading}
                 >
                   <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="white">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
