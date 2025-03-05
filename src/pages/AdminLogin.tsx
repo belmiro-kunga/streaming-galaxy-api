@@ -21,13 +21,32 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Mock authentication - In production, this would be an actual API call
+      // Mock authentication with different admin roles
+      // In production, this would be an actual API call with proper role verification
       if (email === 'admin@cineplay.com' && password === 'admin123') {
         setTimeout(() => {
           navigate('/admin-dashboard');
           toast({
             title: "Login realizado com sucesso!",
             description: "Bem-vindo ao painel administrativo.",
+          });
+          setLoading(false);
+        }, 1000);
+      } else if (email === 'editor@cineplay.com' && password === 'editor123') {
+        setTimeout(() => {
+          navigate('/admin-dashboard');
+          toast({
+            title: "Login realizado com sucesso!",
+            description: "Bem-vindo ao painel de edição.",
+          });
+          setLoading(false);
+        }, 1000);
+      } else if (email === 'super@cineplay.com' && password === 'super123') {
+        setTimeout(() => {
+          navigate('/admin-dashboard');
+          toast({
+            title: "Login realizado com sucesso!",
+            description: "Bem-vindo ao painel de super administrador.",
           });
           setLoading(false);
         }, 1000);
@@ -133,9 +152,12 @@ const AdminLogin = () => {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="text-center text-sm text-gray-400">
+          <CardFooter className="flex flex-col space-y-2 text-center text-sm text-gray-400">
             <p className="w-full">
               Área restrita para funcionários autorizados
+            </p>
+            <p className="text-xs text-gray-500">
+              Acesso disponível para: Editor, Administrador e Super Administrador
             </p>
           </CardFooter>
         </Card>

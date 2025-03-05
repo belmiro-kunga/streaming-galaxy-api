@@ -2,19 +2,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Lock, X } from 'lucide-react';
+import { Mail, ArrowRight, Lock, X, Github, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
-type AuthView = 'login' | 'reset-password';
+type AuthView = 'login' | 'reset-password' | 'signup';
 
 const Login = () => {
   const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -41,6 +44,15 @@ const Login = () => {
           setLoading(false);
           setView('login');
         }, 1000);
+      } else if (view === 'signup') {
+        // Simulate account creation
+        setTimeout(() => {
+          navigate('/dashboard');
+          toast({
+            title: "Conta criada com sucesso!",
+            description: "Bem-vindo à CinePlay.",
+          });
+        }, 1000);
       }
     } catch (error) {
       toast({
@@ -50,6 +62,17 @@ const Login = () => {
       });
       setLoading(false);
     }
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate('/dashboard');
+      toast({
+        title: `Login com ${provider} realizado com sucesso!`,
+        description: "Bem-vindo à CinePlay.",
+      });
+    }, 1000);
   };
 
   return (
@@ -65,14 +88,67 @@ const Login = () => {
             <CardTitle className="text-2xl font-bold tracking-tight text-white">
               {view === 'login' && 'Entrar na CinePlay'}
               {view === 'reset-password' && 'Recuperar senha'}
+              {view === 'signup' && 'Criar uma conta'}
             </CardTitle>
             <CardDescription className="text-gray-400">
               {view === 'login' && 'Entre com sua conta para acessar o conteúdo'}
               {view === 'reset-password' && 'Enviaremos um link para redefinir sua senha'}
+              {view === 'signup' && 'Preencha seus dados para criar uma nova conta'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {view === 'login' && (
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="h-12 w-full bg-gray-900 border-gray-700 hover:bg-gray-800"
+                  onClick={() => handleSocialLogin('Facebook')}
+                >
+                  <Facebook className="mr-2 h-5 w-5 text-blue-500" />
+                  Facebook
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-12 w-full bg-gray-900 border-gray-700 hover:bg-gray-800"
+                  onClick={() => handleSocialLogin('Github')}
+                >
+                  <Github className="mr-2 h-5 w-5" />
+                  Github
+                </Button>
+              </div>
+            )}
+
+            {view === 'login' && (
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    ou continue com email
+                  </span>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
+              {view === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-gray-200">
+                    Nome completo
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Seu nome"
+                    required={view === 'signup'}
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-gray-200">
                   Email
@@ -116,7 +192,27 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                       placeholder="********"
-                      required
+                      required={view !== 'reset-password'}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {view === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-200">
+                    Confirmar Senha
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="********"
+                      required={view === 'signup'}
                     />
                   </div>
                 </div>
@@ -139,6 +235,7 @@ const Login = () => {
                   <span className="flex items-center justify-center">
                     {view === 'login' && 'Entrar'}
                     {view === 'reset-password' && 'Enviar link de recuperação'}
+                    {view === 'signup' && 'Criar conta'}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 )}
@@ -147,9 +244,39 @@ const Login = () => {
           </CardContent>
           <CardFooter className="flex flex-wrap items-center justify-center">
             <div className="text-center text-sm text-gray-400">
-              <p>
-                Acesso restrito apenas para assinantes
-              </p>
+              {view === 'login' ? (
+                <p>
+                  Não tem uma conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setView('signup')}
+                    className="text-primary hover:underline"
+                  >
+                    Criar conta
+                  </button>
+                </p>
+              ) : view === 'signup' ? (
+                <p>
+                  Já tem uma conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setView('login')}
+                    className="text-primary hover:underline"
+                  >
+                    Fazer login
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  <button
+                    type="button"
+                    onClick={() => setView('login')}
+                    className="text-primary hover:underline"
+                  >
+                    Voltar para o login
+                  </button>
+                </p>
+              )}
             </div>
           </CardFooter>
         </Card>
