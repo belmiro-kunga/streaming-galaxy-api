@@ -24,7 +24,7 @@ const Index = () => {
           className="text-center max-w-3xl mx-auto"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
-            Streaming Galaxy
+            CinePlay
           </h1>
           <p className="text-lg md:text-xl mb-8 text-gray-200 leading-relaxed">
             Uma plataforma de streaming angolana com conteúdo premium para todos os gostos
@@ -87,7 +87,7 @@ const Index = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Recursos da API</h2>
             <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-              Nossa API robusta permite integrar a plataforma Streaming Galaxy em diversos aplicativos e serviços
+              Nossa API robusta permite integrar a plataforma CinePlay em diversos aplicativos e serviços
             </p>
           </motion.div>
 
