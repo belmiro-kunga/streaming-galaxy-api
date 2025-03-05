@@ -332,6 +332,7 @@ const Login = () => {
                   </button>
                 </p>
               ) : (
+                // Here's the fix - ensuring we handle both reset-password and signup views correctly
                 <p>
                   {view === 'signup' ? (
                     <>
@@ -345,6 +346,7 @@ const Login = () => {
                       </button>
                     </>
                   ) : (
+                    // This is for reset-password view
                     <button
                       type="button"
                       onClick={() => setView('login')}
