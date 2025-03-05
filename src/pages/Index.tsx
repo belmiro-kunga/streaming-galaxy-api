@@ -31,7 +31,7 @@ const Index = () => {
               transition={{ duration: 0.2 }}
             >
               <Link 
-                to="/explore" 
+                to="/home" 
                 className="group inline-flex items-center justify-center px-8 py-3 rounded-md bg-white text-black font-medium text-base transition-all duration-300"
               >
                 Explorar Catálogo

@@ -1,522 +1,432 @@
 
-import { supabase } from '../lib/supabase';
-import type { 
-  ApiResponse, 
-  Content, 
-  UserProfile, 
-  SubscriptionPlan, 
-  UserSubscription, 
-  Episode,
-  Favorite,
-  Download,
-  PlaybackHistory,
-  PaginatedResponse,
-  Genre,
-  Device,
-  UserStatistics
-} from '../types/api';
+import axios from 'axios';
+import { supabase } from '@/lib/supabase';
 
-// Helper function to format responses in a consistent way
-const formatResponse = <T>(data: T, error: any = null): ApiResponse<T> => {
-  if (error) {
-    return {
-      success: false,
-      data: null,
-      error: {
-        message: error.message || 'Ocorreu um erro',
-        details: error.details || null
-      }
-    };
-  }
-  return {
-    success: true,
-    data,
-    error: null
-  };
+// API base configuration
+const api = axios.create({
+  baseURL: '/api',
+});
+
+// Authentication APIs
+export const authAPI = {
+  login: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+  
+  register: async (email: string, password: string, nome: string) => {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          nome,
+        },
+      },
+    });
+    
+    if (authError) throw authError;
+    
+    // Create user profile after registration
+    if (authData.user) {
+      const { error: profileError } = await supabase
+        .from('perfis_usuario')
+        .insert({
+          id: authData.user.id,
+          nome,
+          fuso_horario: 'Africa/Luanda',
+          idioma_preferido: 'pt-AO',
+          perfil: 'usuario',
+        });
+      
+      if (profileError) throw profileError;
+    }
+    
+    return authData;
+  },
+  
+  logout: async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    return true;
+  },
+  
+  resetPassword: async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+    return true;
+  },
+  
+  getCurrentUser: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return data.user;
+  },
 };
 
-// User Profiles
-export const getUserProfile = async (): Promise<ApiResponse<UserProfile>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
+// User profile APIs
+export const profileAPI = {
+  getProfile: async (userId: string) => {
     const { data, error } = await supabase
       .from('perfis_usuario')
       .select('*')
-      .eq('id', user.data.user.id)
+      .eq('id', userId)
       .single();
-    
+      
     if (error) throw error;
-    
-    return formatResponse({
-      id: data.id,
-      name: data.nome,
-      timezone: data.fuso_horario,
-      preferredLanguage: data.idioma_preferido,
-      profileType: data.perfil,
-      createdAt: data.created_at
-    });
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
-};
-
-export const updateUserProfile = async (profile: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
+    return data;
+  },
+  
+  updateProfile: async (userId: string, profileData: any) => {
     const { data, error } = await supabase
       .from('perfis_usuario')
-      .update({
-        nome: profile.name,
-        fuso_horario: profile.timezone,
-        idioma_preferido: profile.preferredLanguage
-      })
-      .eq('id', user.data.user.id)
-      .select()
-      .single();
-    
+      .update(profileData)
+      .eq('id', userId)
+      .select();
+      
     if (error) throw error;
-    
-    return formatResponse({
-      id: data.id,
-      name: data.nome,
-      timezone: data.fuso_horario,
-      preferredLanguage: data.idioma_preferido,
-      profileType: data.perfil,
-      createdAt: data.created_at
-    });
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
+    return data;
+  },
 };
 
-// Subscription Plans
-export const getSubscriptionPlans = async (): Promise<ApiResponse<SubscriptionPlan[]>> => {
-  try {
+// Content APIs
+export const contentAPI = {
+  getFeatureContent: async () => {
+    const { data, error } = await supabase
+      .from('conteudos')
+      .select(`
+        *,
+        generos:conteudo_generos(genero:generos(*))
+      `)
+      .eq('status', 'ativo')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  },
+  
+  getTrendingContent: async (limit = 10) => {
+    const { data, error } = await supabase
+      .from('conteudos')
+      .select(`
+        *,
+        generos:conteudo_generos(genero:generos(*))
+      `)
+      .eq('status', 'ativo')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return data || [];
+  },
+  
+  getContentByGenre: async (genreId: string, limit = 10) => {
+    const { data, error } = await supabase
+      .from('conteudo_generos')
+      .select(`
+        conteudo:conteudos(*)
+      `)
+      .eq('genero_id', genreId)
+      .limit(limit);
+      
+    if (error) throw error;
+    return data?.map(item => item.conteudo) || [];
+  },
+  
+  getContentById: async (contentId: string) => {
+    const { data, error } = await supabase
+      .from('conteudos')
+      .select(`
+        *,
+        generos:conteudo_generos(genero:generos(*)),
+        episodios(*)
+      `)
+      .eq('id', contentId)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  },
+  
+  searchContent: async (query: string) => {
+    const { data, error } = await supabase
+      .from('conteudos')
+      .select(`
+        *,
+        generos:conteudo_generos(genero:generos(*))
+      `)
+      .or(`titulo.ilike.%${query}%, descricao.ilike.%${query}%`)
+      .eq('status', 'ativo');
+      
+    if (error) throw error;
+    return data || [];
+  },
+  
+  getAllGenres: async () => {
+    const { data, error } = await supabase
+      .from('generos')
+      .select('*')
+      .order('nome');
+      
+    if (error) throw error;
+    return data || [];
+  },
+};
+
+// Subscription APIs
+export const subscriptionAPI = {
+  getPlans: async () => {
     const { data, error } = await supabase
       .from('planos_assinatura')
       .select(`
         *,
-        precos_planos(*)
+        precos:precos_planos(*)
       `)
       .eq('ativo', true);
-    
+      
     if (error) throw error;
-    
-    const plans = data.map(plan => ({
-      id: plan.id,
-      name: plan.nome,
-      description: plan.descricao || '',
-      maxQuality: plan.qualidade_maxima || 'HD',
-      simultaneousScreens: plan.telas_simultaneas,
-      downloadLimit: plan.limite_downloads,
-      billingCycle: plan.ciclo_cobranca,
-      isActive: plan.ativo,
-      prices: plan.precos_planos.map((price: any) => ({
-        currencyCode: price.moeda_codigo,
-        amount: price.preco
-      }))
-    }));
-    
-    return formatResponse(plans);
-  } catch (error: any) {
-    return formatResponse([], error);
-  }
-};
-
-export const getUserSubscription = async (): Promise<ApiResponse<UserSubscription>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
+    return data || [];
+  },
+  
+  getUserSubscription: async (userId: string) => {
     const { data, error } = await supabase
       .from('assinaturas_usuario')
       .select(`
         *,
-        planos_assinatura(*)
+        plano:planos_assinatura(*)
       `)
-      .eq('usuario_id', user.data.user.id)
+      .eq('usuario_id', userId)
       .eq('status', 'ativa')
-      .maybeSingle();
-    
-    if (error) throw error;
-    if (!data) {
-      return formatResponse(null, { message: 'Nenhuma assinatura ativa encontrada' });
-    }
-    
-    return formatResponse({
-      id: data.id,
-      userId: data.usuario_id,
-      planId: data.plano_id,
-      currencyCode: data.moeda_codigo,
-      startDate: data.data_inicio,
-      endDate: data.data_fim,
-      status: data.status,
-      downloadsUsed: data.downloads_utilizados,
-      plan: {
-        id: data.planos_assinatura.id,
-        name: data.planos_assinatura.nome,
-        description: data.planos_assinatura.descricao || '',
-        maxQuality: data.planos_assinatura.qualidade_maxima || 'HD',
-        simultaneousScreens: data.planos_assinatura.telas_simultaneas,
-        downloadLimit: data.planos_assinatura.limite_downloads,
-        billingCycle: data.planos_assinatura.ciclo_cobranca,
-        isActive: data.planos_assinatura.ativo,
-        prices: []
-      }
-    });
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
-};
-
-// Content
-export const getContents = async (params?: { 
-  page?: number; 
-  pageSize?: number; 
-  tipo?: string;
-  genero?: string;
-  query?: string;
-}): Promise<ApiResponse<PaginatedResponse<Content>>> => {
-  try {
-    let query = supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero_id(id, nome))
-      `, { count: 'exact' });
-    
-    // Apply filters
-    if (params?.tipo) {
-      query = query.eq('tipo', params.tipo);
-    }
-    
-    if (params?.query) {
-      query = query.ilike('titulo', `%${params.query}%`);
-    }
-    
-    // Pagination
-    const page = params?.page || 1;
-    const pageSize = params?.pageSize || 10;
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-    
-    query = query.range(from, to);
-    
-    const { data, error, count } = await query;
-    
-    if (error) throw error;
-    
-    // Process results
-    const contents = data.map(item => {
-      const genreIds = item.generos.map((g: any) => g.genero_id);
-      
-      return {
-        id: item.id,
-        type: item.tipo,
-        title: item.titulo,
-        description: item.descricao || '',
-        releaseYear: item.ano_lancamento,
-        duration: item.duracao,
-        ageRating: item.classificacao_etaria,
-        status: item.status,
-        isFree: item.gratuito,
-        metadata: item.metadata,
-        genres: genreIds
-      };
-    });
-    
-    return formatResponse({
-      items: contents,
-      totalCount: count || 0,
-      page,
-      pageSize,
-      totalPages: Math.ceil((count || 0) / pageSize)
-    });
-  } catch (error: any) {
-    return formatResponse({
-      items: [],
-      totalCount: 0,
-      page: params?.page || 1,
-      pageSize: params?.pageSize || 10,
-      totalPages: 0
-    }, error);
-  }
-};
-
-export const getContentById = async (id: string): Promise<ApiResponse<Content>> => {
-  try {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero_id(id, nome))
-      `)
-      .eq('id', id)
       .single();
-    
-    if (error) throw error;
-    
-    const genreIds = data.generos.map((g: any) => g.genero_id);
-    
-    const content = {
-      id: data.id,
-      type: data.tipo,
-      title: data.titulo,
-      description: data.descricao || '',
-      releaseYear: data.ano_lancamento,
-      duration: data.duracao,
-      ageRating: data.classificacao_etaria,
-      status: data.status,
-      isFree: data.gratuito,
-      metadata: data.metadata,
-      genres: genreIds
-    };
-    
-    return formatResponse(content);
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
-};
-
-export const getFeaturedContent = async (): Promise<ApiResponse<Content[]>> => {
-  try {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero_id(id, nome))
-      `)
-      .eq('status', 'publicado')
-      .limit(6);
-    
-    if (error) throw error;
-    
-    const contents = data.map(item => {
-      const genreIds = item.generos.map((g: any) => g.genero_id);
       
-      return {
-        id: item.id,
-        type: item.tipo,
-        title: item.titulo,
-        description: item.descricao || '',
-        releaseYear: item.ano_lancamento,
-        duration: item.duracao,
-        ageRating: item.classificacao_etaria,
-        status: item.status,
-        isFree: item.gratuito,
-        metadata: item.metadata,
-        genres: genreIds
-      };
-    });
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+  
+  subscribe: async (userId: string, planId: string, moedaCodigo: string) => {
+    // Get current date and add 30 days
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 30);
     
-    return formatResponse(contents);
-  } catch (error: any) {
-    return formatResponse([], error);
-  }
-};
-
-// Episodes
-export const getEpisodesByContentId = async (contentId: string): Promise<ApiResponse<Episode[]>> => {
-  try {
     const { data, error } = await supabase
-      .from('episodios')
-      .select('*')
-      .eq('conteudo_id', contentId)
-      .order('numero_temporada', { ascending: true })
-      .order('numero_episodio', { ascending: true });
-    
+      .from('assinaturas_usuario')
+      .insert({
+        usuario_id: userId,
+        plano_id: planId,
+        moeda_codigo: moedaCodigo,
+        data_inicio: startDate.toISOString().split('T')[0],
+        data_fim: endDate.toISOString().split('T')[0],
+        status: 'ativa',
+      })
+      .select();
+      
     if (error) throw error;
-    
-    const episodes = data.map(episode => ({
-      id: episode.id,
-      contentId: episode.conteudo_id,
-      seasonNumber: episode.numero_temporada,
-      episodeNumber: episode.numero_episodio,
-      title: episode.titulo,
-      description: episode.descricao || '',
-      duration: episode.duracao,
-      releaseDate: episode.data_estreia,
-      metadata: episode.metadata
-    }));
-    
-    return formatResponse(episodes);
-  } catch (error: any) {
-    return formatResponse([], error);
-  }
+    return data;
+  },
 };
 
-// User Interactions
-export const addFavorite = async (contentId: string): Promise<ApiResponse<Favorite>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
+// User interaction APIs
+export const userInteractionAPI = {
+  addToFavorites: async (userId: string, contentId: string) => {
     const { data, error } = await supabase
       .from('favoritos')
       .insert({
-        usuario_id: user.data.user.id,
-        conteudo_id: contentId
+        usuario_id: userId,
+        conteudo_id: contentId,
       })
-      .select()
-      .single();
-    
+      .select();
+      
     if (error) throw error;
-    
-    return formatResponse({
-      userId: data.usuario_id,
-      contentId: data.conteudo_id,
-      createdAt: data.created_at
-    });
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
-};
-
-export const removeFavorite = async (contentId: string): Promise<ApiResponse<void>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
+    return data;
+  },
+  
+  removeFromFavorites: async (userId: string, contentId: string) => {
     const { error } = await supabase
       .from('favoritos')
       .delete()
-      .eq('usuario_id', user.data.user.id)
+      .eq('usuario_id', userId)
       .eq('conteudo_id', contentId);
-    
+      
     if (error) throw error;
-    
-    return formatResponse(null);
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
-};
-
-export const getFavorites = async (): Promise<ApiResponse<Content[]>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse([], { message: 'Usuário não autenticado' });
-    }
-
+    return true;
+  },
+  
+  getFavorites: async (userId: string) => {
     const { data, error } = await supabase
       .from('favoritos')
       .select(`
-        conteudo:conteudo_id(
-          *,
-          generos:conteudo_generos(genero_id(id, nome))
-        )
+        conteudo:conteudos(*)
       `)
-      .eq('usuario_id', user.data.user.id);
-    
-    if (error) throw error;
-    
-    const contents = data.map(item => {
-      const content = item.conteudo;
-      const genreIds = content.generos.map((g: any) => g.genero_id);
+      .eq('usuario_id', userId);
       
-      return {
-        id: content.id,
-        type: content.tipo,
-        title: content.titulo,
-        description: content.descricao || '',
-        releaseYear: content.ano_lancamento,
-        duration: content.duracao,
-        ageRating: content.classificacao_etaria,
-        status: content.status,
-        isFree: content.gratuito,
-        metadata: content.metadata,
-        genres: genreIds
-      };
-    });
-    
-    return formatResponse(contents);
-  } catch (error: any) {
-    return formatResponse([], error);
-  }
-};
-
-export const updatePlaybackProgress = async (
-  data: { conteudo_id?: string; episodio_id?: string; posicao_tempo: number; percentual_assistido?: number }
-): Promise<ApiResponse<PlaybackHistory>> => {
-  try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      return formatResponse(null, { message: 'Usuário não autenticado' });
-    }
-
-    // Check if record exists
-    const { data: existingData, error: queryError } = await supabase
+    if (error) throw error;
+    return data?.map(item => item.conteudo) || [];
+  },
+  
+  updateWatchHistory: async (userId: string, contentId: string, episodeId: string | null, position: number, percentage: number) => {
+    // Check if entry exists
+    const { data: existingData } = await supabase
       .from('historico_reproducao')
       .select('id')
-      .eq('usuario_id', user.data.user.id)
-      .eq(data.conteudo_id ? 'conteudo_id' : 'episodio_id', data.conteudo_id || data.episodio_id)
+      .eq('usuario_id', userId)
+      .eq(episodeId ? 'episodio_id' : 'conteudo_id', episodeId || contentId)
       .maybeSingle();
-    
-    if (queryError) throw queryError;
-    
-    let result;
-    
+      
     if (existingData) {
-      // Update existing record
-      const { data: updatedData, error } = await supabase
+      // Update existing entry
+      const { data, error } = await supabase
         .from('historico_reproducao')
         .update({
-          posicao_tempo: data.posicao_tempo,
-          percentual_assistido: data.percentual_assistido
+          posicao_tempo: position,
+          percentual_assistido: percentage,
         })
         .eq('id', existingData.id)
-        .select()
-        .single();
-      
+        .select();
+        
       if (error) throw error;
-      result = updatedData;
+      return data;
     } else {
-      // Create new record
-      const { data: newData, error } = await supabase
+      // Create new entry
+      const { data, error } = await supabase
         .from('historico_reproducao')
         .insert({
-          usuario_id: user.data.user.id,
-          conteudo_id: data.conteudo_id || null,
-          episodio_id: data.episodio_id || null,
-          posicao_tempo: data.posicao_tempo,
-          percentual_assistido: data.percentual_assistido
+          usuario_id: userId,
+          conteudo_id: episodeId ? null : contentId,
+          episodio_id: episodeId,
+          posicao_tempo: position,
+          percentual_assistido: percentage,
         })
-        .select()
-        .single();
-      
+        .select();
+        
       if (error) throw error;
-      result = newData;
+      return data;
     }
-    
-    return formatResponse({
-      id: result.id,
-      userId: result.usuario_id,
-      contentId: result.conteudo_id,
-      episodeId: result.episodio_id,
-      position: result.posicao_tempo,
-      percentWatched: result.percentual_assistido,
-      updatedAt: result.updated_at
-    });
-  } catch (error: any) {
-    return formatResponse(null, error);
-  }
+  },
+  
+  getContinueWatching: async (userId: string) => {
+    const { data, error } = await supabase
+      .from('historico_reproducao')
+      .select(`
+        id,
+        posicao_tempo,
+        percentual_assistido,
+        conteudo:conteudos(*),
+        episodio:episodios(*)
+      `)
+      .eq('usuario_id', userId)
+      .lt('percentual_assistido', 95)
+      .order('updated_at', { ascending: false })
+      .limit(10);
+      
+    if (error) throw error;
+    return data || [];
+  },
 };
 
-// Add other methods as needed for your application
+// Device and Download APIs
+export const deviceAPI = {
+  registerDevice: async (userId: string, deviceType: string, deviceId: string, metadata: any = {}) => {
+    const { data, error } = await supabase
+      .from('dispositivos')
+      .insert({
+        usuario_id: userId,
+        tipo: deviceType,
+        identificador: deviceId,
+        metadata,
+        ultimo_acesso: new Date().toISOString(),
+      })
+      .select();
+      
+    if (error) throw error;
+    return data;
+  },
+  
+  updateDeviceAccess: async (deviceId: string) => {
+    const { data, error } = await supabase
+      .from('dispositivos')
+      .update({
+        ultimo_acesso: new Date().toISOString(),
+      })
+      .eq('id', deviceId)
+      .select();
+      
+    if (error) throw error;
+    return data;
+  },
+  
+  getUserDevices: async (userId: string) => {
+    const { data, error } = await supabase
+      .from('dispositivos')
+      .select('*')
+      .eq('usuario_id', userId);
+      
+    if (error) throw error;
+    return data || [];
+  },
+};
 
-// Install necessary dependency
-<lov-add-dependency>@supabase/supabase-js@latest</lov-add-dependency>
+export const downloadAPI = {
+  createDownload: async (userId: string, mediaFileId: string, deviceId: string) => {
+    // Set expiration to 48 hours from now
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + 48);
+    
+    const { data, error } = await supabase
+      .from('downloads')
+      .insert({
+        usuario_id: userId,
+        arquivo_midia_id: mediaFileId,
+        dispositivo_id: deviceId,
+        status: 'completo',
+        data_expiracao: expirationDate.toISOString(),
+      })
+      .select();
+      
+    if (error) throw error;
+    
+    // Update downloads count in user subscription
+    await supabase.rpc('incrementar_downloads_utilizados', {
+      p_usuario_id: userId
+    });
+    
+    return data;
+  },
+  
+  getUserDownloads: async (userId: string) => {
+    const { data, error } = await supabase
+      .from('downloads')
+      .select(`
+        *,
+        arquivo:arquivos_midia(*),
+        dispositivo:dispositivos(*)
+      `)
+      .eq('usuario_id', userId)
+      .eq('status', 'completo')
+      .gt('data_expiracao', new Date().toISOString());
+      
+    if (error) throw error;
+    return data || [];
+  },
+  
+  deleteDownload: async (downloadId: string) => {
+    const { error } = await supabase
+      .from('downloads')
+      .update({
+        status: 'removido'
+      })
+      .eq('id', downloadId);
+      
+    if (error) throw error;
+    return true;
+  },
+};
+
+export default api;
