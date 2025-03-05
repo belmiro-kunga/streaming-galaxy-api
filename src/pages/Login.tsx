@@ -166,7 +166,7 @@ const Login = () => {
                   Email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-violet-400" />
+                  <Mail className="absolute left-3 top-3.5 h-5 w-5 text-violet-400 pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -197,7 +197,7 @@ const Login = () => {
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-violet-400" />
+                    <Lock className="absolute left-3 top-3.5 h-5 w-5 text-violet-400 pointer-events-none" />
                     <Input
                       id="password"
                       type="password"
@@ -218,7 +218,7 @@ const Login = () => {
                     Confirmar Senha
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-5 w-5 text-violet-400" />
+                    <Lock className="absolute left-3 top-3.5 h-5 w-5 text-violet-400 pointer-events-none" />
                     <Input
                       id="confirmPassword"
                       type="password"
