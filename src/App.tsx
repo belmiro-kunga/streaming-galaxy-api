@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import Watch from "./pages/Watch";
 import ApiDocs from "./pages/ApiDocs";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
             <Route path="/home" element={<Home />} />
             <Route path="/watch/:id" element={<Watch />} />
             <Route path="/api-docs" element={<ApiDocs />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>

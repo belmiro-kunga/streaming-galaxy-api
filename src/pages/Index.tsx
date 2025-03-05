@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, LogIn } from 'lucide-react';
 
 const Index = () => {
   const backgroundStyle = {
@@ -42,6 +42,20 @@ const Index = () => {
               >
                 Explorar Catálogo
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 transform group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
+            
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Link 
+                to="/login" 
+                className="group inline-flex items-center justify-center px-8 py-3 rounded-md bg-primary border border-primary text-white font-medium text-base transition-all duration-300 hover:bg-primary/90"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Entrar
               </Link>
             </motion.div>
             
