@@ -1,24 +1,38 @@
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../types/database';
 
 // Supabase client configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
-}
+// Create a mock Supabase client if credentials are missing
+let supabase: any;
 
-// Create Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables - using mock client');
+    // Create a mock client that doesn't throw errors when methods are called
+    supabase = {
+        auth: {
+            getUser: async () => ({ data: { user: null }, error: null }),
+            signOut: async () => ({ error: null }),
+        },
+        // Add other commonly used methods as needed
+    };
+} else {
+    // Create actual Supabase client when credentials are available
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+}
 
 // Export helper functions for common operations
 export const getUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+    if (!supabaseUrl || !supabaseAnonKey) return null;
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
 };
 
 export const signOut = async () => {
-  return await supabase.auth.signOut();
+    if (!supabaseUrl || !supabaseAnonKey) return { error: null };
+    return await supabase.auth.signOut();
 };
+
+export { supabase };

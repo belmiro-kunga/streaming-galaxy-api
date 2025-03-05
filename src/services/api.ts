@@ -1,467 +1,88 @@
-import axios from 'axios';
-import { supabase } from '@/lib/supabase';
 
-// API base configuration
-const api = axios.create({
-  baseURL: '/api',
-});
+// Mock implementation for the API
+// Replace this with actual API calls in production
 
-// Authentication APIs
-export const authAPI = {
-  login: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) throw error;
-    return data;
-  },
-  
-  register: async (email: string, password: string, nome: string) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          nome,
-        },
-      },
-    });
-    
-    if (authError) throw authError;
-    
-    // Create user profile after registration
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('perfis_usuario')
-        .insert({
-          id: authData.user.id,
-          nome,
-          fuso_horario: 'Africa/Luanda',
-          idioma_preferido: 'pt-AO',
-          perfil: 'usuario',
-        });
-      
-      if (profileError) throw profileError;
-    }
-    
-    return authData;
-  },
-  
-  logout: async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    return true;
-  },
-  
-  resetPassword: async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    if (error) throw error;
-    return true;
-  },
-  
-  getCurrentUser: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    return data.user;
-  },
+import { ContentItem, Genre } from '@/types/api';
+
+// Helper function to ensure content items have the correct structure
+const validateContentItem = (item: any): ContentItem => {
+  return {
+    id: item?.id || `mock-${Math.random().toString(36).substr(2, 9)}`,
+    tipo: item?.tipo || 'filme',
+    titulo: item?.titulo || 'Título não disponível',
+    descricao: item?.descricao || 'Descrição não disponível',
+    ano_lancamento: item?.ano_lancamento || 2023,
+    classificacao_etaria: item?.classificacao_etaria || '16',
+    gratuito: item?.gratuito ?? true,
+  };
 };
 
-// User profile APIs
-export const profileAPI = {
-  getProfile: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('perfis_usuario')
-      .select('*')
-      .eq('id', userId)
-      .single();
-      
-    if (error) throw error;
-    return data;
-  },
-  
-  updateProfile: async (userId: string, profileData: any) => {
-    const { data, error } = await supabase
-      .from('perfis_usuario')
-      .update(profileData)
-      .eq('id', userId)
-      .select();
-      
-    if (error) throw error;
-    return data;
-  },
-};
-
-// Content APIs
+// Content API mock
 export const contentAPI = {
-  getFeatureContent: async () => {
-    try {
-      const { data, error } = await supabase
-        .from('conteudos')
-        .select(`
-          *,
-          generos:conteudo_generos(genero:generos(*))
-        `)
-        .eq('status', 'ativo')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-        
-      if (error) throw error;
-      
-      // Adding proper error logging
-      if (!data) {
-        console.warn('No featured content found');
-        return null;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error fetching featured content:', error);
-      return null;
-    }
-  },
-  
-  getTrendingContent: async (limit = 10) => {
-    try {
-      const { data, error } = await supabase
-        .from('conteudos')
-        .select(`
-          *,
-          generos:conteudo_generos(genero:generos(*))
-        `)
-        .eq('status', 'ativo')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-        
-      if (error) throw error;
-      
-      // Ensure we always return an array of ContentItem objects
-      return Array.isArray(data) ? data : [];
-    } catch (error) {
-      console.error('Error fetching trending content:', error);
-      return [];
-    }
-  },
-  
-  getContentByGenre: async (genreId: string, limit = 10) => {
-    try {
-      const { data, error } = await supabase
-        .from('conteudo_generos')
-        .select(`
-          conteudo:conteudos(*)
-        `)
-        .eq('genero_id', genreId)
-        .limit(limit);
-        
-      if (error) throw error;
-      
-      // Flatten and type-check the response to ensure we have a valid ContentItem array
-      if (!data || !Array.isArray(data)) {
-        console.warn(`No content found for genre ${genreId}`);
-        return [];
-      }
-      
-      // Properly extract and flatten the content items
-      const contentItems = data
-        .map(item => item.conteudo)
-        .filter(item => item && typeof item === 'object' && 'id' in item);
-      
-      return contentItems;
-    } catch (error) {
-      console.error(`Error fetching content for genre ${genreId}:`, error);
-      return [];
-    }
-  },
-  
-  getContentById: async (contentId: string) => {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero:generos(*)),
-        episodios(*)
-      `)
-      .eq('id', contentId)
-      .single();
-      
-    if (error) throw error;
-    return data;
-  },
-  
-  searchContent: async (query: string) => {
-    const { data, error } = await supabase
-      .from('conteudos')
-      .select(`
-        *,
-        generos:conteudo_generos(genero:generos(*))
-      `)
-      .or(`titulo.ilike.%${query}%, descricao.ilike.%${query}%`)
-      .eq('status', 'ativo');
-      
-    if (error) throw error;
-    return data || [];
-  },
-  
-  getAllGenres: async () => {
-    const { data, error } = await supabase
-      .from('generos')
-      .select('*')
-      .order('nome');
-      
-    if (error) throw error;
-    return data || [];
-  },
-};
-
-// Subscription APIs
-export const subscriptionAPI = {
-  getPlans: async () => {
-    const { data, error } = await supabase
-      .from('planos_assinatura')
-      .select(`
-        *,
-        precos:precos_planos(*)
-      `)
-      .eq('ativo', true);
-      
-    if (error) throw error;
-    return data || [];
-  },
-  
-  getUserSubscription: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('assinaturas_usuario')
-      .select(`
-        *,
-        plano:planos_assinatura(*)
-      `)
-      .eq('usuario_id', userId)
-      .eq('status', 'ativa')
-      .single();
-      
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  },
-  
-  subscribe: async (userId: string, planId: string, moedaCodigo: string) => {
-    // Get current date and add 30 days
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30);
-    
-    const { data, error } = await supabase
-      .from('assinaturas_usuario')
-      .insert({
-        usuario_id: userId,
-        plano_id: planId,
-        moeda_codigo: moedaCodigo,
-        data_inicio: startDate.toISOString().split('T')[0],
-        data_fim: endDate.toISOString().split('T')[0],
-        status: 'ativa',
-      })
-      .select();
-      
-    if (error) throw error;
-    return data;
-  },
-};
-
-// User interaction APIs
-export const userInteractionAPI = {
-  addToFavorites: async (userId: string, contentId: string) => {
-    const { data, error } = await supabase
-      .from('favoritos')
-      .insert({
-        usuario_id: userId,
-        conteudo_id: contentId,
-      })
-      .select();
-      
-    if (error) throw error;
-    return data;
-  },
-  
-  removeFromFavorites: async (userId: string, contentId: string) => {
-    const { error } = await supabase
-      .from('favoritos')
-      .delete()
-      .eq('usuario_id', userId)
-      .eq('conteudo_id', contentId);
-      
-    if (error) throw error;
-    return true;
-  },
-  
-  getFavorites: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('favoritos')
-      .select(`
-        conteudo:conteudos(*)
-      `)
-      .eq('usuario_id', userId);
-      
-    if (error) throw error;
-    return data?.map(item => item.conteudo) || [];
-  },
-  
-  updateWatchHistory: async (userId: string, contentId: string, episodeId: string | null, position: number, percentage: number) => {
-    // Check if entry exists
-    const { data: existingData } = await supabase
-      .from('historico_reproducao')
-      .select('id')
-      .eq('usuario_id', userId)
-      .eq(episodeId ? 'episodio_id' : 'conteudo_id', episodeId || contentId)
-      .maybeSingle();
-      
-    if (existingData) {
-      // Update existing entry
-      const { data, error } = await supabase
-        .from('historico_reproducao')
-        .update({
-          posicao_tempo: position,
-          percentual_assistido: percentage,
-        })
-        .eq('id', existingData.id)
-        .select();
-        
-      if (error) throw error;
-      return data;
-    } else {
-      // Create new entry
-      const { data, error } = await supabase
-        .from('historico_reproducao')
-        .insert({
-          usuario_id: userId,
-          conteudo_id: episodeId ? null : contentId,
-          episodio_id: episodeId,
-          posicao_tempo: position,
-          percentual_assistido: percentage,
-        })
-        .select();
-        
-      if (error) throw error;
-      return data;
-    }
-  },
-  
-  getContinueWatching: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('historico_reproducao')
-      .select(`
-        id,
-        posicao_tempo,
-        percentual_assistido,
-        conteudo:conteudos(*),
-        episodio:episodios(*)
-      `)
-      .eq('usuario_id', userId)
-      .lt('percentual_assistido', 95)
-      .order('updated_at', { ascending: false })
-      .limit(10);
-      
-    if (error) throw error;
-    return data || [];
-  },
-};
-
-// Device and Download APIs
-export const deviceAPI = {
-  registerDevice: async (userId: string, deviceType: string, deviceId: string, metadata: any = {}) => {
-    const { data, error } = await supabase
-      .from('dispositivos')
-      .insert({
-        usuario_id: userId,
-        tipo: deviceType,
-        identificador: deviceId,
-        metadata,
-        ultimo_acesso: new Date().toISOString(),
-      })
-      .select();
-      
-    if (error) throw error;
-    return data;
-  },
-  
-  updateDeviceAccess: async (deviceId: string) => {
-    const { data, error } = await supabase
-      .from('dispositivos')
-      .update({
-        ultimo_acesso: new Date().toISOString(),
-      })
-      .eq('id', deviceId)
-      .select();
-      
-    if (error) throw error;
-    return data;
-  },
-  
-  getUserDevices: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('dispositivos')
-      .select('*')
-      .eq('usuario_id', userId);
-      
-    if (error) throw error;
-    return data || [];
-  },
-};
-
-export const downloadAPI = {
-  createDownload: async (userId: string, mediaFileId: string, deviceId: string) => {
-    // Set expiration to 48 hours from now
-    const expirationDate = new Date();
-    expirationDate.setHours(expirationDate.getHours() + 48);
-    
-    const { data, error } = await supabase
-      .from('downloads')
-      .insert({
-        usuario_id: userId,
-        arquivo_midia_id: mediaFileId,
-        dispositivo_id: deviceId,
-        status: 'completo',
-        data_expiracao: expirationDate.toISOString(),
-      })
-      .select();
-      
-    if (error) throw error;
-    
-    // Update downloads count in user subscription
-    await supabase.rpc('incrementar_downloads_utilizados', {
-      p_usuario_id: userId
+  // Get featured content for homepage
+  getFeatureContent: async (): Promise<ContentItem> => {
+    return validateContentItem({
+      id: "feature-1",
+      tipo: "filme",
+      titulo: "Aventuras em Angola",
+      descricao: "Um filme épico sobre as belezas naturais e culturais de Angola.",
+      ano_lancamento: 2023,
+      classificacao_etaria: "12",
+      gratuito: false
     });
+  },
+
+  // Get trending content
+  getTrendingContent: async (limit = 10): Promise<ContentItem[]> => {
+    const mockTrending = Array(limit).fill(null).map((_, index) => ({
+      id: `trending-${index}`,
+      tipo: index % 2 === 0 ? "filme" : "serie",
+      titulo: `Título Tendência ${index + 1}`,
+      descricao: `Descrição do conteúdo em tendência número ${index + 1}`,
+      ano_lancamento: 2020 + (index % 4),
+      classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+      gratuito: index % 3 === 0
+    }));
     
-    return data;
+    return mockTrending.map(validateContentItem);
   },
-  
-  getUserDownloads: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('downloads')
-      .select(`
-        *,
-        arquivo:arquivos_midia(*),
-        dispositivo:dispositivos(*)
-      `)
-      .eq('usuario_id', userId)
-      .eq('status', 'completo')
-      .gt('data_expiracao', new Date().toISOString());
-      
-    if (error) throw error;
-    return data || [];
+
+  // Get content by genre
+  getContentByGenre: async (genreId: string, limit = 10): Promise<ContentItem[]> => {
+    const mockContent = Array(limit).fill(null).map((_, index) => ({
+      id: `genre-${genreId}-${index}`,
+      tipo: index % 2 === 0 ? "filme" : "serie",
+      titulo: `Título Gênero ${genreId} - ${index + 1}`,
+      descricao: `Descrição do conteúdo do gênero ${genreId} número ${index + 1}`,
+      ano_lancamento: 2019 + (index % 5),
+      classificacao_etaria: ["L", "10", "12", "14", "16", "18"][index % 6],
+      gratuito: index % 4 === 0
+    }));
+    
+    return mockContent.map(validateContentItem);
   },
-  
-  deleteDownload: async (downloadId: string) => {
-    const { error } = await supabase
-      .from('downloads')
-      .update({
-        status: 'removido'
-      })
-      .eq('id', downloadId);
-      
-    if (error) throw error;
-    return true;
-  },
+
+  // Get all genres
+  getAllGenres: async (): Promise<Genre[]> => {
+    return [
+      { id: "1", nome: "Ação" },
+      { id: "2", nome: "Aventura" },
+      { id: "3", nome: "Comédia" },
+      { id: "4", nome: "Drama" },
+      { id: "5", nome: "Terror" },
+      { id: "6", nome: "Sci-Fi" },
+      { id: "7", nome: "Romance" },
+      { id: "8", nome: "Documentário" },
+      { id: "9", nome: "Animação" },
+      { id: "10", nome: "Musical" }
+    ];
+  }
 };
 
-export default api;
+// User interaction API mock
+export const userInteractionAPI = {
+  // Get continue watching content
+  getContinueWatching: async (userId: string) => {
+    return []; // Return empty array for now
+  }
+};

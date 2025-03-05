@@ -5,8 +5,14 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
+  const backgroundStyle = {
+    background: 'linear-gradient(to bottom, #000000, #141414)',
+    minHeight: '100vh',
+    color: 'white'
+  };
+  
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden">
+    <div style={backgroundStyle} className="min-h-screen flex flex-col overflow-hidden">
       {/* Hero Section */}
       <div className="relative flex flex-col items-center justify-center min-h-screen px-4 md:px-8">
         <div className="absolute inset-0 z-[-1] bg-gradient-to-b from-black to-gray-900"></div>
