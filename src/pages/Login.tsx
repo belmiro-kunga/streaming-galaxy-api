@@ -65,7 +65,8 @@ const Login = () => {
   };
 
   const validateEmail = (email: string) => {
-    return email.includes('@') && email.includes('.');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSignup = async () => {
@@ -98,6 +99,8 @@ const Login = () => {
 
     setIsLoading(true);
     try {
+      console.log('Attempting to register with email:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -113,14 +116,21 @@ const Login = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
+      }
 
+      console.log('Signup response:', data);
+      
       toast({
         title: 'Conta criada',
         description: 'Sua conta foi criada com sucesso. Você já pode fazer login.',
       });
       setView('login');
     } catch (error: any) {
+      console.error('Error details:', error);
+      
       toast({
         title: 'Erro no cadastro',
         description: error?.message || 'Não foi possível criar sua conta. Tente novamente.',
