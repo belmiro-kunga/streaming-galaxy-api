@@ -23,6 +23,9 @@ export const getUser = async () => {
 
 export const signOut = async () => {
   try {
+    // Remove any stored sessions
+    localStorage.removeItem('cineplay-supabase-auth');
+    localStorage.removeItem('userSession');
     return await supabase.auth.signOut();
   } catch (error) {
     console.error('Erro ao sair:', error);
@@ -32,6 +35,9 @@ export const signOut = async () => {
 
 // Auth helpers for testing without Supabase
 export const mockSignIn = async (email: string, password: string) => {
+  // First, ensure any previous session is cleared
+  await signOut();
+  
   // Verificar se estamos usando cliente real do Supabase
   if (supabase) {
     console.log('Usando autenticação real do Supabase');

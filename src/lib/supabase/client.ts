@@ -17,7 +17,7 @@ export const supabase = createClient(
   supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15dm9lY3hvaWN4aGtsYXh2Z2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMTc3OTIsImV4cCI6MjA1NjY5Mzc5Mn0.XWLoIGayQvzdyQlFi8v9ziM991Xt44uOFT3FL58RkP8',
   {
     auth: {
-      persistSession: true,
+      persistSession: false, // Changed to false to prevent automatic session persistence
       storageKey: 'cineplay-supabase-auth',
       autoRefreshToken: true,
       detectSessionInUrl: true
