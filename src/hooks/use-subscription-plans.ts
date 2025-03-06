@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -29,25 +30,15 @@ export const useSubscriptionPlans = () => {
     console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
-      // Buscar apenas planos ativos do Supabase
-      const { data: subscriptionPlans, error } = await supabase
-        .from('planos_assinatura')
-        .select(`
-          *,
-          precos:precos_planos(*)
-        `)
-        .eq('ativo', true); // Apenas planos ativos
-
-      if (error) throw error;
-
-      console.log("SubscriptionPlans: Active plans fetched:", subscriptionPlans?.length);
+      // Using planAPI to be consistent with admin panel operations
+      const plans = await planAPI.getAllPlans();
+      console.log("SubscriptionPlans: Plans fetched successfully:", plans.length);
       
-      if (subscriptionPlans && subscriptionPlans.length > 0) {
-        setPlans(subscriptionPlans);
-      } else {
-        console.log("SubscriptionPlans: No active plans found");
-        setPlans([]);
-      }
+      // Filter only active plans
+      const activePlans = plans.filter(plan => plan.ativo);
+      console.log("SubscriptionPlans: Active plans:", activePlans.length);
+      
+      setPlans(activePlans);
     } catch (error) {
       console.error('SubscriptionPlans: Error fetching plans:', error);
       toast({
@@ -67,26 +58,15 @@ export const useSubscriptionPlans = () => {
     
     fetchPlans();
     
-    // Subscribe to changes in planos_assinatura table
-    const subscription = supabase
-      .channel('planos_assinatura_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'planos_assinatura'
-        },
-        (payload) => {
-          console.log("SubscriptionPlans: Plans changed, refreshing data", payload);
-          fetchPlans();
-        }
-      )
-      .subscribe();
+    // Use planAPI.subscribeToChanges to be consistent with admin panel
+    const unsubscribe = planAPI.subscribeToChanges(() => {
+      console.log("SubscriptionPlans: Plans changed, refreshing data");
+      fetchPlans();
+    });
     
     return () => {
-      console.log("SubscriptionPlans: Unsubscribing from plan changes");
-      subscription.unsubscribe();
+      console.log("SubscriptionPlans: Cleaning up subscription");
+      unsubscribe();
     };
   }, [fetchPlans]);
 
