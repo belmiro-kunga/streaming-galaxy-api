@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase, mockSignIn } from '@/lib/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const Login = () => {
   const [view, setView] = useState<'login' | 'signup' | 'reset'>('login');
@@ -64,11 +64,24 @@ const Login = () => {
     }
   };
 
+  const validateEmail = (email: string) => {
+    return email.includes('@') && email.includes('.');
+  };
+
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword || !firstName || !lastName || !phoneNumber || !country || !province) {
       toast({
         title: 'Campos obrigatórios',
         description: 'Por favor, preencha todos os campos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast({
+        title: 'Email inválido',
+        description: 'Por favor, insira um endereço de email válido.',
         variant: 'destructive',
       });
       return;
@@ -85,7 +98,6 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      // Registrar o usuário com Supabase
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -161,13 +173,16 @@ const Login = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md shadow-xl rounded-lg overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-background dark:bg-gray-900">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <Card className="w-full max-w-md shadow-xl rounded-lg overflow-hidden bg-card dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-800">
+          <CardTitle className="text-3xl font-bold text-foreground dark:text-white">
             {view === 'login' ? 'Login' : view === 'signup' ? 'Criar conta' : 'Redefinir senha'}
           </CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-muted-foreground dark:text-gray-400">
             {view === 'login'
               ? 'Entre com seu e-mail e senha'
               : view === 'signup'
@@ -177,9 +192,8 @@ const Login = () => {
         </CardHeader>
         <CardContent className="p-8">
           <div className="space-y-4">
-            {/* Email field - shown in all views */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700">
+              <Label htmlFor="email" className="text-foreground dark:text-gray-200">
                 Email
               </Label>
               <Input
@@ -188,14 +202,13 @@ const Login = () => {
                 placeholder="seuemail@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
 
-            {/* Password field - shown in login and signup views */}
             {view !== 'reset' && (
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700">
+                <Label htmlFor="password" className="text-foreground dark:text-gray-200">
                   Senha
                 </Label>
                 <Input
@@ -204,16 +217,15 @@ const Login = () => {
                   placeholder="********"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                  className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
             )}
 
-            {/* Additional signup fields */}
             {view === 'signup' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-700">
+                  <Label htmlFor="confirmPassword" className="text-foreground dark:text-gray-200">
                     Confirmar Senha
                   </Label>
                   <Input
@@ -222,13 +234,13 @@ const Login = () => {
                     placeholder="********"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                    className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-gray-700">
+                    <Label htmlFor="firstName" className="text-foreground dark:text-gray-200">
                       Primeiro Nome
                     </Label>
                     <Input
@@ -236,12 +248,12 @@ const Login = () => {
                       id="firstName"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                      className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-gray-700">
+                    <Label htmlFor="lastName" className="text-foreground dark:text-gray-200">
                       Último Nome
                     </Label>
                     <Input
@@ -249,13 +261,13 @@ const Login = () => {
                       id="lastName"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                      className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber" className="text-gray-700">
+                  <Label htmlFor="phoneNumber" className="text-foreground dark:text-gray-200">
                     Número de Telefone
                   </Label>
                   <Input
@@ -263,12 +275,12 @@ const Login = () => {
                     id="phoneNumber"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                    className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="country" className="text-gray-700">
+                  <Label htmlFor="country" className="text-foreground dark:text-gray-200">
                     País
                   </Label>
                   <Input
@@ -276,25 +288,25 @@ const Login = () => {
                     id="country"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                    className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     disabled
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="province" className="text-gray-700">
+                  <Label htmlFor="province" className="text-foreground dark:text-gray-200">
                     Província
                   </Label>
                   <Select
                     value={province}
                     onValueChange={setProvince}
                   >
-                    <SelectTrigger className="bg-white border-gray-300 focus:ring-violet-500 focus:border-violet-500">
+                    <SelectTrigger className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                       <SelectValue placeholder="Selecione uma província" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover dark:bg-gray-800 dark:border-gray-700">
                       {provinces.map((prov) => (
-                        <SelectItem key={prov} value={prov}>
+                        <SelectItem key={prov} value={prov} className="dark:text-gray-200 dark:data-[state=checked]:text-white">
                           {prov}
                         </SelectItem>
                       ))}
@@ -309,33 +321,33 @@ const Login = () => {
         <CardFooter className="flex justify-between pb-8">
           <div>
             {view === "login" ? (
-              <p>
+              <p className="dark:text-gray-300">
                 Não tem uma conta?{' '}
                 <button
                   type="button"
                   onClick={() => setView('signup')}
-                  className="text-violet-500 hover:text-violet-700 font-medium hover:underline transition-colors"
+                  className="text-primary dark:text-violet-400 hover:text-primary/90 dark:hover:text-violet-300 font-medium hover:underline transition-colors"
                 >
                   Criar conta
                 </button>
               </p>
             ) : view === "signup" ? (
-              <p>
+              <p className="dark:text-gray-300">
                 Já tem uma conta?{' '}
                 <button
                   type="button"
                   onClick={() => setView('login')}
-                  className="text-violet-500 hover:text-violet-700 font-medium hover:underline transition-colors"
+                  className="text-primary dark:text-violet-400 hover:text-primary/90 dark:hover:text-violet-300 font-medium hover:underline transition-colors"
                 >
                   Fazer login
                 </button>
               </p>
             ) : (
-              <p>
+              <p className="dark:text-gray-300">
                 <button
                   type="button"
                   onClick={() => setView('login')}
-                  className="text-violet-500 hover:text-violet-700 font-medium hover:underline transition-colors"
+                  className="text-primary dark:text-violet-400 hover:text-primary/90 dark:hover:text-violet-300 font-medium hover:underline transition-colors"
                 >
                   Voltar para o login
                 </button>
@@ -351,7 +363,7 @@ const Login = () => {
                 ? handleSignup
                 : handleResetPassword
             }
-            className="bg-violet-500 text-white hover:bg-violet-600 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-50 transition-colors"
+            className="bg-primary dark:bg-violet-500 text-primary-foreground dark:text-white hover:bg-primary/90 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-50 transition-colors"
             disabled={isLoading}
           >
             {isLoading ? 'Processando...' : view === 'login' ? 'Entrar' : view === 'signup' ? 'Criar conta' : 'Redefinir'}
@@ -363,7 +375,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setView('reset')}
-              className="text-sm text-gray-500 hover:text-gray-700 hover:underline transition-colors"
+              className="text-sm text-muted-foreground dark:text-gray-400 hover:text-foreground dark:hover:text-gray-300 hover:underline transition-colors"
             >
               Esqueceu sua senha?
             </button>

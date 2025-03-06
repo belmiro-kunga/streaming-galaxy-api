@@ -44,13 +44,13 @@ export const ThemeToggle = () => {
       variant="ghost" 
       size="icon" 
       onClick={toggleTheme} 
-      className="theme-toggle-button"
+      className="theme-toggle-button bg-background/10 backdrop-blur-sm hover:bg-background/20 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
       aria-label={`Toggle ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (
-        <Sun className="h-5 w-5 theme-toggle-icon" />
+        <Sun className="h-5 w-5 theme-toggle-icon text-yellow-500" />
       ) : (
-        <Moon className="h-5 w-5 theme-toggle-icon" />
+        <Moon className="h-5 w-5 theme-toggle-icon text-violet-500" />
       )}
     </Button>
   );

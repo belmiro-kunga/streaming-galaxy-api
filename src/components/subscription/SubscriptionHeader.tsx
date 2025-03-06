@@ -1,19 +1,16 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export const SubscriptionHeader = () => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="text-center mb-12"
-    >
-      <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Escolha seu plano</h1>
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-        Encontre o plano perfeito para sua experiência de streaming. Todos os planos incluem acesso ao nosso catálogo completo.
+    <div className="text-center mb-12 animate-fade-in">
+      <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground dark:text-white">
+        Escolha seu plano de assinatura
+      </h1>
+      <p className="text-lg text-muted-foreground dark:text-gray-400 max-w-2xl mx-auto">
+        Acesse todos os benefícios da plataforma com um plano que se adapta às suas necessidades.
+        Cancele a qualquer momento.
       </p>
-    </motion.div>
+    </div>
   );
 };
