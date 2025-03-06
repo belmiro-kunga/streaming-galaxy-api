@@ -13,7 +13,7 @@ interface PlanCardProps {
 
 export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardProps) => {
   const isSelected = selectedPlan === plan.id;
-  const isPopular = plan.name.toLowerCase().includes('standard');
+  const isPopular = plan.nome.toLowerCase().includes('standard');
   
   const animationDelay = `${index * 0.1}s`;
   
@@ -25,6 +25,11 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
       maximumFractionDigits: 0
     }).format(price);
   };
+
+  // Get the price from the first price in the precos array
+  const planPrice = plan.precos && plan.precos.length > 0 
+    ? plan.precos[0].preco 
+    : 0;
 
   return (
     <div 
@@ -49,23 +54,56 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
         )}
         
         <CardHeader className="text-center pb-2">
-          <h3 className="text-lg font-bold text-foreground dark:text-white">{plan.name}</h3>
+          <h3 className="text-lg font-bold text-foreground dark:text-white">{plan.nome}</h3>
           <p className="text-3xl font-bold mt-2 text-foreground dark:text-white">
-            {formatPrice(plan.price)}
+            {formatPrice(planPrice)}
             <span className="text-sm font-normal text-muted-foreground dark:text-gray-400"> /mês</span>
           </p>
         </CardHeader>
         
         <CardContent className="pt-4">
           <ul className="space-y-3">
-            {plan.features.map((feature, i) => (
-              <li key={i} className="flex items-start gap-2">
+            {/* Use the descricao field to create feature list if no features available */}
+            {plan.descricao ? (
+              <li className="flex items-start gap-2">
                 <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
                   <Check className="h-3 w-3" />
                 </div>
-                <span className="text-sm text-muted-foreground dark:text-gray-300">{feature}</span>
+                <span className="text-sm text-muted-foreground dark:text-gray-300">{plan.descricao}</span>
               </li>
-            ))}
+            ) : null}
+            <li className="flex items-start gap-2">
+              <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
+                <Check className="h-3 w-3" />
+              </div>
+              <span className="text-sm text-muted-foreground dark:text-gray-300">
+                {plan.qualidade_maxima ? `Qualidade ${plan.qualidade_maxima}` : 'Alta qualidade'}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
+                <Check className="h-3 w-3" />
+              </div>
+              <span className="text-sm text-muted-foreground dark:text-gray-300">
+                {plan.telas_simultaneas} {plan.telas_simultaneas === 1 ? 'dispositivo' : 'dispositivos'} simultâneos
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
+                <Check className="h-3 w-3" />
+              </div>
+              <span className="text-sm text-muted-foreground dark:text-gray-300">
+                {plan.limite_downloads} downloads
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
+                <Check className="h-3 w-3" />
+              </div>
+              <span className="text-sm text-muted-foreground dark:text-gray-300">
+                {plan.limite_perfis} {plan.limite_perfis === 1 ? 'perfil' : 'perfis'}
+              </span>
+            </li>
           </ul>
         </CardContent>
         
