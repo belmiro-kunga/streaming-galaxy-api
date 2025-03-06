@@ -67,14 +67,17 @@ const subscribers: SubscriberCallback[] = [];
 
 // Function to notify all subscribers when plans change
 const notifySubscribers = () => {
+  console.log("Notifying subscribers about plan changes, count:", subscribers.length);
   subscribers.forEach(callback => callback());
 };
 
 export const planAPI = {
   // Subscribe to plan changes
   subscribeToChanges: (callback: SubscriberCallback): (() => void) => {
+    console.log("New subscription to plan changes");
     subscribers.push(callback);
     return () => {
+      console.log("Unsubscribing from plan changes");
       const index = subscribers.indexOf(callback);
       if (index !== -1) {
         subscribers.splice(index, 1);
@@ -94,6 +97,7 @@ export const planAPI = {
       }
       
       // Otherwise use mock data
+      console.log("Returning plans from mock DB, count:", plansMockDB.length);
       return [...plansMockDB]; // Return a copy to prevent accidental mutations
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -153,6 +157,7 @@ export const planAPI = {
       plansMockDB.push(newPlan);
       
       // Notify subscribers about the change
+      console.log("Created new plan, notifying subscribers");
       notifySubscribers();
       
       return { 
@@ -213,6 +218,7 @@ export const planAPI = {
       plansMockDB[planIndex] = updatedPlan;
       
       // Notify subscribers about the change
+      console.log("Updated plan, notifying subscribers");
       notifySubscribers();
       
       return {
@@ -265,6 +271,7 @@ export const planAPI = {
       plansMockDB[planIndex] = updatedPlan;
       
       // Notify subscribers about the change
+      console.log(`Toggled plan status to ${active}, notifying subscribers`);
       notifySubscribers();
       
       return {
@@ -307,6 +314,7 @@ export const planAPI = {
       plansMockDB = plansMockDB.filter(p => p.id !== planId);
       
       // Notify subscribers about the change
+      console.log("Deleted plan, notifying subscribers");
       notifySubscribers();
       
       return {
@@ -329,6 +337,7 @@ export const planAPI = {
   updateMockData: (newData: SubscriptionPlan[]) => {
     plansMockDB = [...newData];
     // Notify subscribers about the change
+    console.log("Updated mock data, notifying subscribers");
     notifySubscribers();
   }
 };

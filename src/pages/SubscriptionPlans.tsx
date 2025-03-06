@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, CreditCard, Smartphone, Download, MonitorPlay, Shield } from 'lucide-react';
@@ -32,9 +33,11 @@ const SubscriptionPlans = () => {
 
   // Function to fetch plans
   const fetchPlans = useCallback(async () => {
+    console.log("Fetching plans for SubscriptionPlans page");
     setIsLoading(true);
     try {
       const data = await planAPI.getAllPlans();
+      console.log("Plans fetched successfully:", data.length);
       setPlans(data.filter(plan => plan.ativo));  // Only show active plans
       setIsLoading(false);
     } catch (error) {
@@ -49,7 +52,7 @@ const SubscriptionPlans = () => {
     
     // Subscribe to plan changes
     const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("Plans changed, refreshing data");
+      console.log("Plans changed, refreshing data in SubscriptionPlans page");
       fetchPlans();
     });
     
