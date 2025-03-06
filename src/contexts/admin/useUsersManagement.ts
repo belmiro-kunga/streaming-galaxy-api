@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { User } from './types';
 import { mockUsers } from './mockData';
+import { supabase } from '@/lib/supabase';
 
 export const useUsersManagement = () => {
   const { toast } = useToast();
@@ -52,15 +53,40 @@ export const useUsersManagement = () => {
     setIsDeleteDialogOpen(true);
   }, []);
   
-  const handleDeleteConfirm = useCallback(() => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (userToDelete) {
-      setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
-      toast({
-        title: "Usuário excluído",
-        description: `O usuário ${userToDelete.name} foi excluído com sucesso.`
-      });
-      setIsDeleteDialogOpen(false);
-      setUserToDelete(null);
+      try {
+        // Delete from Supabase if it's not a mock user
+        if (userToDelete.id.startsWith('USR-')) {
+          // Mock user, just remove from local state
+          setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
+        } else {
+          // Real user, delete from Supabase
+          const { error } = await supabase.auth.admin.deleteUser(userToDelete.id);
+          
+          if (error) {
+            throw error;
+          }
+          
+          // Remove from local state as well
+          setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
+        }
+        
+        toast({
+          title: "Usuário excluído",
+          description: `O usuário ${userToDelete.name} foi excluído com sucesso.`
+        });
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        toast({
+          title: "Erro ao excluir usuário",
+          description: `Não foi possível excluir o usuário ${userToDelete.name}.`,
+          variant: "destructive"
+        });
+      } finally {
+        setIsDeleteDialogOpen(false);
+        setUserToDelete(null);
+      }
     }
   }, [userToDelete, toast]);
   
@@ -70,34 +96,76 @@ export const useUsersManagement = () => {
     setIsSubscriptionDialogOpen(true);
   }, []);
   
-  const handleSaveUser = useCallback(() => {
+  const handleSaveUser = useCallback(async () => {
     if (!currentUser) return;
     
-    if (dialogMode === "add") {
-      const newUser = {
-        ...currentUser,
-        id: `USR-${users.length + 1}`.padStart(7, '0'),
-        name: `${currentUser.first_name} ${currentUser.last_name}`,
-        created_at: new Date().toISOString().split('T')[0]
-      };
-      setUsers(prevUsers => [...prevUsers, newUser]);
+    try {
+      if (dialogMode === "add") {
+        // Create user logic
+        const { data, error } = await supabase.auth.signUp({
+          email: currentUser.email,
+          password: '123456', // Default password
+          options: {
+            data: {
+              first_name: currentUser.first_name,
+              last_name: currentUser.last_name,
+              phone: currentUser.phone,
+              country: currentUser.country,
+              province: currentUser.province
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        const newUser = {
+          ...currentUser,
+          id: data.user?.id || `USR-${Math.random().toString(36).substring(2, 10)}`,
+          name: `${currentUser.first_name} ${currentUser.last_name}`,
+          created_at: new Date().toISOString().split('T')[0]
+        };
+        
+        setUsers(prevUsers => [...prevUsers, newUser]);
+        toast({
+          title: "Usuário adicionado",
+          description: `${newUser.name} foi adicionado com sucesso.`
+        });
+      } else {
+        // Update user logic
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            first_name: currentUser.first_name,
+            last_name: currentUser.last_name,
+            phone: currentUser.phone,
+            country: currentUser.country,
+            province: currentUser.province
+          }
+        });
+        
+        if (error) throw error;
+        
+        const updatedUser = {
+          ...currentUser,
+          name: `${currentUser.first_name} ${currentUser.last_name}`
+        };
+        
+        setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+        toast({
+          title: "Usuário atualizado",
+          description: `As informações de ${updatedUser.name} foram atualizadas.`
+        });
+      }
+    } catch (error: any) {
+      console.error('Error saving user:', error);
       toast({
-        title: "Usuário adicionado",
-        description: `${newUser.name} foi adicionado com sucesso.`
+        title: "Erro ao salvar usuário",
+        description: error.message || "Não foi possível salvar o usuário.",
+        variant: "destructive"
       });
-    } else {
-      const updatedUser = {
-        ...currentUser,
-        name: `${currentUser.first_name} ${currentUser.last_name}`
-      };
-      setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
-      toast({
-        title: "Usuário atualizado",
-        description: `As informações de ${updatedUser.name} foram atualizadas.`
-      });
+    } finally {
+      setIsUserDialogOpen(false);
     }
-    setIsUserDialogOpen(false);
-  }, [currentUser, dialogMode, users.length, toast]);
+  }, [currentUser, dialogMode, toast]);
   
   const handleSaveSubscription = useCallback(() => {
     if (!currentUser) return;
