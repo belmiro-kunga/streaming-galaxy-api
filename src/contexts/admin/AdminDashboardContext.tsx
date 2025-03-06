@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { AdminDashboardContextType, SubscriptionPlan } from './types';
+import { AdminDashboardContextType } from './types';
+import { SubscriptionPlan } from '@/types/api';
 import { useUsersManagement } from './useUsersManagement';
 import { usePaymentsManagement } from './usePaymentsManagement';
 import { mockContentStats, generateUserStats } from './mockData';
