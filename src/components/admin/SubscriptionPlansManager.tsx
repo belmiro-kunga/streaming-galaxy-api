@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash, MonitorPlay, Smartphone, Download, Users, Tv } from 'lucide-react';
 import { SubscriptionPlan } from '@/types/api';
+import { directSupabaseApi } from '@/lib/supabase';
 import { planAPI } from '@/services/plans';
 
 const SubscriptionPlansManager: React.FC = () => {
@@ -50,8 +51,8 @@ const SubscriptionPlansManager: React.FC = () => {
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("SubscriptionPlansManager: Fetching plans");
-      const data = await planAPI.getAllPlans();
+      console.log("SubscriptionPlansManager: Fetching plans using direct Supabase API");
+      const data = await directSupabaseApi.getAllPlans();
       console.log("SubscriptionPlansManager: Plans fetched successfully:", data.length);
       setPlans(data);
     } catch (error) {
@@ -67,15 +68,35 @@ const SubscriptionPlansManager: React.FC = () => {
   }, [toast]);
   
   useEffect(() => {
-    console.log("SubscriptionPlansManager: Setting up subscription to plan changes");
-    const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("SubscriptionPlansManager: Plans changed, refreshing data");
-      fetchPlans();
-    });
+    fetchPlans();
+    
+    const channel = supabase
+      .channel('public:planos_assinatura')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'planos_assinatura'
+      }, (payload) => {
+        console.log("SubscriptionPlansManager: Real-time update received", payload);
+        fetchPlans();
+      })
+      .subscribe();
+    
+    const priceChannel = supabase
+      .channel('public:precos_planos')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'precos_planos'
+      }, (payload) => {
+        console.log("SubscriptionPlansManager: Real-time price update received", payload);
+        fetchPlans();
+      })
+      .subscribe();
     
     return () => {
-      console.log("SubscriptionPlansManager: Cleaning up subscription");
-      unsubscribe();
+      channel.unsubscribe();
+      priceChannel.unsubscribe();
     };
   }, [fetchPlans]);
   
@@ -113,7 +134,7 @@ const SubscriptionPlansManager: React.FC = () => {
   const togglePlanStatus = async (planId: string, currentStatus: boolean) => {
     try {
       console.log(`SubscriptionPlansManager: Toggling plan status for ${planId} to ${!currentStatus}`);
-      const response = await planAPI.togglePlanStatus(planId, !currentStatus);
+      const response = await directSupabaseApi.togglePlanStatus(planId, !currentStatus);
       
       if (response.status === 200) {
         toast({
@@ -144,7 +165,7 @@ const SubscriptionPlansManager: React.FC = () => {
       console.log("SubscriptionPlansManager: Saving plan:", currentPlan.nome);
       
       if (dialogMode === "add") {
-        const response = await planAPI.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
+        const response = await directSupabaseApi.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
         
         if (response.status === 201) {
           toast({
@@ -153,6 +174,7 @@ const SubscriptionPlansManager: React.FC = () => {
           });
           setIsPlanDialogOpen(false);
           console.log("SubscriptionPlansManager: Plan created successfully");
+          fetchPlans();
         } else {
           toast({
             title: 'Erro',
@@ -170,7 +192,7 @@ const SubscriptionPlansManager: React.FC = () => {
           return;
         }
         
-        const response = await planAPI.updatePlan(currentPlan.id, currentPlan);
+        const response = await directSupabaseApi.updatePlan(currentPlan.id, currentPlan);
         
         if (response.status === 200) {
           toast({
@@ -179,6 +201,7 @@ const SubscriptionPlansManager: React.FC = () => {
           });
           setIsPlanDialogOpen(false);
           console.log("SubscriptionPlansManager: Plan updated successfully");
+          fetchPlans();
         } else {
           toast({
             title: 'Erro',
@@ -220,7 +243,7 @@ const SubscriptionPlansManager: React.FC = () => {
     
     try {
       console.log(`SubscriptionPlansManager: Deleting plan ${planToDelete.id}`);
-      const response = await planAPI.deletePlan(planToDelete.id);
+      const response = await directSupabaseApi.deletePlan(planToDelete.id);
       
       if (response.status === 200) {
         toast({
@@ -228,6 +251,7 @@ const SubscriptionPlansManager: React.FC = () => {
           description: response.message
         });
         setIsDeleteDialogOpen(false);
+        fetchPlans();
       } else {
         toast({
           title: 'Erro',

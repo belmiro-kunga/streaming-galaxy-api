@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { planAPI } from '@/services/plans';
 import { SubscriptionPlan } from '@/types/api';
-import { supabase } from '@/lib/supabase';
+import { supabase, directSupabaseApi } from '@/lib/supabase';
 
 export const useSubscriptionPlans = () => {
   const navigate = useNavigate();
@@ -27,43 +27,23 @@ export const useSubscriptionPlans = () => {
 
   // Function to fetch plans
   const fetchPlans = useCallback(async () => {
-    console.log("SubscriptionPlans: Fetching plans");
+    console.log("SubscriptionPlans: Fetching plans using direct Supabase API");
     setIsLoading(true);
     try {
-      // First try to get plans directly from Supabase
-      const { data: subscriptionPlans, error } = await supabase
-        .from('planos_assinatura')
-        .select(`
-          *,
-          precos:precos_planos(*)
-        `)
-        .eq('ativo', true); // Only active plans
+      // Use the direct Supabase API
+      const plans = await directSupabaseApi.getAllPlans();
+      console.log("SubscriptionPlans: All plans fetched, count:", plans.length);
       
-      if (error) {
-        console.error('SubscriptionPlans: Supabase error:', error);
-        throw error;
-      }
+      // Filter only active plans
+      const activePlans = plans.filter(plan => plan.ativo);
+      console.log("SubscriptionPlans: Active plans count:", activePlans.length);
       
-      if (subscriptionPlans && subscriptionPlans.length > 0) {
-        console.log("SubscriptionPlans: Active plans fetched from Supabase:", subscriptionPlans.length);
-        setPlans(subscriptionPlans);
-      } else {
-        console.log("SubscriptionPlans: No active plans found in Supabase, falling back to planAPI");
-        // Fallback to planAPI if no plans found in Supabase
-        const apiPlans = await planAPI.getAllPlans();
-        console.log("SubscriptionPlans: Plans fetched from API:", apiPlans.length);
-        
-        // Filter only active plans
-        const activePlans = apiPlans.filter(plan => plan.ativo);
-        console.log("SubscriptionPlans: Active plans from API:", activePlans.length);
-        
-        setPlans(activePlans);
-      }
+      setPlans(activePlans);
     } catch (error) {
       console.error('SubscriptionPlans: Error fetching plans, falling back to planAPI:', error);
       
       try {
-        // Fallback to planAPI if Supabase query fails
+        // Fallback to planAPI if the direct API fails
         const apiPlans = await planAPI.getAllPlans();
         const activePlans = apiPlans.filter(plan => plan.ativo);
         console.log("SubscriptionPlans: Active plans from API fallback:", activePlans.length);
@@ -82,57 +62,42 @@ export const useSubscriptionPlans = () => {
     }
   }, [toast]);
 
-  // Subscribe to plan changes from both Supabase and planAPI
+  // Subscribe to plan changes
   useEffect(() => {
     console.log("SubscriptionPlans: Setting up subscriptions to plan changes");
     
     fetchPlans();
     
-    // Subscribe to Supabase changes
-    const subscription = supabase
-      .channel('planos_assinatura_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'planos_assinatura'
-        },
-        (payload) => {
-          console.log("SubscriptionPlans: Plans changed in Supabase, refreshing data", payload);
-          fetchPlans();
-        }
-      )
+    // Subscribe to Supabase changes for plans
+    const plansChannel = supabase
+      .channel('public:planos_assinatura')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'planos_assinatura'
+      }, (payload) => {
+        console.log("SubscriptionPlans: Plans changed in Supabase, refreshing data", payload);
+        fetchPlans();
+      })
       .subscribe();
     
-    // Also listen for price changes
-    const priceSubscription = supabase
-      .channel('precos_planos_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'precos_planos'
-        },
-        (payload) => {
-          console.log("SubscriptionPlans: Prices changed in Supabase, refreshing data", payload);
-          fetchPlans();
-        }
-      )
+    // Subscribe to Supabase changes for prices
+    const pricesChannel = supabase
+      .channel('public:precos_planos')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'precos_planos'
+      }, (payload) => {
+        console.log("SubscriptionPlans: Prices changed in Supabase, refreshing data", payload);
+        fetchPlans();
+      })
       .subscribe();
-    
-    // Also use planAPI.subscribeToChanges to be consistent with admin panel
-    const apiUnsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("SubscriptionPlans: Plans changed in API, refreshing data");
-      fetchPlans();
-    });
     
     return () => {
       console.log("SubscriptionPlans: Cleaning up subscriptions");
-      subscription.unsubscribe();
-      priceSubscription.unsubscribe();
-      apiUnsubscribe();
+      plansChannel.unsubscribe();
+      pricesChannel.unsubscribe();
     };
   }, [fetchPlans]);
 
