@@ -30,43 +30,91 @@ export const useSubscriptionPlans = () => {
     console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
-      // Using planAPI to be consistent with admin panel operations
-      const plans = await planAPI.getAllPlans();
-      console.log("SubscriptionPlans: Plans fetched successfully:", plans.length);
+      // First try to get plans directly from Supabase
+      const { data: subscriptionPlans, error } = await supabase
+        .from('planos_assinatura')
+        .select(`
+          *,
+          precos:precos_planos(*)
+        `)
+        .eq('ativo', true); // Only active plans
       
-      // Filter only active plans
-      const activePlans = plans.filter(plan => plan.ativo);
-      console.log("SubscriptionPlans: Active plans:", activePlans.length);
+      if (error) {
+        console.error('SubscriptionPlans: Supabase error:', error);
+        throw error;
+      }
       
-      setPlans(activePlans);
+      if (subscriptionPlans && subscriptionPlans.length > 0) {
+        console.log("SubscriptionPlans: Active plans fetched from Supabase:", subscriptionPlans.length);
+        setPlans(subscriptionPlans);
+      } else {
+        console.log("SubscriptionPlans: No active plans found in Supabase, falling back to planAPI");
+        // Fallback to planAPI if no plans found in Supabase
+        const apiPlans = await planAPI.getAllPlans();
+        console.log("SubscriptionPlans: Plans fetched from API:", apiPlans.length);
+        
+        // Filter only active plans
+        const activePlans = apiPlans.filter(plan => plan.ativo);
+        console.log("SubscriptionPlans: Active plans from API:", activePlans.length);
+        
+        setPlans(activePlans);
+      }
     } catch (error) {
-      console.error('SubscriptionPlans: Error fetching plans:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os planos de assinatura.",
-        variant: "destructive"
-      });
-      setPlans([]);
+      console.error('SubscriptionPlans: Error fetching plans, falling back to planAPI:', error);
+      
+      try {
+        // Fallback to planAPI if Supabase query fails
+        const apiPlans = await planAPI.getAllPlans();
+        const activePlans = apiPlans.filter(plan => plan.ativo);
+        console.log("SubscriptionPlans: Active plans from API fallback:", activePlans.length);
+        setPlans(activePlans);
+      } catch (apiError) {
+        console.error('SubscriptionPlans: Error from API fallback:', apiError);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os planos de assinatura.",
+          variant: "destructive"
+        });
+        setPlans([]);
+      }
     } finally {
       setIsLoading(false);
     }
   }, [toast]);
 
-  // Subscribe to plan changes
+  // Subscribe to plan changes from both Supabase and planAPI
   useEffect(() => {
-    console.log("SubscriptionPlans: Setting up subscription to plan changes");
+    console.log("SubscriptionPlans: Setting up subscriptions to plan changes");
     
     fetchPlans();
     
-    // Use planAPI.subscribeToChanges to be consistent with admin panel
-    const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("SubscriptionPlans: Plans changed, refreshing data");
+    // Subscribe to Supabase changes
+    const subscription = supabase
+      .channel('planos_assinatura_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'planos_assinatura'
+        },
+        (payload) => {
+          console.log("SubscriptionPlans: Plans changed in Supabase, refreshing data", payload);
+          fetchPlans();
+        }
+      )
+      .subscribe();
+    
+    // Also use planAPI.subscribeToChanges to be consistent with admin panel
+    const apiUnsubscribe = planAPI.subscribeToChanges(() => {
+      console.log("SubscriptionPlans: Plans changed in API, refreshing data");
       fetchPlans();
     });
     
     return () => {
-      console.log("SubscriptionPlans: Cleaning up subscription");
-      unsubscribe();
+      console.log("SubscriptionPlans: Cleaning up subscriptions");
+      subscription.unsubscribe();
+      apiUnsubscribe();
     };
   }, [fetchPlans]);
 
