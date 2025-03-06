@@ -1,5 +1,5 @@
-
 // Types for our streaming platform API
+
 export interface UserProfile {
   id: string;
   nome: string;
@@ -17,7 +17,7 @@ export interface SubscriptionPlan {
   qualidade_maxima: string | null;
   telas_simultaneas: number;
   limite_downloads: number;
-  limite_perfis: number; // Added for profile limits
+  limite_perfis: number; // Updated to reflect new DB schema
   ciclo_cobranca: string;
   ativo: boolean;
   created_at: string;
@@ -50,6 +50,7 @@ export interface UserSubscription {
 }
 
 // New Profile Management types
+
 export interface Profile {
   id: string;
   usuario_id: string;
@@ -187,6 +188,7 @@ export interface UserStatistics {
 }
 
 // API response types
+
 export interface ApiResponse<T> {
   data: T;
   status: number;

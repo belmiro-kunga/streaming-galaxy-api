@@ -52,6 +52,8 @@ export async function createPlan(
           };
         }
         
+        console.log('[PlanAPI] Plan created successfully:', planData);
+        
         // Insert the prices if they exist
         if (precos && precos.length > 0) {
           const precosToInsert = precos.map(preco => ({

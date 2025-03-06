@@ -508,6 +508,7 @@ export type Database = {
           descricao: string | null
           id: string
           limite_downloads: number | null
+          limite_perfis: number | null
           nome: string
           qualidade_maxima: string | null
           telas_simultaneas: number | null
@@ -520,6 +521,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           limite_downloads?: number | null
+          limite_perfis?: number | null
           nome: string
           qualidade_maxima?: string | null
           telas_simultaneas?: number | null
@@ -532,6 +534,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           limite_downloads?: number | null
+          limite_perfis?: number | null
           nome?: string
           qualidade_maxima?: string | null
           telas_simultaneas?: number | null
