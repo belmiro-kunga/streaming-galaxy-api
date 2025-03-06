@@ -31,6 +31,20 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
     ? plan.precos[0].preco 
     : 0;
 
+  // Tradução do ciclo de cobrança
+  const getCycleLabel = (cycle: string): string => {
+    const cycles: Record<string, string> = {
+      'mensal': '/mês',
+      'anual': '/ano',
+      'trimestral': '/trimestre',
+      'semestral': '/semestre',
+      'diário': '/dia',
+      'semanal': '/semana',
+      'quinzenal': '/quinzena'
+    };
+    return cycles[cycle] || '';
+  };
+
   return (
     <div 
       className="animate-fade-in" 
@@ -57,7 +71,7 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
           <h3 className="text-lg font-bold text-foreground dark:text-white">{plan.nome}</h3>
           <p className="text-3xl font-bold mt-2 text-foreground dark:text-white">
             {formatPrice(planPrice)}
-            <span className="text-sm font-normal text-muted-foreground dark:text-gray-400"> /mês</span>
+            <span className="text-sm font-normal text-muted-foreground dark:text-gray-400"> {getCycleLabel(plan.ciclo_cobranca)}</span>
           </p>
         </CardHeader>
         

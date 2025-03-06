@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/ui/Header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { SubscriptionPlan } from '@/types/api';
 
 const PaymentUpload = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const PaymentUpload = () => {
   const [uploadComplete, setUploadComplete] = useState(false);
   
   // Get the plan details from location state
-  const planDetails = location.state?.plan;
+  const planDetails = location.state?.plan as SubscriptionPlan;
   
   if (!planDetails) {
     return (
@@ -72,6 +73,11 @@ const PaymentUpload = () => {
       // In a real app, you would make an API call to update the user's subscription status
     }, 2000);
   };
+
+  // Obter o preço do plano
+  const planPrice = planDetails.precos && planDetails.precos.length > 0 
+    ? `${planDetails.precos[0].moeda_codigo} ${planDetails.precos[0].preco.toLocaleString()}`
+    : "Preço não definido";
   
   return (
     <div className="min-h-screen bg-background">
@@ -105,16 +111,22 @@ const PaymentUpload = () => {
                 <h3 className="text-lg font-medium mb-2">Detalhes do Plano</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Plano:</span>
-                  <span>{planDetails.name}</span>
+                  <span>{planDetails.nome}</span>
                   
                   <span className="text-muted-foreground">Preço:</span>
-                  <span>{planDetails.currency} {planDetails.price.toLocaleString()} {planDetails.cycle}</span>
+                  <span>{planPrice} ({planDetails.ciclo_cobranca})</span>
                   
                   <span className="text-muted-foreground">Dispositivos:</span>
-                  <span>{planDetails.devices}</span>
+                  <span>{planDetails.telas_simultaneas}</span>
                   
                   <span className="text-muted-foreground">Qualidade:</span>
-                  <span>{planDetails.quality}</span>
+                  <span>{planDetails.qualidade_maxima}</span>
+
+                  <span className="text-muted-foreground">Perfis:</span>
+                  <span>{planDetails.limite_perfis}</span>
+
+                  <span className="text-muted-foreground">Downloads:</span>
+                  <span>{planDetails.limite_downloads}</span>
                 </div>
               </div>
               

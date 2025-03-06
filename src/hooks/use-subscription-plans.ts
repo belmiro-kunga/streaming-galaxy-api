@@ -97,9 +97,15 @@ export const useSubscriptionPlans = () => {
         description: "Faça login para continuar com a assinatura.",
       });
       navigate('/login');
-    } else {
-      // Redirect to payment page if user is logged in
+    } else if (selectedPlanDetails) {
+      // Redirect to payment page if user is logged in and plan is selected
       navigate('/payment-upload', { state: { plan: selectedPlanDetails } });
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não foi possível encontrar os detalhes do plano selecionado.",
+        variant: "destructive"
+      });
     }
   };
 
