@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, Package, CreditCard, Settings, BarChart3, 
-  FileText, LogOut, PackageOpen, BookOpen
+  FileText, LogOut, PackageOpen, BookOpen, Home
 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,14 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, handleLogout }: Sidebar
           >
             <BarChart3 className="h-5 w-5" />
             {sidebarOpen && <span>Visão Geral</span>}
+          </Button>
+          <Button
+            variant="ghost"
+            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "home" ? "bg-gray-800" : ""}`}
+            onClick={() => setActiveTab("home")}
+          >
+            <Home className="h-5 w-5" />
+            {sidebarOpen && <span>Home</span>}
           </Button>
           <Button
             variant="ghost"
