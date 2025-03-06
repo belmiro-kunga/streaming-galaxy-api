@@ -25,7 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash, MonitorPlay, Smartphone, Download, Users, Tv } from 'lucide-react';
 import { SubscriptionPlan } from '@/types/api';
-import { planAPI } from '@/services/planAPI';
+import { planAPI } from '@/services/plans';
 
 const SubscriptionPlansManager: React.FC = () => {
   const { toast } = useToast();

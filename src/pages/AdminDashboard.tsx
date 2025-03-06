@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, Package, CreditCard, Settings, BarChart3, 
@@ -32,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { SubscriptionPlan } from '@/types/api';
 import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
-import { planAPI } from '@/services/planAPI';
+import { planAPI } from '@/services/plans';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

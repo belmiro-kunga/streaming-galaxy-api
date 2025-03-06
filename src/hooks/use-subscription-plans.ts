@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { planAPI } from '@/services/planAPI';
+import { planAPI } from '@/services/plans'; // Updated import path
 import { SubscriptionPlan } from '@/types/api';
 
 export const useSubscriptionPlans = () => {
