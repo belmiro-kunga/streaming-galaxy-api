@@ -4,8 +4,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { mockSignIn } from '@/lib/supabase';
+import { mockSignIn, signOut } from '@/lib/supabase/auth';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface LoginFormProps {
   email: string;
@@ -28,6 +29,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Ensure user is logged out when visiting login page
+  useEffect(() => {
+    const logoutOnMount = async () => {
+      await signOut();
+      console.log('User logged out on login page load');
+    };
+    
+    logoutOnMount();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {

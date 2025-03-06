@@ -14,13 +14,13 @@ export const useSubscriptionPlans = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Check login status
+  // Check login status - but default to not logged in
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const { data } = await supabase.auth.getSession();
-        const hasSession = data.session || localStorage.getItem('userSession');
-        setIsLoggedIn(!!hasSession);
+        // Only consider logged in if there's a valid session
+        setIsLoggedIn(!!data.session);
       } catch (error) {
         console.error("Error checking login status:", error);
         setIsLoggedIn(false);
