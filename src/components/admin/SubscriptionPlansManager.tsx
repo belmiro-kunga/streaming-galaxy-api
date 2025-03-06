@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash, MonitorPlay, Smartphone, Download, Users, Tv } from 'lucide-react';
 import { SubscriptionPlan } from '@/types/api';
-import { directSupabaseApi } from '@/lib/supabase';
+import { supabase, directSupabaseApi } from '@/lib/supabase';
 import { planAPI } from '@/services/plans';
 
 const SubscriptionPlansManager: React.FC = () => {
