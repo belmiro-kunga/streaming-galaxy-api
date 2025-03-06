@@ -1,5 +1,7 @@
 
 // Define types for admin dashboard
+import { SubscriptionPlan } from '@/types/api';
+
 export interface User {
   id: string;
   name: string;
@@ -95,5 +97,3 @@ export interface AdminDashboardContextType {
   approvePayment: (id: string) => void;
   rejectPayment: (id: string) => void;
 }
-
-export type { SubscriptionPlan } from '@/types/api';

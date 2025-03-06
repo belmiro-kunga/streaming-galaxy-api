@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { mockPendingPayments } from './mockData';
+import { Payment } from './types';
 
 export const usePaymentsManagement = () => {
   const { toast } = useToast();
