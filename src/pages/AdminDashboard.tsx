@@ -18,15 +18,19 @@ const AdminDashboardContent = () => {
   const { setSubscriptionPlans } = useAdminDashboard();
 
   // Use React Query to fetch subscription plans
-  const { isLoading, error } = useQuery({
+  const { isLoading, error, data } = useQuery({
     queryKey: ['subscriptionPlans'],
     queryFn: planAPI.getAllPlans,
-    onSuccess: (data) => {
-      setSubscriptionPlans(data);
-    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
+
+  // When data changes and is available, update the context
+  React.useEffect(() => {
+    if (data) {
+      setSubscriptionPlans(data);
+    }
+  }, [data, setSubscriptionPlans]);
 
   // If there was an error fetching the plans, we could show an error message
   if (error) {
