@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SubscriptionPlan } from '@/types/api';
+import { Loader2 } from 'lucide-react';
 
 interface PlanDialogProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface PlanDialogProps {
   dialogMode: "add" | "edit";
   onSave: () => void;
   handlePriceChange: (value: string) => void;
+  isLoading?: boolean;
 }
 
 const PlanDialog: React.FC<PlanDialogProps> = ({
@@ -39,12 +41,17 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
   setCurrentPlan,
   dialogMode,
   onSave,
-  handlePriceChange
+  handlePriceChange,
+  isLoading = false
 }) => {
   if (!currentPlan) return null;
   
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!isLoading) {
+        onOpenChange(open);
+      }
+    }}>
       <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl">
         <DialogHeader>
           <DialogTitle>{dialogMode === "add" ? "Adicionar Novo Plano" : "Editar Plano"}</DialogTitle>
@@ -58,13 +65,15 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome do Plano</Label>
+              <Label htmlFor="name">Nome do Plano*</Label>
               <Input 
                 id="name" 
                 value={currentPlan?.nome || ""}
                 onChange={(e) => setCurrentPlan({...currentPlan, nome: e.target.value})}
                 className="bg-gray-800 border-gray-700 text-white"
                 placeholder="Ex: Premium, Básico, etc."
+                disabled={isLoading}
+                required
               />
             </div>
             
@@ -73,6 +82,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               <Select 
                 value={currentPlan?.ciclo_cobranca || "mensal"} 
                 onValueChange={(value) => setCurrentPlan({...currentPlan, ciclo_cobranca: value})}
+                disabled={isLoading}
               >
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                   <SelectValue placeholder="Selecione o ciclo" />
@@ -98,6 +108,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               onChange={(e) => setCurrentPlan({...currentPlan, descricao: e.target.value})}
               className="bg-gray-800 border-gray-700 text-white"
               placeholder="Breve descrição do plano"
+              disabled={isLoading}
             />
           </div>
           
@@ -107,6 +118,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               <Select 
                 value={currentPlan?.qualidade_maxima || "HD"} 
                 onValueChange={(value) => setCurrentPlan({...currentPlan, qualidade_maxima: value})}
+                disabled={isLoading}
               >
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                   <SelectValue placeholder="Selecione a qualidade" />
@@ -130,6 +142,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
                 onChange={(e) => handlePriceChange(e.target.value)}
                 className="bg-gray-800 border-gray-700 text-white"
                 placeholder="Preço em Kwanzas"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -145,6 +158,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
                 value={currentPlan?.telas_simultaneas || 1}
                 onChange={(e) => setCurrentPlan({...currentPlan, telas_simultaneas: Number(e.target.value) || 1})}
                 className="bg-gray-800 border-gray-700 text-white"
+                disabled={isLoading}
               />
             </div>
             
@@ -157,6 +171,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
                 value={currentPlan?.limite_downloads || 0}
                 onChange={(e) => setCurrentPlan({...currentPlan, limite_downloads: Number(e.target.value) || 0})}
                 className="bg-gray-800 border-gray-700 text-white"
+                disabled={isLoading}
               />
             </div>
             
@@ -170,6 +185,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
                 value={currentPlan?.limite_perfis || 1}
                 onChange={(e) => setCurrentPlan({...currentPlan, limite_perfis: Number(e.target.value) || 1})}
                 className="bg-gray-800 border-gray-700 text-white"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -179,6 +195,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               id="active"
               checked={currentPlan?.ativo || false} 
               onCheckedChange={(checked) => setCurrentPlan({...currentPlan, ativo: checked})}
+              disabled={isLoading}
             />
             <Label htmlFor="active">Plano Ativo</Label>
           </div>
@@ -186,16 +203,27 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
         
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700">
+            <Button 
+              variant="outline" 
+              className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
           </DialogClose>
           <Button 
             onClick={onSave}
-            disabled={!currentPlan?.nome}
+            disabled={!currentPlan?.nome || isLoading}
             className="bg-primary hover:bg-primary/90"
           >
-            {dialogMode === "add" ? "Adicionar" : "Atualizar"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {dialogMode === "add" ? "Adicionando..." : "Atualizando..."}
+              </>
+            ) : (
+              dialogMode === "add" ? "Adicionar" : "Atualizar"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -11,6 +11,11 @@ export const directSupabaseApi = {
       // Prepare the plan data (without precos)
       const { precos, ...planDataWithoutPrecos } = planData;
       
+      // Important: Make sure limite_perfis is present
+      if (!planDataWithoutPrecos.limite_perfis) {
+        planDataWithoutPrecos.limite_perfis = 1; // Set default if missing
+      }
+      
       // Insert the plan
       const { data: planDataResult, error: planError } = await supabase
         .from('planos_assinatura')
@@ -64,6 +69,7 @@ export const directSupabaseApi = {
       };
     } catch (error) {
       console.error('[DirectSupabaseAPI] Error in createPlan:', error);
+      // Return a more detailed error message
       return {
         data: null,
         status: 500,

@@ -37,6 +37,7 @@ const SubscriptionPlansManager: React.FC = () => {
         <Button 
           onClick={addPlan} 
           className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+          disabled={isLoading}
         >
           <Plus size={16} />
           <span>Adicionar Plano</span>
@@ -71,6 +72,7 @@ const SubscriptionPlansManager: React.FC = () => {
         dialogMode={dialogMode}
         onSave={handleSavePlan}
         handlePriceChange={handlePriceChange}
+        isLoading={isLoading}
       />
       
       <DeleteConfirmationDialog
@@ -78,6 +80,7 @@ const SubscriptionPlansManager: React.FC = () => {
         onOpenChange={setIsDeleteDialogOpen}
         planToDelete={planToDelete}
         onConfirm={handleDeleteConfirm}
+        isLoading={isLoading}
       />
     </div>
   );

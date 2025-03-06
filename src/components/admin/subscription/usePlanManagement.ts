@@ -127,11 +127,35 @@ export const usePlanManagement = () => {
   const handleSavePlan = async () => {
     if (!currentPlan) return;
     
+    // Validate required fields
+    if (!currentPlan.nome) {
+      toast({
+        title: 'Erro',
+        description: 'O nome do plano é obrigatório',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    // Make sure all numeric fields are numbers, not strings
+    const planToSave = {
+      ...currentPlan,
+      telas_simultaneas: Number(currentPlan.telas_simultaneas) || 1,
+      limite_downloads: Number(currentPlan.limite_downloads) || 0,
+      limite_perfis: Number(currentPlan.limite_perfis) || 1,
+      precos: currentPlan.precos?.map(preco => ({
+        ...preco,
+        preco: Number(preco.preco) || 0
+      }))
+    };
+    
     try {
-      console.log("SubscriptionPlansManager: Saving plan:", currentPlan.nome);
+      console.log("SubscriptionPlansManager: Saving plan:", planToSave);
       
       if (dialogMode === "add") {
-        const response = await directSupabaseApi.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
+        setIsLoading(true);
+        const response = await directSupabaseApi.createPlan(planToSave as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
+        setIsLoading(false);
         
         if (response.status === 201) {
           toast({
@@ -149,7 +173,7 @@ export const usePlanManagement = () => {
           });
         }
       } else {
-        if (!currentPlan.id) {
+        if (!planToSave.id) {
           toast({
             title: 'Erro',
             description: 'ID do plano não encontrado',
@@ -158,7 +182,9 @@ export const usePlanManagement = () => {
           return;
         }
         
-        const response = await directSupabaseApi.updatePlan(currentPlan.id, currentPlan);
+        setIsLoading(true);
+        const response = await directSupabaseApi.updatePlan(planToSave.id, planToSave);
+        setIsLoading(false);
         
         if (response.status === 200) {
           toast({
@@ -177,6 +203,7 @@ export const usePlanManagement = () => {
         }
       }
     } catch (error) {
+      setIsLoading(false);
       console.error('SubscriptionPlansManager: Error saving plan:', error);
       toast({
         title: 'Erro',
@@ -208,8 +235,10 @@ export const usePlanManagement = () => {
     if (!planToDelete) return;
     
     try {
+      setIsLoading(true);
       console.log(`SubscriptionPlansManager: Deleting plan ${planToDelete.id}`);
       const response = await directSupabaseApi.deletePlan(planToDelete.id);
+      setIsLoading(false);
       
       if (response.status === 200) {
         toast({
@@ -226,6 +255,7 @@ export const usePlanManagement = () => {
         });
       }
     } catch (error) {
+      setIsLoading(false);
       console.error('SubscriptionPlansManager: Error deleting plan:', error);
       toast({
         title: 'Erro',
