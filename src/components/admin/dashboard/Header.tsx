@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Menu, Search, BookOpen } from 'lucide-react';
+import { Bell, Menu, Search, Home } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -35,10 +35,10 @@ const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery, setA
           variant="ghost" 
           size="icon" 
           className="text-gray-300 hover:text-primary hover:bg-gray-800"
-          onClick={() => setActiveTab && setActiveTab("content")}
-          title="Acessar Conteúdos"
+          onClick={() => setActiveTab && setActiveTab("home")}
+          title="Ir para Home"
         >
-          <BookOpen className="h-5 w-5" />
+          <Home className="h-5 w-5" />
         </Button>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
