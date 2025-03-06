@@ -1,3 +1,4 @@
+
 import { SubscriptionPlan, PlanPrice, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 
@@ -105,11 +106,20 @@ export const planAPI = {
   createPlan: async (planData: Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<SubscriptionPlan>> => {
     try {
       const now = new Date().toISOString();
+      const newId = `plan-${Date.now()}`;
+      
+      // Make sure the prices have the correct plan_id
+      const precos = planData.precos?.map(preco => ({
+        ...preco,
+        plano_id: newId
+      })) || [];
+      
       const newPlan: SubscriptionPlan = {
         ...planData,
-        id: `plan-${Date.now()}`,
+        id: newId,
         created_at: now,
         updated_at: now,
+        precos: precos
       };
       
       // If we have Supabase configured, use it
@@ -151,11 +161,18 @@ export const planAPI = {
         };
       }
       
+      // Make sure the prices have the correct plan_id
+      const precos = planData.precos?.map(preco => ({
+        ...preco,
+        plano_id: planId
+      }));
+      
       // If we have Supabase configured, use it
       if (supabase?.auth) {
         // In a real implementation, this would update the Supabase database
         // const { data, error } = await supabase.from('planos_assinatura').update({
         //   ...planData,
+        //   precos: precos,
         //   updated_at: new Date().toISOString()
         // }).eq('id', planId).select().single();
         // if (error) throw error;
@@ -166,6 +183,7 @@ export const planAPI = {
       const updatedPlan: SubscriptionPlan = {
         ...plansMockDB[planIndex],
         ...planData,
+        precos: precos || plansMockDB[planIndex].precos,
         updated_at: new Date().toISOString()
       };
       

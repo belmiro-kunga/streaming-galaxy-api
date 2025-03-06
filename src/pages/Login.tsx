@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -29,7 +28,6 @@ const Login = () => {
 
     try {
       if (view === 'login') {
-        // Login with Supabase
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -37,14 +35,12 @@ const Login = () => {
 
         if (error) throw error;
 
-        // Successful login
         navigate('/dashboard');
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta à CinePlay.",
         });
       } else if (view === 'reset-password') {
-        // Reset password with Supabase
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
@@ -58,7 +54,6 @@ const Login = () => {
         setLoading(false);
         setView('login');
       } else if (view === 'signup') {
-        // Verify passwords match
         if (password !== confirmPassword) {
           toast({
             title: "Erro na criação da conta",
@@ -69,7 +64,6 @@ const Login = () => {
           return;
         }
 
-        // Create account with Supabase
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -82,7 +76,6 @@ const Login = () => {
 
         if (error) throw error;
 
-        // Check if email confirmation is required
         if (data.user?.identities?.length === 0) {
           toast({
             title: "Verifique seu email",
@@ -120,8 +113,6 @@ const Login = () => {
       });
 
       if (error) throw error;
-      
-      // The redirect happens automatically, but we'll show loading state
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
       toast({
@@ -158,7 +149,6 @@ const Login = () => {
           </CardHeader>
           
           <CardContent className="space-y-6 px-8 py-6 relative z-10">
-            {/* Social login buttons only in login view */}
             {view === 'login' && (
               <div className="grid grid-cols-2 gap-5">
                 <Button 
@@ -187,7 +177,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Separator only visible in login view */}
             {view === 'login' && (
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
@@ -202,7 +191,6 @@ const Login = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name field - only in signup view */}
               {view === 'signup' && (
                 <div className="space-y-2.5">
                   <Label htmlFor="name" className="text-sm font-medium text-violet-100 block mb-1.5">
@@ -220,7 +208,6 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Email field - in all views */}
               <div className="space-y-2.5">
                 <Label htmlFor="email" className="text-sm font-medium text-violet-100 block mb-1.5">
                   Email
@@ -239,7 +226,6 @@ const Login = () => {
                 </div>
               </div>
               
-              {/* Password field - not in reset-password view */}
               {view !== 'reset-password' && (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between mb-1.5">
@@ -271,7 +257,6 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Confirm password field - only in signup view */}
               {view === 'signup' && (
                 <div className="space-y-2.5">
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-violet-100 block mb-1.5">
@@ -292,7 +277,6 @@ const Login = () => {
                 </div>
               )}
               
-              {/* Submit button */}
               <Button
                 type="submit"
                 className="w-full h-12 text-base bg-violet-600 hover:bg-violet-700 transition-colors mt-6"
@@ -320,48 +304,39 @@ const Login = () => {
           
           <CardFooter className="flex flex-wrap items-center justify-center pb-8 pt-2 relative z-10 px-6">
             <div className="text-center text-sm text-violet-200">
-              {(() => {
-                if (view === 'login') {
-                  return (
-                    <p>
-                      Não tem uma conta?{' '}
-                      <button
-                        type="button"
-                        onClick={() => setView('signup')}
-                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                      >
-                        Criar conta
-                      </button>
-                    </p>
-                  );
-                } else if (view === 'signup') {
-                  return (
-                    <p>
-                      Já tem uma conta?{' '}
-                      <button
-                        type="button"
-                        onClick={() => setView('login')}
-                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                      >
-                        Fazer login
-                      </button>
-                    </p>
-                  );
-                } else {
-                  // This is for reset-password view
-                  return (
-                    <p>
-                      <button
-                        type="button"
-                        onClick={() => setView('login')}
-                        className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
-                      >
-                        Voltar para o login
-                      </button>
-                    </p>
-                  );
-                }
-              })()}
+              {view === 'login' ? (
+                <p>
+                  Não tem uma conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setView('signup')}
+                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                  >
+                    Criar conta
+                  </button>
+                </p>
+              ) : view === 'signup' ? (
+                <p>
+                  Já tem uma conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setView('login')}
+                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                  >
+                    Fazer login
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  <button
+                    type="button"
+                    onClick={() => setView('login')}
+                    className="text-violet-300 hover:text-white font-medium hover:underline transition-colors"
+                  >
+                    Voltar para o login
+                  </button>
+                </p>
+              )}
             </div>
           </CardFooter>
         </Card>

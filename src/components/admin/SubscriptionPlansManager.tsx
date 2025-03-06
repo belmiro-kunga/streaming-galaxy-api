@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash, MonitorPlay, Smartphone, Download, Users, Quality } from 'lucide-react';
+import { Plus, Pencil, Trash, MonitorPlay, Smartphone, Download, Users, Tv } from 'lucide-react';
 import { SubscriptionPlan } from '@/types/api';
 import { planAPI } from '@/services/planAPI';
 
@@ -48,7 +47,6 @@ const SubscriptionPlansManager: React.FC = () => {
     'anual': 'yearly'
   };
   
-  // Fetch plans from the API
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
@@ -66,12 +64,10 @@ const SubscriptionPlansManager: React.FC = () => {
     }
   };
   
-  // Load plans on component mount
   useEffect(() => {
     fetchPlans();
   }, []);
   
-  // Add a new plan
   const addPlan = () => {
     setDialogMode("add");
     setCurrentPlan({
@@ -88,20 +84,17 @@ const SubscriptionPlansManager: React.FC = () => {
     setIsPlanDialogOpen(true);
   };
   
-  // Edit an existing plan
   const editPlan = (plan: SubscriptionPlan) => {
     setDialogMode("edit");
     setCurrentPlan({ ...plan });
     setIsPlanDialogOpen(true);
   };
   
-  // Delete a plan
   const deletePlan = (plan: SubscriptionPlan) => {
     setPlanToDelete(plan);
     setIsDeleteDialogOpen(true);
   };
   
-  // Toggle plan active status
   const togglePlanStatus = async (planId: string, currentStatus: boolean) => {
     try {
       const response = await planAPI.togglePlanStatus(planId, !currentStatus);
@@ -129,13 +122,11 @@ const SubscriptionPlansManager: React.FC = () => {
     }
   };
   
-  // Handle saving a plan (create or update)
   const handleSavePlan = async () => {
     if (!currentPlan) return;
     
     try {
       if (dialogMode === "add") {
-        // Create new plan
         const response = await planAPI.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
         
         if (response.status === 201) {
@@ -153,7 +144,6 @@ const SubscriptionPlansManager: React.FC = () => {
           });
         }
       } else {
-        // Update existing plan
         if (!currentPlan.id) {
           toast({
             title: 'Erro',
@@ -190,43 +180,17 @@ const SubscriptionPlansManager: React.FC = () => {
     }
   };
   
-  // Handle deleting a plan
-  const handleDeleteConfirm = async () => {
-    if (!planToDelete?.id) return;
-    
-    try {
-      const response = await planAPI.deletePlan(planToDelete.id);
-      
-      if (response.status === 200) {
-        toast({
-          title: 'Sucesso',
-          description: 'Plano excluído com sucesso'
-        });
-        fetchPlans();
-        setIsDeleteDialogOpen(false);
-      } else {
-        toast({
-          title: 'Erro',
-          description: response.message,
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting plan:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir o plano',
-        variant: 'destructive'
-      });
-    }
-  };
-  
-  // Helper function to handle price changes
   const handlePriceChange = (value: string) => {
     if (!currentPlan || !currentPlan.precos || currentPlan.precos.length === 0) return;
     
     const precos = [...currentPlan.precos];
-    precos[0] = { ...precos[0], preco: Number(value) || 0 };
+    const planId = currentPlan.id || `temp-${Date.now()}`;
+    
+    precos[0] = { 
+      ...precos[0], 
+      preco: Number(value) || 0,
+      plano_id: precos[0].plano_id || planId
+    };
     
     setCurrentPlan({
       ...currentPlan,
@@ -274,7 +238,7 @@ const SubscriptionPlansManager: React.FC = () => {
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
-                    <Quality className="h-5 w-5 text-muted-foreground" />
+                    <Tv className="h-5 w-5 text-muted-foreground" />
                     <span className="flex-1">Qualidade {plan.qualidade_maxima}</span>
                   </div>
                   
@@ -344,7 +308,6 @@ const SubscriptionPlansManager: React.FC = () => {
         </div>
       )}
       
-      {/* Plan Add/Edit Dialog */}
       <Dialog open={isPlanDialogOpen} onOpenChange={setIsPlanDialogOpen}>
         <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl">
           <DialogHeader>
@@ -502,7 +465,6 @@ const SubscriptionPlansManager: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="bg-gray-900 border-gray-800 text-white">
           <DialogHeader>
