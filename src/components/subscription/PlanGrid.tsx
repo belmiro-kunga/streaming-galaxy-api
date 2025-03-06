@@ -23,10 +23,10 @@ export const PlanGrid = ({ plans, selectedPlan, onSelectPlan, isLoading }: PlanG
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Nenhum plano disponível
+          Nenhum plano ativo disponível
         </h3>
         <p className="text-gray-500 dark:text-gray-400">
-          Não há planos de assinatura disponíveis no momento. Por favor, tente novamente mais tarde.
+          No momento não há planos de assinatura ativos. Por favor, entre em contato com o administrador ou tente novamente mais tarde.
         </p>
       </div>
     );

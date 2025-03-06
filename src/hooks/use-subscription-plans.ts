@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -17,7 +16,6 @@ export const useSubscriptionPlans = () => {
   // Check login status
   useEffect(() => {
     const checkLoginStatus = async () => {
-      // Try to get user from Supabase
       const { data } = await supabase.auth.getSession();
       const hasSession = data.session || localStorage.getItem('userSession');
       setIsLoggedIn(!!hasSession);
@@ -31,47 +29,33 @@ export const useSubscriptionPlans = () => {
     console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
-      // Try to get all active plans, not just from the local subscription
+      // Buscar apenas planos ativos do Supabase
       const { data: subscriptionPlans, error } = await supabase
         .from('planos_assinatura')
         .select(`
           *,
           precos:precos_planos(*)
         `)
-        .eq('ativo', true);
+        .eq('ativo', true); // Apenas planos ativos
 
       if (error) throw error;
 
-      console.log("SubscriptionPlans: Plans fetched successfully:", subscriptionPlans?.length);
-      console.log("SubscriptionPlans: Plans data:", subscriptionPlans);
+      console.log("SubscriptionPlans: Active plans fetched:", subscriptionPlans?.length);
       
-      if (subscriptionPlans && subscriptionPlans.length === 0) {
-        // If no plans from Supabase, fallback to planAPI
-        console.log("SubscriptionPlans: No plans found in Supabase, trying planAPI");
-        const apiPlans = await planAPI.getAllPlans();
-        console.log("SubscriptionPlans: Plans from API:", apiPlans.length);
-        setPlans(apiPlans || []);
+      if (subscriptionPlans && subscriptionPlans.length > 0) {
+        setPlans(subscriptionPlans);
       } else {
-        setPlans(subscriptionPlans || []);
+        console.log("SubscriptionPlans: No active plans found");
+        setPlans([]);
       }
     } catch (error) {
       console.error('SubscriptionPlans: Error fetching plans:', error);
-      
-      // Fallback to the planAPI if Supabase fails
-      console.log("SubscriptionPlans: Error with Supabase, falling back to planAPI");
-      try {
-        const apiPlans = await planAPI.getAllPlans();
-        console.log("SubscriptionPlans: Plans from API fallback:", apiPlans.length);
-        setPlans(apiPlans || []);
-      } catch (fallbackError) {
-        console.error('SubscriptionPlans: Error with fallback method:', fallbackError);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os planos de assinatura.",
-          variant: "destructive"
-        });
-        setPlans([]);
-      }
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os planos de assinatura.",
+        variant: "destructive"
+      });
+      setPlans([]);
     } finally {
       setIsLoading(false);
     }
