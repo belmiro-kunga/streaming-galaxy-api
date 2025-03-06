@@ -79,7 +79,11 @@ const SubscriptionPlansManager: React.FC = () => {
       limite_perfis: 1,
       ciclo_cobranca: "mensal",
       ativo: true,
-      precos: [{ moeda_codigo: "AOA", preco: 0 }]
+      precos: [{ 
+        moeda_codigo: "AOA", 
+        preco: 0,
+        plano_id: `temp-${Date.now()}`
+      }]
     });
     setIsPlanDialogOpen(true);
   };
@@ -196,6 +200,36 @@ const SubscriptionPlansManager: React.FC = () => {
       ...currentPlan,
       precos
     });
+  };
+  
+  const handleDeleteConfirm = async () => {
+    if (!planToDelete) return;
+    
+    try {
+      const response = await planAPI.deletePlan(planToDelete.id);
+      
+      if (response.status === 200) {
+        toast({
+          title: 'Sucesso',
+          description: response.message
+        });
+        fetchPlans();
+        setIsDeleteDialogOpen(false);
+      } else {
+        toast({
+          title: 'Erro',
+          description: response.message,
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o plano',
+        variant: 'destructive'
+      });
+    }
   };
   
   return (

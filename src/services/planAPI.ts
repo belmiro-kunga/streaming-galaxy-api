@@ -1,4 +1,3 @@
-
 import { SubscriptionPlan, PlanPrice, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 
