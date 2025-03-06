@@ -3,7 +3,6 @@ import React from 'react';
 import { Bell, Menu, Search, Home } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -32,16 +31,16 @@ const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery, setA
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Link to="/home">
+        <a href="/home" target="_blank" rel="noopener noreferrer">
           <Button 
             variant="ghost" 
             size="icon" 
             className="text-gray-300 hover:text-primary hover:bg-gray-800"
-            title="Ir para CinePlay"
+            title="Abrir CinePlay em nova aba"
           >
             <Home className="h-5 w-5" />
           </Button>
-        </Link>
+        </a>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
