@@ -1,3 +1,4 @@
+
 import { SubscriptionPlan, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 import { plansMockDB } from '../mockData';
@@ -22,16 +23,12 @@ export async function createPlan(
       updated_at: now
     };
     
-    // If we have Supabase configured, use it
+    // Check Supabase configuration
     if (supabase?.auth) {
-      // Verificar se temos uma URL e chave configuradas
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      console.log("[PlanAPI] Creating new plan in Supabase");
       
-      if (supabaseUrl && supabaseKey) {
-        console.log("[PlanAPI] Creating new plan in Supabase");
-        
-        // Start a transaction
+      try {
+        // Insert the plan
         const { data: planData, error: planError } = await supabase
           .from('planos_assinatura')
           .insert(newPlan)
@@ -46,7 +43,7 @@ export async function createPlan(
         // Insert the prices if they exist
         if (precos && precos.length > 0) {
           const precosToInsert = precos.map(preco => ({
-            plano_id: newId,
+            plano_id: planData.id, // Use the ID returned from Supabase
             moeda_codigo: preco.moeda_codigo,
             preco: preco.preco
           }));
@@ -65,7 +62,7 @@ export async function createPlan(
         const { data: completePlan, error: fetchError } = await supabase
           .from('planos_assinatura')
           .select('*, precos:precos_planos(*)')
-          .eq('id', newId)
+          .eq('id', planData.id)
           .single();
         
         if (fetchError) {
@@ -82,10 +79,15 @@ export async function createPlan(
           status: 201,
           message: 'Plano criado com sucesso'
         };
+      } catch (supabaseError) {
+        console.error('[PlanAPI] Error with Supabase operations:', supabaseError);
+        // If Supabase operations fail, fall back to mock data
       }
     }
     
-    // Otherwise use mock data
+    // Fallback to using mock data
+    console.log("[PlanAPI] Falling back to mock database for plan creation");
+    
     const completePlan: SubscriptionPlan = {
       ...newPlan as any,
       precos: precos?.map(preco => ({
@@ -97,7 +99,7 @@ export async function createPlan(
     plansMockDB.push(completePlan);
     
     // Notify subscribers about the change
-    console.log("[PlanAPI] Created new plan, notifying subscribers");
+    console.log("[PlanAPI] Created new plan in mock DB, notifying subscribers");
     eventSystem.notify();
     
     return { 

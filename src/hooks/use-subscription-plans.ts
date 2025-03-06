@@ -105,6 +105,23 @@ export const useSubscriptionPlans = () => {
       )
       .subscribe();
     
+    // Also listen for price changes
+    const priceSubscription = supabase
+      .channel('precos_planos_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'precos_planos'
+        },
+        (payload) => {
+          console.log("SubscriptionPlans: Prices changed in Supabase, refreshing data", payload);
+          fetchPlans();
+        }
+      )
+      .subscribe();
+    
     // Also use planAPI.subscribeToChanges to be consistent with admin panel
     const apiUnsubscribe = planAPI.subscribeToChanges(() => {
       console.log("SubscriptionPlans: Plans changed in API, refreshing data");
@@ -114,6 +131,7 @@ export const useSubscriptionPlans = () => {
     return () => {
       console.log("SubscriptionPlans: Cleaning up subscriptions");
       subscription.unsubscribe();
+      priceSubscription.unsubscribe();
       apiUnsubscribe();
     };
   }, [fetchPlans]);

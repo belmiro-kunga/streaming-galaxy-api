@@ -14,33 +14,23 @@ export async function updatePlan(
     // Find the plan to update
     const planIndex = plansMockDB.findIndex(p => p.id === planId);
     
-    if (planIndex === -1 && !supabase?.auth) {
-      return {
-        data: null as unknown as SubscriptionPlan,
-        status: 404,
-        message: 'Plano não encontrado'
-      };
-    }
-    
     // Extract prices from plan data
     const { precos, ...planDataWithoutPrecos } = planData;
     
-    // If we have Supabase configured, use it
+    // Check Supabase configuration
     if (supabase?.auth) {
-      // Verificar se temos uma URL e chave configuradas
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      console.log(`[PlanAPI] Updating plan ${planId} in Supabase`);
       
-      if (supabaseUrl && supabaseKey) {
-        console.log(`[PlanAPI] Updating plan ${planId} in Supabase`);
-        
+      try {
         // Update plan data
+        const updateData = {
+          ...planDataWithoutPrecos,
+          updated_at: new Date().toISOString()
+        };
+        
         const { error: planError } = await supabase
           .from('planos_assinatura')
-          .update({
-            ...planDataWithoutPrecos,
-            updated_at: new Date().toISOString()
-          })
+          .update(updateData)
           .eq('id', planId);
         
         if (planError) {
@@ -99,10 +89,23 @@ export async function updatePlan(
           status: 200,
           message: 'Plano atualizado com sucesso'
         };
+      } catch (supabaseError) {
+        console.error(`[PlanAPI] Error with Supabase operations:`, supabaseError);
+        // If Supabase operations fail, fall back to mock data
       }
     }
     
-    // Otherwise use mock data
+    // Fallback to using mock data
+    console.log(`[PlanAPI] Falling back to mock database for plan update`);
+    
+    if (planIndex === -1) {
+      return {
+        data: null as unknown as SubscriptionPlan,
+        status: 404,
+        message: 'Plano não encontrado'
+      };
+    }
+    
     const updatedPlan: SubscriptionPlan = {
       ...plansMockDB[planIndex],
       ...planDataWithoutPrecos,
@@ -113,7 +116,7 @@ export async function updatePlan(
     plansMockDB[planIndex] = updatedPlan;
     
     // Notify subscribers about the change
-    console.log(`[PlanAPI] Updated plan ${planId}, notifying subscribers`);
+    console.log(`[PlanAPI] Updated plan ${planId} in mock DB, notifying subscribers`);
     eventSystem.notify();
     
     return {

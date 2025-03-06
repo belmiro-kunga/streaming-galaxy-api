@@ -11,7 +11,7 @@ const projectId = 'myvoecxoicxhklaxvgdi';
 // If no URL is provided, construct it from the project ID
 const finalSupabaseUrl = supabaseUrl || `https://${projectId}.supabase.co`;
 
-// Test admin credentials
+// Test admin credentials for development
 const TEST_ADMIN_EMAIL = 'admin@cineplay.com';
 const TEST_ADMIN_PASSWORD = 'admin123';
 const TEST_EDITOR_EMAIL = 'editor@cineplay.com';
@@ -22,10 +22,18 @@ const TEST_SUPER_ADMIN_PASSWORD = 'super123';
 // Create the Supabase client
 export const supabase = createClient(
   finalSupabaseUrl, 
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15dm9lY3hvaWN4aGtsYXh2Z2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMTc3OTIsImV4cCI6MjA1NjY5Mzc5Mn0.XWLoIGayQvzdyQlFi8v9ziM991Xt44uOFT3FL58RkP8'
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15dm9lY3hvaWN4aGtsYXh2Z2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMTc3OTIsImV4cCI6MjA1NjY5Mzc5Mn0.XWLoIGayQvzdyQlFi8v9ziM991Xt44uOFT3FL58RkP8',
+  {
+    auth: {
+      persistSession: true,
+      storageKey: 'cineplay-supabase-auth',
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 
-// Verificar a conexão e registrar status
+// Log connection status
 if (!finalSupabaseUrl || !supabaseAnonKey) {
   console.warn('Credenciais do Supabase não encontradas - usando cliente simulado.');
   console.info('Para conectar ao Supabase, defina as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
