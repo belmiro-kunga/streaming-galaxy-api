@@ -8,6 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase, mockSignIn } from '@/lib/supabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { Separator } from '@/components/ui/separator';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
+import { FacebookIcon } from '@/components/SocialIcons';
 
 const Login = () => {
   const [view, setView] = useState<'login' | 'signup' | 'reset'>('login');
@@ -65,8 +68,7 @@ const Login = () => {
   };
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return email.includes('@');
   };
 
   const handleSignup = async () => {
@@ -112,7 +114,8 @@ const Login = () => {
             country: country,
             province: province,
             role: 'user'
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
@@ -175,6 +178,52 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      toast({
+        title: 'Erro no login com Google',
+        description: error?.message || 'Não foi possível fazer login com o Google.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Facebook login error:', error);
+      toast({
+        title: 'Erro no login com Facebook',
+        description: error?.message || 'Não foi possível fazer login com o Facebook.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const provinces = [
     'Bengo', 'Benguela', 'Bié', 'Cabinda', 'Cuando Cubango', 
     'Cuanza Norte', 'Cuanza Sul', 'Cunene', 'Huambo', 'Huíla', 
@@ -202,6 +251,45 @@ const Login = () => {
         </CardHeader>
         <CardContent className="p-8">
           <div className="space-y-4">
+            {(view === 'login' || view === 'reset') && (
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Button 
+                    onClick={handleGoogleLogin} 
+                    variant="outline" 
+                    type="button" 
+                    className="flex items-center justify-center gap-2 bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    disabled={isLoading}
+                  >
+                    <GoogleIcon className="h-4 w-4" />
+                    <span>Continuar com Google</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleFacebookLogin} 
+                    variant="outline" 
+                    type="button" 
+                    className="flex items-center justify-center gap-2 bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    disabled={isLoading}
+                  >
+                    <FacebookIcon className="h-4 w-4" />
+                    <span>Continuar com Facebook</span>
+                  </Button>
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full dark:bg-gray-600" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card dark:bg-gray-800 px-2 text-muted-foreground dark:text-gray-400">
+                      Ou continue com seu e-mail
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground dark:text-gray-200">
                 Email
