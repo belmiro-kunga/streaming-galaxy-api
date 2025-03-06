@@ -31,6 +31,7 @@ export const useSubscriptionPlans = () => {
     console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
+      // Try to get all active plans, not just from the local subscription
       const { data: subscriptionPlans, error } = await supabase
         .from('planos_assinatura')
         .select(`
@@ -42,14 +43,35 @@ export const useSubscriptionPlans = () => {
       if (error) throw error;
 
       console.log("SubscriptionPlans: Plans fetched successfully:", subscriptionPlans?.length);
-      setPlans(subscriptionPlans || []);
+      console.log("SubscriptionPlans: Plans data:", subscriptionPlans);
+      
+      if (subscriptionPlans && subscriptionPlans.length === 0) {
+        // If no plans from Supabase, fallback to planAPI
+        console.log("SubscriptionPlans: No plans found in Supabase, trying planAPI");
+        const apiPlans = await planAPI.getAllPlans();
+        console.log("SubscriptionPlans: Plans from API:", apiPlans.length);
+        setPlans(apiPlans || []);
+      } else {
+        setPlans(subscriptionPlans || []);
+      }
     } catch (error) {
       console.error('SubscriptionPlans: Error fetching plans:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os planos de assinatura.",
-        variant: "destructive"
-      });
+      
+      // Fallback to the planAPI if Supabase fails
+      console.log("SubscriptionPlans: Error with Supabase, falling back to planAPI");
+      try {
+        const apiPlans = await planAPI.getAllPlans();
+        console.log("SubscriptionPlans: Plans from API fallback:", apiPlans.length);
+        setPlans(apiPlans || []);
+      } catch (fallbackError) {
+        console.error('SubscriptionPlans: Error with fallback method:', fallbackError);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os planos de assinatura.",
+          variant: "destructive"
+        });
+        setPlans([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -71,8 +93,8 @@ export const useSubscriptionPlans = () => {
           schema: 'public',
           table: 'planos_assinatura'
         },
-        () => {
-          console.log("SubscriptionPlans: Plans changed, refreshing data");
+        (payload) => {
+          console.log("SubscriptionPlans: Plans changed, refreshing data", payload);
           fetchPlans();
         }
       )
