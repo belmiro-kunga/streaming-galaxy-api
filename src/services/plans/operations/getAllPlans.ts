@@ -15,15 +15,21 @@ export async function getAllPlans(): Promise<SubscriptionPlan[]> {
       
       if (supabaseUrl && supabaseKey) {
         console.log("[PlanAPI] Fetching plans from Supabase");
-        const { data, error } = await supabase.from('planos_assinatura').select('*');
+        const { data, error } = await supabase.from('planos_assinatura').select('*, precos:precos_planos(*)');
         
         if (error) {
           console.error('[PlanAPI] Supabase error:', error);
           throw error;
         }
         
-        console.log("[PlanAPI] Returned plans from Supabase, count:", data?.length);
-        return data || [];
+        // Transformar os dados do Supabase para o formato esperado pela aplicação
+        const formattedPlans = data.map(plan => ({
+          ...plan,
+          precos: plan.precos || []
+        }));
+        
+        console.log("[PlanAPI] Returned plans from Supabase, count:", formattedPlans?.length);
+        return formattedPlans || [];
       } else {
         console.log("[PlanAPI] Supabase credentials not found, using mock data");
       }

@@ -1,4 +1,3 @@
-
 import { SubscriptionPlan, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 import { plansMockDB } from '../mockData';
@@ -13,18 +12,14 @@ export async function createPlan(
     const now = new Date().toISOString();
     const newId = `plan-${Date.now()}`;
     
-    // Make sure the prices have the correct plan_id
-    const precos = planData.precos?.map(preco => ({
-      ...preco,
-      plano_id: newId
-    })) || [];
+    // Prepare the plan data (without precos)
+    const { precos, ...planDataWithoutPrecos } = planData;
     
-    const newPlan: SubscriptionPlan = {
-      ...planData,
+    const newPlan: Omit<SubscriptionPlan, 'precos'> = {
+      ...planDataWithoutPrecos,
       id: newId,
       created_at: now,
-      updated_at: now,
-      precos: precos
+      updated_at: now
     };
     
     // If we have Supabase configured, use it
@@ -35,11 +30,47 @@ export async function createPlan(
       
       if (supabaseUrl && supabaseKey) {
         console.log("[PlanAPI] Creating new plan in Supabase");
-        const { data, error } = await supabase.from('planos_assinatura').insert(newPlan).select().single();
         
-        if (error) {
-          console.error('[PlanAPI] Supabase error creating plan:', error);
-          throw error;
+        // Start a transaction
+        const { data: planData, error: planError } = await supabase
+          .from('planos_assinatura')
+          .insert(newPlan)
+          .select()
+          .single();
+        
+        if (planError) {
+          console.error('[PlanAPI] Supabase error creating plan:', planError);
+          throw planError;
+        }
+        
+        // Insert the prices if they exist
+        if (precos && precos.length > 0) {
+          const precosToInsert = precos.map(preco => ({
+            plano_id: newId,
+            moeda_codigo: preco.moeda_codigo,
+            preco: preco.preco
+          }));
+          
+          const { error: precosError } = await supabase
+            .from('precos_planos')
+            .insert(precosToInsert);
+          
+          if (precosError) {
+            console.error('[PlanAPI] Supabase error inserting prices:', precosError);
+            throw precosError;
+          }
+        }
+        
+        // Get the complete plan with prices
+        const { data: completePlan, error: fetchError } = await supabase
+          .from('planos_assinatura')
+          .select('*, precos:precos_planos(*)')
+          .eq('id', newId)
+          .single();
+        
+        if (fetchError) {
+          console.error('[PlanAPI] Supabase error fetching complete plan:', fetchError);
+          throw fetchError;
         }
         
         // Notify subscribers about the change
@@ -47,22 +78,30 @@ export async function createPlan(
         eventSystem.notify();
         
         return { 
-          data: data as SubscriptionPlan,
+          data: completePlan as SubscriptionPlan,
           status: 201,
           message: 'Plano criado com sucesso'
         };
       }
     }
     
-    // Add to mock database
-    plansMockDB.push(newPlan);
+    // Otherwise use mock data
+    const completePlan: SubscriptionPlan = {
+      ...newPlan as any,
+      precos: precos?.map(preco => ({
+        ...preco,
+        plano_id: newId
+      })) || []
+    };
+    
+    plansMockDB.push(completePlan);
     
     // Notify subscribers about the change
     console.log("[PlanAPI] Created new plan, notifying subscribers");
     eventSystem.notify();
     
     return { 
-      data: newPlan,
+      data: completePlan,
       status: 201,
       message: 'Plano criado com sucesso'
     };

@@ -1,3 +1,4 @@
+
 import { SubscriptionPlan, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 import { plansMockDB } from '../mockData';
@@ -13,7 +14,7 @@ export async function updatePlan(
     // Find the plan to update
     const planIndex = plansMockDB.findIndex(p => p.id === planId);
     
-    if (planIndex === -1) {
+    if (planIndex === -1 && !supabase?.auth) {
       return {
         data: null as unknown as SubscriptionPlan,
         status: 404,
@@ -21,11 +22,8 @@ export async function updatePlan(
       };
     }
     
-    // Make sure the prices have the correct plan_id
-    const precos = planData.precos?.map(preco => ({
-      ...preco,
-      plano_id: planId
-    }));
+    // Extract prices from plan data
+    const { precos, ...planDataWithoutPrecos } = planData;
     
     // If we have Supabase configured, use it
     if (supabase?.auth) {
@@ -35,15 +33,61 @@ export async function updatePlan(
       
       if (supabaseUrl && supabaseKey) {
         console.log(`[PlanAPI] Updating plan ${planId} in Supabase`);
-        const { data, error } = await supabase.from('planos_assinatura').update({
-          ...planData,
-          precos: precos,
-          updated_at: new Date().toISOString()
-        }).eq('id', planId).select().single();
         
-        if (error) {
-          console.error(`[PlanAPI] Supabase error updating plan ${planId}:`, error);
-          throw error;
+        // Update plan data
+        const { error: planError } = await supabase
+          .from('planos_assinatura')
+          .update({
+            ...planDataWithoutPrecos,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', planId);
+        
+        if (planError) {
+          console.error(`[PlanAPI] Supabase error updating plan ${planId}:`, planError);
+          throw planError;
+        }
+        
+        // Update prices if provided
+        if (precos && precos.length > 0) {
+          // First delete existing prices
+          const { error: deleteError } = await supabase
+            .from('precos_planos')
+            .delete()
+            .eq('plano_id', planId);
+          
+          if (deleteError) {
+            console.error(`[PlanAPI] Supabase error deleting prices for plan ${planId}:`, deleteError);
+            throw deleteError;
+          }
+          
+          // Then insert new prices
+          const precosToInsert = precos.map(preco => ({
+            plano_id: planId,
+            moeda_codigo: preco.moeda_codigo,
+            preco: preco.preco
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('precos_planos')
+            .insert(precosToInsert);
+          
+          if (insertError) {
+            console.error(`[PlanAPI] Supabase error inserting prices for plan ${planId}:`, insertError);
+            throw insertError;
+          }
+        }
+        
+        // Get updated plan
+        const { data: updatedPlan, error: fetchError } = await supabase
+          .from('planos_assinatura')
+          .select('*, precos:precos_planos(*)')
+          .eq('id', planId)
+          .single();
+        
+        if (fetchError) {
+          console.error(`[PlanAPI] Supabase error fetching updated plan ${planId}:`, fetchError);
+          throw fetchError;
         }
         
         // Notify subscribers about the change
@@ -51,7 +95,7 @@ export async function updatePlan(
         eventSystem.notify();
         
         return { 
-          data: data as SubscriptionPlan,
+          data: updatedPlan as SubscriptionPlan,
           status: 200,
           message: 'Plano atualizado com sucesso'
         };
@@ -61,7 +105,7 @@ export async function updatePlan(
     // Otherwise use mock data
     const updatedPlan: SubscriptionPlan = {
       ...plansMockDB[planIndex],
-      ...planData,
+      ...planDataWithoutPrecos,
       precos: precos || plansMockDB[planIndex].precos,
       updated_at: new Date().toISOString()
     };

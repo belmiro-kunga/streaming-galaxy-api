@@ -13,7 +13,7 @@ export async function togglePlanStatus(
     // Find the plan to update
     const planIndex = plansMockDB.findIndex(p => p.id === planId);
     
-    if (planIndex === -1) {
+    if (planIndex === -1 && !supabase?.auth) {
       return {
         data: null as unknown as SubscriptionPlan,
         status: 404,
@@ -29,14 +29,31 @@ export async function togglePlanStatus(
       
       if (supabaseUrl && supabaseKey) {
         console.log(`[PlanAPI] Toggling plan status to ${active} for plan ${planId} in Supabase`);
-        const { data, error } = await supabase.from('planos_assinatura').update({
-          ativo: active,
-          updated_at: new Date().toISOString()
-        }).eq('id', planId).select().single();
         
-        if (error) {
-          console.error(`[PlanAPI] Supabase error toggling plan status ${planId}:`, error);
-          throw error;
+        // Update plan status
+        const { error: updateError } = await supabase
+          .from('planos_assinatura')
+          .update({
+            ativo: active,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', planId);
+        
+        if (updateError) {
+          console.error(`[PlanAPI] Supabase error toggling plan status ${planId}:`, updateError);
+          throw updateError;
+        }
+        
+        // Get updated plan
+        const { data: updatedPlan, error: fetchError } = await supabase
+          .from('planos_assinatura')
+          .select('*, precos:precos_planos(*)')
+          .eq('id', planId)
+          .single();
+        
+        if (fetchError) {
+          console.error(`[PlanAPI] Supabase error fetching updated plan ${planId}:`, fetchError);
+          throw fetchError;
         }
         
         // Notify subscribers about the change
@@ -44,7 +61,7 @@ export async function togglePlanStatus(
         eventSystem.notify();
         
         return {
-          data: data as SubscriptionPlan,
+          data: updatedPlan as SubscriptionPlan,
           status: 200,
           message: `Plano ${active ? 'ativado' : 'desativado'} com sucesso`
         };

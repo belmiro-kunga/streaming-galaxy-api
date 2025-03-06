@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { planAPI } from '@/services/plans';
 import { SubscriptionPlan } from '@/types/api';
+import { supabase } from '@/lib/supabase';
 
 export const useSubscriptionPlans = () => {
   const navigate = useNavigate();
@@ -13,12 +14,12 @@ export const useSubscriptionPlans = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Check login status - in a real app, this would be from auth context
+  // Check login status
   useEffect(() => {
-    // Mock check for logged in status - in a real app, this would come from an auth context
-    const checkLoginStatus = () => {
-      // This is a mock implementation - replace with actual auth logic
-      const hasSession = localStorage.getItem('userSession');
+    const checkLoginStatus = async () => {
+      // Try to get user from Supabase
+      const { data } = await supabase.auth.getSession();
+      const hasSession = data.session || localStorage.getItem('userSession');
       setIsLoggedIn(!!hasSession);
     };
     
@@ -48,9 +49,12 @@ export const useSubscriptionPlans = () => {
     }
   }, [toast]);
 
-  // Set up subscription to plan changes
+  // Fetch plans initially and set up subscription for updates
   useEffect(() => {
     console.log("SubscriptionPlans: Setting up subscription to plan changes");
+    
+    // Initial fetch
+    fetchPlans();
     
     // Subscribe to plan changes
     const unsubscribe = planAPI.subscribeToChanges(() => {

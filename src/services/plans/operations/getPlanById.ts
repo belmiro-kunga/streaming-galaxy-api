@@ -14,14 +14,24 @@ export async function getPlanById(planId: string): Promise<SubscriptionPlan | nu
       
       if (supabaseUrl && supabaseKey) {
         console.log(`[PlanAPI] Fetching plan ${planId} from Supabase`);
-        const { data, error } = await supabase.from('planos_assinatura').select('*').eq('id', planId).single();
+        const { data, error } = await supabase
+          .from('planos_assinatura')
+          .select('*, precos:precos_planos(*)')
+          .eq('id', planId)
+          .maybeSingle();
         
         if (error) {
           console.error(`[PlanAPI] Supabase error fetching plan ${planId}:`, error);
           throw error;
         }
         
-        return data || null;
+        if (data) {
+          return {
+            ...data,
+            precos: data.precos || []
+          };
+        }
+        return null;
       }
     }
     

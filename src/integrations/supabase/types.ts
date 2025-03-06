@@ -572,6 +572,53 @@ export type Database = {
           },
         ]
       }
+      preferencias_usuario: {
+        Row: {
+          autoplay: boolean | null
+          created_at: string | null
+          generos_favoritos: string[] | null
+          id: string
+          idioma_legendas: string | null
+          legendas_ativadas: boolean | null
+          notificacoes: boolean | null
+          qualidade_preferida: string | null
+          tema: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          autoplay?: boolean | null
+          created_at?: string | null
+          generos_favoritos?: string[] | null
+          id: string
+          idioma_legendas?: string | null
+          legendas_ativadas?: boolean | null
+          notificacoes?: boolean | null
+          qualidade_preferida?: string | null
+          tema?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          autoplay?: boolean | null
+          created_at?: string | null
+          generos_favoritos?: string[] | null
+          id?: string
+          idioma_legendas?: string | null
+          legendas_ativadas?: boolean | null
+          notificacoes?: boolean | null
+          qualidade_preferida?: string | null
+          tema?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencias_usuario_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       traducoes_conteudo: {
         Row: {
           conteudo_id: string

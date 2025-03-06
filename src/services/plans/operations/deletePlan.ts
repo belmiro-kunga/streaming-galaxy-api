@@ -12,7 +12,7 @@ export async function deletePlan(
     // Find the plan to delete
     const planIndex = plansMockDB.findIndex(p => p.id === planId);
     
-    if (planIndex === -1) {
+    if (planIndex === -1 && !supabase?.auth) {
       return {
         data: null,
         status: 404,
@@ -28,11 +28,27 @@ export async function deletePlan(
       
       if (supabaseUrl && supabaseKey) {
         console.log(`[PlanAPI] Deleting plan ${planId} from Supabase`);
-        const { error } = await supabase.from('planos_assinatura').delete().eq('id', planId);
         
-        if (error) {
-          console.error(`[PlanAPI] Supabase error deleting plan ${planId}:`, error);
-          throw error;
+        // First delete associated prices
+        const { error: pricesError } = await supabase
+          .from('precos_planos')
+          .delete()
+          .eq('plano_id', planId);
+        
+        if (pricesError) {
+          console.error(`[PlanAPI] Supabase error deleting prices for plan ${planId}:`, pricesError);
+          throw pricesError;
+        }
+        
+        // Then delete the plan
+        const { error: planError } = await supabase
+          .from('planos_assinatura')
+          .delete()
+          .eq('id', planId);
+        
+        if (planError) {
+          console.error(`[PlanAPI] Supabase error deleting plan ${planId}:`, planError);
+          throw planError;
         }
         
         // Notify subscribers about the change
@@ -48,9 +64,8 @@ export async function deletePlan(
     }
     
     // Otherwise use mock data
-    const index = plansMockDB.findIndex(p => p.id === planId);
-    if (index !== -1) {
-      plansMockDB.splice(index, 1);
+    if (planIndex !== -1) {
+      plansMockDB.splice(planIndex, 1);
     }
     
     // Notify subscribers about the change
