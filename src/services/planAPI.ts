@@ -76,6 +76,10 @@ export const planAPI = {
   subscribeToChanges: (callback: SubscriberCallback): (() => void) => {
     console.log("New subscription to plan changes");
     subscribers.push(callback);
+    
+    // Force an immediate callback to ensure initial data is loaded
+    setTimeout(() => callback(), 0);
+    
     return () => {
       console.log("Unsubscribing from plan changes");
       const index = subscribers.indexOf(callback);

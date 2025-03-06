@@ -50,7 +50,9 @@ const SubscriptionPlansManager: React.FC = () => {
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching plans for admin SubscriptionPlansManager");
       const data = await planAPI.getAllPlans();
+      console.log("Admin fetched plans:", data.length);
       setPlans(data);
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -66,6 +68,13 @@ const SubscriptionPlansManager: React.FC = () => {
   
   useEffect(() => {
     fetchPlans();
+    
+    const unsubscribe = planAPI.subscribeToChanges(() => {
+      console.log("Plans changed, refreshing data in SubscriptionPlansManager");
+      fetchPlans();
+    });
+    
+    return () => unsubscribe();
   }, []);
   
   const addPlan = () => {
@@ -130,6 +139,8 @@ const SubscriptionPlansManager: React.FC = () => {
     if (!currentPlan) return;
     
     try {
+      console.log("Saving plan in admin:", currentPlan.nome);
+      
       if (dialogMode === "add") {
         const response = await planAPI.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
         
@@ -140,6 +151,7 @@ const SubscriptionPlansManager: React.FC = () => {
           });
           fetchPlans();
           setIsPlanDialogOpen(false);
+          console.log("Plan created successfully, changes should be reflected in subscription page");
         } else {
           toast({
             title: 'Erro',
@@ -166,6 +178,7 @@ const SubscriptionPlansManager: React.FC = () => {
           });
           fetchPlans();
           setIsPlanDialogOpen(false);
+          console.log("Plan updated successfully, changes should be reflected in subscription page");
         } else {
           toast({
             title: 'Erro',

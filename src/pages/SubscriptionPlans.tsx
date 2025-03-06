@@ -38,17 +38,25 @@ const SubscriptionPlans = () => {
     try {
       const data = await planAPI.getAllPlans();
       console.log("Plans fetched successfully:", data.length);
-      setPlans(data.filter(plan => plan.ativo));  // Only show active plans
-      setIsLoading(false);
+      // Only show active plans
+      const activePlans = data.filter(plan => plan.ativo);
+      console.log("Active plans:", activePlans.length);
+      setPlans(activePlans);
     } catch (error) {
       console.error('Error fetching plans:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os planos de assinatura.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   // Load subscription plans and set up subscription
   useEffect(() => {
-    fetchPlans();
+    console.log("Setting up subscription to plan changes in SubscriptionPlans");
     
     // Subscribe to plan changes
     const unsubscribe = planAPI.subscribeToChanges(() => {
