@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { mockSignIn, signOut } from '@/lib/supabase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useUser } from '@/contexts/UserContext';
 
 interface LoginFormProps {
   email: string;
@@ -29,6 +30,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { refreshUserData } = useUser();
 
   // Ensure user is logged out when visiting login page
   useEffect(() => {
@@ -65,6 +67,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         const role = data.user.user_metadata?.role || 'user';
         console.log('User role:', role);
         
+        // Refresh user data in context
+        await refreshUserData();
+        
         toast({
           title: 'Login bem-sucedido',
           description: `Você está logado como ${role}.`,
@@ -73,7 +78,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         if (role === 'admin' || role === 'super_admin') {
           navigate('/admin-dashboard');
         } else {
-          navigate('/');
+          navigate('/dashboard');
         }
       } else {
         console.log('No user data returned:', data);

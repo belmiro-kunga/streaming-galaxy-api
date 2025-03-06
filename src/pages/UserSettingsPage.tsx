@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import UserSettings from '@/components/UserSettings';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import UserProfileDisplay from '@/components/UserProfileDisplay';
 
 const UserSettingsPage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,10 @@ const UserSettingsPage = () => {
           </div>
           
           <ThemeToggle />
+        </div>
+        
+        <div className="mb-6">
+          <UserProfileDisplay />
         </div>
         
         <UserSettings />

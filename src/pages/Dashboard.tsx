@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, Film, TrendingUp, Clock, BookmarkCheck, Download, 
-  Settings, LogOut, Bell, User, Search, Gift, CreditCard, Users
+  Settings, LogOut, Gift, CreditCard, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useTVMode } from '@/hooks/use-tv-mode';
+import { useUser } from '@/contexts/UserContext';
+import { signOut } from '@/lib/supabase/auth';
 import ProfileManagement from '@/components/ProfileManagement';
+import DashboardHeader from '@/components/DashboardHeader';
+import UserProfileDisplay from '@/components/UserProfileDisplay';
 
 const Dashboard = () => {
   const location = useLocation();
@@ -21,6 +25,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const { isTVMode } = useTVMode();
   const navigate = useNavigate();
+  const { profile } = useUser();
   
   useEffect(() => {
     if (isDownloadsPath) {
@@ -44,6 +49,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   const userSubscription = {
     plan: 'Premium',
     startDate: '2023-07-15',
@@ -65,31 +75,15 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-      <header className="bg-black/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/home" className="text-2xl font-bold">CinePlay</Link>
-          
-          <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
-            <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
-            <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-800 transition-colors">
-              <div className="bg-gradient-to-br from-purple-600 to-blue-500 w-8 h-8 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader />
 
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-6">
         <aside className="md:w-64 flex-shrink-0 space-y-1">
           <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="p-3">
-              <nav className="space-y-1">
+              <UserProfileDisplay />
+              
+              <nav className="space-y-1 mt-4">
                 {[
                   { icon: <Home className="h-5 w-5" />, label: 'Home', id: 'home' },
                   { icon: <Film className="h-5 w-5" />, label: 'Minha Lista', id: 'mylist' },
@@ -138,7 +132,7 @@ const Dashboard = () => {
                     key={item.id}
                     onClick={() => {
                       if (item.id === 'logout') {
-                        window.location.href = '/login';
+                        handleLogout();
                       } else if (item.id === 'settings') {
                         navigate('/user-settings');
                       } else {
@@ -174,7 +168,9 @@ const Dashboard = () => {
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
                       <div>
-                        <h2 className="text-2xl font-bold mb-2">Olá, Usuário!</h2>
+                        <h2 className="text-2xl font-bold mb-2">
+                          Olá, {profile?.first_name || 'Usuário'}!
+                        </h2>
                         <p className="text-gray-300">Bem-vindo de volta à CinePlay</p>
                       </div>
                       <Button className="mt-4 md:mt-0" size="lg">

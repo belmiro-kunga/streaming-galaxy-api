@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from 'react';
 import { signOut } from '@/lib/supabase/auth';
+import { UserProvider } from '@/contexts/UserContext';
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Watch from "./pages/Watch";
@@ -39,32 +40,34 @@ function App() {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<Navigate to="/home" replace />} />
-                <Route path="/welcome" element={<Navigate to="/home" replace />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/watch/:id" element={<Watch />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/dashboard/downloads" element={<Dashboard />} />
-                <Route path="/dashboard/profiles" element={<ProfileManagement />} />
-                <Route path="/kids" element={<Kids />} />
-                <Route path="/subscription-plans" element={<SubscriptionPlans />} />
-                <Route path="/user-settings" element={<UserSettingsPage />} />
-                <Route path="/payment-upload" element={<PaymentUpload />} />
-                
-                {/* Admin routes */}
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AnimatePresence>
-          </BrowserRouter>
+          <UserProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AnimatePresence mode="wait">
+                <Routes>
+                  <Route path="/" element={<Navigate to="/home" replace />} />
+                  <Route path="/welcome" element={<Navigate to="/home" replace />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/watch/:id" element={<Watch />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard/downloads" element={<Dashboard />} />
+                  <Route path="/dashboard/profiles" element={<ProfileManagement />} />
+                  <Route path="/kids" element={<Kids />} />
+                  <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+                  <Route path="/user-settings" element={<UserSettingsPage />} />
+                  <Route path="/payment-upload" element={<PaymentUpload />} />
+                  
+                  {/* Admin routes */}
+                  <Route path="/admin-login" element={<AdminLogin />} />
+                  <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </AnimatePresence>
+            </BrowserRouter>
+          </UserProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </React.StrictMode>
