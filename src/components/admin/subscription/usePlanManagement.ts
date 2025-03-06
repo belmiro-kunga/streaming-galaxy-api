@@ -13,6 +13,7 @@ export const usePlanManagement = () => {
   const [currentPlan, setCurrentPlan] = useState<Partial<SubscriptionPlan> | null>(null);
   const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
   const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
+  const [formError, setFormError] = useState<string | null>(null);
   
   const fetchPlans = useCallback(async () => {
     setIsLoading(true);
@@ -36,7 +37,8 @@ export const usePlanManagement = () => {
   useEffect(() => {
     fetchPlans();
     
-    const channel = supabase
+    // Setup realtime listeners
+    const plansChannel = supabase
       .channel('public:planos_assinatura')
       .on('postgres_changes', {
         event: '*',
@@ -61,12 +63,14 @@ export const usePlanManagement = () => {
       .subscribe();
     
     return () => {
-      channel.unsubscribe();
-      priceChannel.unsubscribe();
+      console.log("SubscriptionPlansManager: Cleaning up channels");
+      supabase.removeChannel(plansChannel);
+      supabase.removeChannel(priceChannel);
     };
   }, [fetchPlans]);
   
   const addPlan = () => {
+    setFormError(null);
     setDialogMode("add");
     setCurrentPlan({
       nome: "",
@@ -87,6 +91,7 @@ export const usePlanManagement = () => {
   };
   
   const editPlan = (plan: SubscriptionPlan) => {
+    setFormError(null);
     setDialogMode("edit");
     setCurrentPlan({ ...plan });
     setIsPlanDialogOpen(true);
@@ -99,8 +104,10 @@ export const usePlanManagement = () => {
   
   const togglePlanStatus = async (planId: string, currentStatus: boolean) => {
     try {
+      setIsLoading(true);
       console.log(`SubscriptionPlansManager: Toggling plan status for ${planId} to ${!currentStatus}`);
       const response = await directSupabaseApi.togglePlanStatus(planId, !currentStatus);
+      setIsLoading(false);
       
       if (response.status === 200) {
         toast({
@@ -115,6 +122,7 @@ export const usePlanManagement = () => {
         });
       }
     } catch (error) {
+      setIsLoading(false);
       console.error('SubscriptionPlansManager: Error toggling plan status:', error);
       toast({
         title: 'Erro',
@@ -124,14 +132,51 @@ export const usePlanManagement = () => {
     }
   };
   
-  const handleSavePlan = async () => {
-    if (!currentPlan) return;
+  const validatePlan = () => {
+    if (!currentPlan) {
+      setFormError('Dados do plano inválidos');
+      return false;
+    }
     
     // Validate required fields
     if (!currentPlan.nome) {
+      setFormError('O nome do plano é obrigatório');
+      return false;
+    }
+    
+    // Validate numeric fields
+    if (currentPlan.telas_simultaneas && isNaN(Number(currentPlan.telas_simultaneas))) {
+      setFormError('O número de telas simultâneas deve ser um número');
+      return false;
+    }
+    
+    if (currentPlan.limite_downloads && isNaN(Number(currentPlan.limite_downloads))) {
+      setFormError('O limite de downloads deve ser um número');
+      return false;
+    }
+    
+    if (currentPlan.limite_perfis && isNaN(Number(currentPlan.limite_perfis))) {
+      setFormError('O limite de perfis deve ser um número');
+      return false;
+    }
+    
+    if (currentPlan.precos && currentPlan.precos.length > 0) {
+      const price = currentPlan.precos[0].preco;
+      if (isNaN(Number(price))) {
+        setFormError('O preço deve ser um número');
+        return false;
+      }
+    }
+    
+    setFormError(null);
+    return true;
+  };
+  
+  const handleSavePlan = async () => {
+    if (!validatePlan()) {
       toast({
-        title: 'Erro',
-        description: 'O nome do plano é obrigatório',
+        title: 'Erro de validação',
+        description: formError || 'Verifique os dados do formulário',
         variant: 'destructive'
       });
       return;
@@ -140,10 +185,10 @@ export const usePlanManagement = () => {
     // Make sure all numeric fields are numbers, not strings
     const planToSave = {
       ...currentPlan,
-      telas_simultaneas: Number(currentPlan.telas_simultaneas) || 1,
-      limite_downloads: Number(currentPlan.limite_downloads) || 0,
-      limite_perfis: Number(currentPlan.limite_perfis) || 1,
-      precos: currentPlan.precos?.map(preco => ({
+      telas_simultaneas: Number(currentPlan?.telas_simultaneas) || 1,
+      limite_downloads: Number(currentPlan?.limite_downloads) || 0,
+      limite_perfis: Number(currentPlan?.limite_perfis) || 1,
+      precos: currentPlan?.precos?.map(preco => ({
         ...preco,
         preco: Number(preco.preco) || 0
       }))
@@ -166,9 +211,10 @@ export const usePlanManagement = () => {
           console.log("SubscriptionPlansManager: Plan created successfully");
           fetchPlans();
         } else {
+          console.error("SubscriptionPlansManager: Error response from API:", response);
           toast({
             title: 'Erro',
-            description: response.message,
+            description: response.message || 'Erro ao criar plano',
             variant: 'destructive'
           });
         }
@@ -197,17 +243,17 @@ export const usePlanManagement = () => {
         } else {
           toast({
             title: 'Erro',
-            description: response.message,
+            description: response.message || 'Erro ao atualizar plano',
             variant: 'destructive'
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
       console.error('SubscriptionPlansManager: Error saving plan:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível salvar o plano',
+        description: error?.message || 'Não foi possível salvar o plano',
         variant: 'destructive'
       });
     }
@@ -232,7 +278,15 @@ export const usePlanManagement = () => {
   };
   
   const handleDeleteConfirm = async () => {
-    if (!planToDelete) return;
+    if (!planToDelete) {
+      console.error("SubscriptionPlansManager: Cannot delete plan - planToDelete is null");
+      toast({
+        title: 'Erro',
+        description: 'Plano para exclusão não encontrado',
+        variant: 'destructive'
+      });
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -246,6 +300,7 @@ export const usePlanManagement = () => {
           description: response.message
         });
         setIsDeleteDialogOpen(false);
+        setPlanToDelete(null);
         fetchPlans();
       } else {
         toast({
@@ -254,12 +309,12 @@ export const usePlanManagement = () => {
           variant: 'destructive'
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
       console.error('SubscriptionPlansManager: Error deleting plan:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível excluir o plano',
+        description: error?.message || 'Não foi possível excluir o plano',
         variant: 'destructive'
       });
     }
@@ -276,6 +331,7 @@ export const usePlanManagement = () => {
     setCurrentPlan,
     planToDelete,
     dialogMode,
+    formError,
     addPlan,
     editPlan,
     deletePlan,

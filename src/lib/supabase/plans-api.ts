@@ -11,21 +11,30 @@ export const directSupabaseApi = {
       // Prepare the plan data (without precos)
       const { precos, ...planDataWithoutPrecos } = planData;
       
-      // Important: Make sure limite_perfis is present
-      if (!planDataWithoutPrecos.limite_perfis) {
-        planDataWithoutPrecos.limite_perfis = 1; // Set default if missing
-      }
+      // Important: Make sure numeric fields are numbers, not strings
+      const sanitizedPlanData = {
+        ...planDataWithoutPrecos,
+        telas_simultaneas: Number(planDataWithoutPrecos.telas_simultaneas) || 1,
+        limite_downloads: Number(planDataWithoutPrecos.limite_downloads) || 0,
+        limite_perfis: Number(planDataWithoutPrecos.limite_perfis) || 1
+      };
+      
+      console.log("[DirectSupabaseAPI] Sanitized plan data:", sanitizedPlanData);
       
       // Insert the plan
       const { data: planDataResult, error: planError } = await supabase
         .from('planos_assinatura')
-        .insert(planDataWithoutPrecos)
+        .insert(sanitizedPlanData)
         .select()
         .single();
         
       if (planError) {
         console.error('[DirectSupabaseAPI] Error creating plan:', planError);
-        throw planError;
+        return {
+          data: null,
+          status: 500,
+          message: `Erro ao criar plano: ${planError.message || planError.details || 'Erro desconhecido'}`
+        };
       }
       
       console.log('[DirectSupabaseAPI] Plan created successfully:', planDataResult);
@@ -35,8 +44,10 @@ export const directSupabaseApi = {
         const precosToInsert = precos.map(preco => ({
           plano_id: planDataResult.id,
           moeda_codigo: preco.moeda_codigo,
-          preco: preco.preco
+          preco: Number(preco.preco) || 0
         }));
+        
+        console.log('[DirectSupabaseAPI] Inserting prices:', precosToInsert);
         
         const { error: precosError } = await supabase
           .from('precos_planos')
@@ -44,7 +55,11 @@ export const directSupabaseApi = {
         
         if (precosError) {
           console.error('[DirectSupabaseAPI] Error inserting prices:', precosError);
-          throw precosError;
+          return {
+            data: null,
+            status: 500,
+            message: `Erro ao inserir preços do plano: ${precosError.message || precosError.details || 'Erro desconhecido'}`
+          };
         }
         
         console.log('[DirectSupabaseAPI] Prices inserted successfully:', precosToInsert);
@@ -59,7 +74,11 @@ export const directSupabaseApi = {
       
       if (fetchError) {
         console.error('[DirectSupabaseAPI] Error fetching complete plan:', fetchError);
-        throw fetchError;
+        return {
+          data: planDataResult,
+          status: 201,
+          message: 'Plano criado com sucesso, mas não foi possível carregar os detalhes completos'
+        };
       }
       
       return { 
@@ -67,8 +86,8 @@ export const directSupabaseApi = {
         status: 201,
         message: 'Plano criado com sucesso'
       };
-    } catch (error) {
-      console.error('[DirectSupabaseAPI] Error in createPlan:', error);
+    } catch (error: any) {
+      console.error('[DirectSupabaseAPI] Unexpected error in createPlan:', error);
       // Return a more detailed error message
       return {
         data: null,

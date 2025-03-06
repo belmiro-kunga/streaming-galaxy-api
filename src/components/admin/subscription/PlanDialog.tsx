@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SubscriptionPlan } from '@/types/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 
 interface PlanDialogProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ interface PlanDialogProps {
   onSave: () => void;
   handlePriceChange: (value: string) => void;
   isLoading?: boolean;
+  formError?: string | null;
 }
 
 const PlanDialog: React.FC<PlanDialogProps> = ({
@@ -42,9 +43,11 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
   dialogMode,
   onSave,
   handlePriceChange,
-  isLoading = false
+  isLoading = false,
+  formError = null
 }) => {
-  if (!currentPlan) return null;
+  // Safety check to ensure component doesn't render without necessary data
+  if (!isOpen || !currentPlan) return null;
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
@@ -61,6 +64,13 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               : "Atualize as informações do plano de assinatura."}
           </DialogDescription>
         </DialogHeader>
+        
+        {formError && (
+          <div className="bg-red-900/30 border border-red-600 rounded-md p-3 flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-red-200 text-sm">{formError}</p>
+          </div>
+        )}
         
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -138,6 +148,7 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               <Input 
                 id="price" 
                 type="number"
+                min="0"
                 value={currentPlan?.precos?.[0]?.preco || 0}
                 onChange={(e) => handlePriceChange(e.target.value)}
                 className="bg-gray-800 border-gray-700 text-white"

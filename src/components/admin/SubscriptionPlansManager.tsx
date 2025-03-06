@@ -21,6 +21,7 @@ const SubscriptionPlansManager: React.FC = () => {
     setCurrentPlan,
     planToDelete,
     dialogMode,
+    formError,
     addPlan,
     editPlan,
     deletePlan,
@@ -73,15 +74,19 @@ const SubscriptionPlansManager: React.FC = () => {
         onSave={handleSavePlan}
         handlePriceChange={handlePriceChange}
         isLoading={isLoading}
+        formError={formError}
       />
       
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        planToDelete={planToDelete}
-        onConfirm={handleDeleteConfirm}
-        isLoading={isLoading}
-      />
+      {/* Only render DeleteConfirmationDialog when needed */}
+      {isDeleteDialogOpen && (
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          planToDelete={planToDelete}
+          onConfirm={handleDeleteConfirm}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 };
