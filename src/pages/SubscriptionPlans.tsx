@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, CreditCard, Smartphone, Download, MonitorPlay, Shield } from 'lucide-react';

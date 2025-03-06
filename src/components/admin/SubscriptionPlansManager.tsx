@@ -67,14 +67,16 @@ const SubscriptionPlansManager: React.FC = () => {
   };
   
   useEffect(() => {
-    fetchPlans();
-    
+    console.log("Setting up subscription to plan changes in SubscriptionPlansManager");
     const unsubscribe = planAPI.subscribeToChanges(() => {
       console.log("Plans changed, refreshing data in SubscriptionPlansManager");
       fetchPlans();
     });
     
-    return () => unsubscribe();
+    return () => {
+      console.log("Cleaning up subscription in SubscriptionPlansManager");
+      unsubscribe();
+    };
   }, []);
   
   const addPlan = () => {
@@ -149,7 +151,6 @@ const SubscriptionPlansManager: React.FC = () => {
             title: 'Sucesso',
             description: 'Plano criado com sucesso'
           });
-          fetchPlans();
           setIsPlanDialogOpen(false);
           console.log("Plan created successfully, changes should be reflected in subscription page");
         } else {
@@ -176,7 +177,6 @@ const SubscriptionPlansManager: React.FC = () => {
             title: 'Sucesso',
             description: 'Plano atualizado com sucesso'
           });
-          fetchPlans();
           setIsPlanDialogOpen(false);
           console.log("Plan updated successfully, changes should be reflected in subscription page");
         } else {
@@ -226,7 +226,6 @@ const SubscriptionPlansManager: React.FC = () => {
           title: 'Sucesso',
           description: response.message
         });
-        fetchPlans();
         setIsDeleteDialogOpen(false);
       } else {
         toast({
