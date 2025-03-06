@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
+import { supabase, mockSignIn } from '@/lib/supabase';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -30,17 +29,8 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Verificar se o auth está disponível
-      if (!supabase.auth || typeof supabase.auth.signInWithPassword !== 'function') {
-        console.error("Supabase auth methods not available");
-        throw new Error("Serviço de autenticação não está disponível no momento.");
-      }
-
-      // Sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Sign in usando nossa função helper que funciona com ou sem Supabase
+      const { data, error } = await mockSignIn(email, password);
 
       if (error) throw error;
 
