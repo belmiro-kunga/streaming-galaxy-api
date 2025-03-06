@@ -17,9 +17,14 @@ export const useSubscriptionPlans = () => {
   // Check login status
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const { data } = await supabase.auth.getSession();
-      const hasSession = data.session || localStorage.getItem('userSession');
-      setIsLoggedIn(!!hasSession);
+      try {
+        const { data } = await supabase.auth.getSession();
+        const hasSession = data.session || localStorage.getItem('userSession');
+        setIsLoggedIn(!!hasSession);
+      } catch (error) {
+        console.error("Error checking login status:", error);
+        setIsLoggedIn(false);
+      }
     };
     
     checkLoginStatus();
@@ -68,7 +73,6 @@ export const useSubscriptionPlans = () => {
     
     fetchPlans();
     
-    // Subscribe to Supabase changes for plans
     const plansChannel = supabase
       .channel('public:planos_assinatura')
       .on('postgres_changes', {
@@ -81,7 +85,6 @@ export const useSubscriptionPlans = () => {
       })
       .subscribe();
     
-    // Subscribe to Supabase changes for prices
     const pricesChannel = supabase
       .channel('public:precos_planos')
       .on('postgres_changes', {
@@ -96,18 +99,20 @@ export const useSubscriptionPlans = () => {
     
     return () => {
       console.log("SubscriptionPlans: Cleaning up subscriptions");
-      plansChannel.unsubscribe();
-      pricesChannel.unsubscribe();
+      supabase.removeChannel(plansChannel);
+      supabase.removeChannel(pricesChannel);
     };
   }, [fetchPlans]);
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
     const plan = plans.find(p => p.id === planId);
-    toast({
-      title: "Plano selecionado",
-      description: `Você selecionou o plano ${plan?.nome}`,
-    });
+    if (plan) {
+      toast({
+        title: "Plano selecionado",
+        description: `Você selecionou o plano ${plan.nome}`,
+      });
+    }
   };
 
   const handleSubscribe = () => {

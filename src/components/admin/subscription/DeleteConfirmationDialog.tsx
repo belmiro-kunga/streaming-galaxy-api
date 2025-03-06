@@ -28,8 +28,6 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onConfirm,
   isLoading = false
 }) => {
-  if (!planToDelete) return null;
-
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => {
       if (!isLoading) {
@@ -40,8 +38,12 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir Plano</AlertDialogTitle>
           <AlertDialogDescription className="text-gray-400">
-            Você tem certeza que deseja excluir o plano "{planToDelete.nome}"? 
-            Esta ação não pode ser desfeita.
+            {planToDelete ? (
+              <>Você tem certeza que deseja excluir o plano "{planToDelete.nome}"? 
+              Esta ação não pode ser desfeita.</>
+            ) : (
+              "Você tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita."
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
