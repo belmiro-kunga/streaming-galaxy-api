@@ -28,6 +28,9 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onConfirm,
   isLoading = false
 }) => {
+  // Ensure the dialog is only rendered when it's open
+  if (!isOpen) return null;
+  
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => {
       if (!isLoading) {

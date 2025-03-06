@@ -7,7 +7,7 @@ import { PlanGrid } from '@/components/subscription/PlanGrid';
 import { SubscriptionFooter } from '@/components/subscription/SubscriptionFooter';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
-const SubscriptionPlans = () => {
+const SubscriptionPlans: React.FC = () => {
   const {
     plans,
     isLoading,
