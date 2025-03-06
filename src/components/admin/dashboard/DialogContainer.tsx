@@ -7,19 +7,23 @@ import DeleteConfirmationDialog from './dialogs/DeleteConfirmationDialog';
 
 const DialogContainer = () => {
   const {
+    // User dialog state and actions
     isUserDialogOpen,
     setIsUserDialogOpen,
     dialogMode,
     currentUser,
     setCurrentUser,
     handleSaveUser,
+    
+    // Subscription dialog state and actions
     isSubscriptionDialogOpen,
     setIsSubscriptionDialogOpen,
-    currentUser: subscriptionUser,
     selectedSubscription,
     setSelectedSubscription,
     subscriptionPlans,
     handleSaveSubscription,
+    
+    // Delete dialog state and actions
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     userToDelete,
@@ -40,7 +44,7 @@ const DialogContainer = () => {
       <SubscriptionDialog 
         isOpen={isSubscriptionDialogOpen}
         onOpenChange={setIsSubscriptionDialogOpen}
-        currentUser={subscriptionUser}
+        currentUser={currentUser}
         selectedSubscription={selectedSubscription}
         setSelectedSubscription={setSelectedSubscription}
         subscriptionPlans={subscriptionPlans}

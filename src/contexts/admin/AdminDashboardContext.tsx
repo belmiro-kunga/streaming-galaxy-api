@@ -51,7 +51,9 @@ export const AdminDashboardProvider: React.FC<{ children: ReactNode }> = ({ chil
     navigate('/admin-login');
   };
   
-  // Combine all context values
+  // The subscriptionDialog component expects a "currentUser" property,
+  // but our refactored code has this state in both userDialog and userSubscription.
+  // For compatibility, we'll expose the userSubscription.currentUser as subscriptionUser.
   const contextValue: AdminDashboardContextType = {
     // Tab and UI state
     activeTab,
