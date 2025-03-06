@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, CreditCard, Smartphone, Download, MonitorPlay, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -31,22 +30,34 @@ const SubscriptionPlans = () => {
     checkLoginStatus();
   }, []);
 
-  // Load subscription plans
-  useEffect(() => {
-    const fetchPlans = async () => {
-      setIsLoading(true);
-      try {
-        const data = await planAPI.getAllPlans();
-        setPlans(data.filter(plan => plan.ativo));  // Only show active plans
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-        setIsLoading(false);
-      }
-    };
-    
-    fetchPlans();
+  // Function to fetch plans
+  const fetchPlans = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await planAPI.getAllPlans();
+      setPlans(data.filter(plan => plan.ativo));  // Only show active plans
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      setIsLoading(false);
+    }
   }, []);
+
+  // Load subscription plans and set up subscription
+  useEffect(() => {
+    fetchPlans();
+    
+    // Subscribe to plan changes
+    const unsubscribe = planAPI.subscribeToChanges(() => {
+      console.log("Plans changed, refreshing data");
+      fetchPlans();
+    });
+    
+    // Cleanup subscription when component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, [fetchPlans]);
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);

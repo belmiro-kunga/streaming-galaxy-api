@@ -1,7 +1,7 @@
 import { SubscriptionPlan, PlanPrice, ApiResponse } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 
-// Mock database for subscription plans
+// Mock database for subscription plans - making it mutable for reflection between pages
 let plansMockDB: SubscriptionPlan[] = [
   { 
     id: "weekly",
@@ -61,7 +61,27 @@ let plansMockDB: SubscriptionPlan[] = [
   }
 ];
 
+// Create a simple event system to notify subscribers when plans change
+type SubscriberCallback = () => void;
+const subscribers: SubscriberCallback[] = [];
+
+// Function to notify all subscribers when plans change
+const notifySubscribers = () => {
+  subscribers.forEach(callback => callback());
+};
+
 export const planAPI = {
+  // Subscribe to plan changes
+  subscribeToChanges: (callback: SubscriberCallback): (() => void) => {
+    subscribers.push(callback);
+    return () => {
+      const index = subscribers.indexOf(callback);
+      if (index !== -1) {
+        subscribers.splice(index, 1);
+      }
+    };
+  },
+
   // Get all subscription plans
   getAllPlans: async (): Promise<SubscriptionPlan[]> => {
     try {
@@ -74,10 +94,10 @@ export const planAPI = {
       }
       
       // Otherwise use mock data
-      return plansMockDB.filter(plan => plan.ativo);
+      return [...plansMockDB]; // Return a copy to prevent accidental mutations
     } catch (error) {
       console.error('Error fetching plans:', error);
-      return plansMockDB.filter(plan => plan.ativo);
+      return [...plansMockDB]; // Return a copy to prevent accidental mutations
     }
   },
   
@@ -131,6 +151,10 @@ export const planAPI = {
       
       // Otherwise use mock data
       plansMockDB.push(newPlan);
+      
+      // Notify subscribers about the change
+      notifySubscribers();
+      
       return { 
         data: newPlan,
         status: 201,
@@ -188,6 +212,9 @@ export const planAPI = {
       
       plansMockDB[planIndex] = updatedPlan;
       
+      // Notify subscribers about the change
+      notifySubscribers();
+      
       return {
         data: updatedPlan,
         status: 200,
@@ -237,6 +264,9 @@ export const planAPI = {
       
       plansMockDB[planIndex] = updatedPlan;
       
+      // Notify subscribers about the change
+      notifySubscribers();
+      
       return {
         data: updatedPlan,
         status: 200,
@@ -276,6 +306,9 @@ export const planAPI = {
       // Otherwise use mock data
       plansMockDB = plansMockDB.filter(p => p.id !== planId);
       
+      // Notify subscribers about the change
+      notifySubscribers();
+      
       return {
         data: null,
         status: 200,
@@ -292,8 +325,10 @@ export const planAPI = {
   },
   
   // Export the mock database for use in other components
-  getMockData: () => plansMockDB,
+  getMockData: () => [...plansMockDB], // Return a copy to prevent accidental mutations
   updateMockData: (newData: SubscriptionPlan[]) => {
-    plansMockDB = newData;
+    plansMockDB = [...newData];
+    // Notify subscribers about the change
+    notifySubscribers();
   }
 };
