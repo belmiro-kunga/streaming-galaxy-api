@@ -48,12 +48,18 @@ const Login = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {(view === 'login' || view === 'reset') && (
-              <>
-                <SocialLoginButtons isLoading={isLoading} setIsLoading={setIsLoading} />
-                <AuthDivider />
-              </>
-            )}
+            {/* Always show social login buttons */}
+            <SocialLoginButtons isLoading={isLoading} setIsLoading={setIsLoading} />
+            
+            {/* Show different divider messages based on view */}
+            <AuthDivider 
+              message={view === 'login' 
+                ? "Ou continue com seu e-mail" 
+                : view === 'signup' 
+                ? "Ou crie uma conta com e-mail" 
+                : "Ou redefina com seu e-mail"
+              } 
+            />
 
             {view === 'login' && (
               <LoginForm

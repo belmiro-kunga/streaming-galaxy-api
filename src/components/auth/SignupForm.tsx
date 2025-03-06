@@ -57,25 +57,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     'Namibe', 'Uíge', 'Zaire'
   ];
 
-  const validateEmail = (email: string) => {
-    // Simple email validation
-    return email.includes('@');
-  };
-
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword || !firstName || !lastName || !phoneNumber || !country || !province) {
       toast({
         title: 'Campos obrigatórios',
         description: 'Por favor, preencha todos os campos.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      toast({
-        title: 'Email inválido',
-        description: 'Por favor, insira um endereço de email válido.',
         variant: 'destructive',
       });
       return;
