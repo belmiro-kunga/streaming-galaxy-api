@@ -2,12 +2,11 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { User } from './types';
-import { mockUsers } from './mockData';
 import { supabase } from '@/lib/supabase';
 
 export const useUsersManagement = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -57,20 +56,17 @@ export const useUsersManagement = () => {
     if (userToDelete) {
       try {
         // Delete from Supabase if it's not a mock user
-        if (userToDelete.id.startsWith('USR-')) {
-          // Mock user, just remove from local state
-          setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
-        } else {
+        if (!userToDelete.id.startsWith('USR-')) {
           // Real user, delete from Supabase
           const { error } = await supabase.auth.admin.deleteUser(userToDelete.id);
           
           if (error) {
             throw error;
           }
-          
-          // Remove from local state as well
-          setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
         }
+        
+        // Remove from local state
+        setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
         
         toast({
           title: "Usuário excluído",

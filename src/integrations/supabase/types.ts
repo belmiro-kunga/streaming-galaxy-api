@@ -109,6 +109,13 @@ export type Database = {
             referencedRelation: "planos_assinatura"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assinaturas_usuario_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       conteudo_generos: {
@@ -190,7 +197,15 @@ export type Database = {
           titulo?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conteudos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dispositivos: {
         Row: {
@@ -220,7 +235,15 @@ export type Database = {
           ultimo_acesso?: string | null
           usuario_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dispositivos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       downloads: {
         Row: {
@@ -266,6 +289,13 @@ export type Database = {
             columns: ["dispositivo_id"]
             isOneToOne: false
             referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "downloads_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
             referencedColumns: ["id"]
           },
         ]
@@ -338,6 +368,13 @@ export type Database = {
             referencedRelation: "conteudos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "favoritos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       generos: {
@@ -401,6 +438,13 @@ export type Database = {
             referencedRelation: "episodios"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "historico_reproducao_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       moedas: {
@@ -446,7 +490,15 @@ export type Database = {
           perfil?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "perfis_usuario_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       planos_assinatura: {
         Row: {
@@ -558,6 +610,47 @@ export type Database = {
           total_conteudos_assistidos: number | null
           total_downloads: number | null
           total_favoritos: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfis_usuario_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_view: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          phone: string | null
+          province: string | null
+        }
+        Insert: {
+          country?: never
+          created_at?: string | null
+          email?: string | null
+          first_name?: never
+          id?: string | null
+          last_name?: never
+          phone?: never
+          province?: never
+        }
+        Update: {
+          country?: never
+          created_at?: string | null
+          email?: string | null
+          first_name?: never
+          id?: string | null
+          last_name?: never
+          phone?: never
+          province?: never
         }
         Relationships: []
       }
