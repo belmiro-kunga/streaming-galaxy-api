@@ -1,3 +1,4 @@
+
 import { SubscriptionPlan } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 import { plansMockDB } from '../mockData';
@@ -7,10 +8,21 @@ export async function getPlanById(planId: string): Promise<SubscriptionPlan | nu
   try {
     // If we have Supabase configured, use it
     if (supabase?.auth) {
-      // In a real implementation, this would query the Supabase database
-      // const { data, error } = await supabase.from('planos_assinatura').select('*').eq('id', planId).single();
-      // if (error) throw error;
-      // return data;
+      // Verificar se temos uma URL e chave configuradas
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        console.log(`[PlanAPI] Fetching plan ${planId} from Supabase`);
+        const { data, error } = await supabase.from('planos_assinatura').select('*').eq('id', planId).single();
+        
+        if (error) {
+          console.error(`[PlanAPI] Supabase error fetching plan ${planId}:`, error);
+          throw error;
+        }
+        
+        return data || null;
+      }
     }
     
     // Otherwise use mock data

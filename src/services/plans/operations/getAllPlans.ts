@@ -1,3 +1,4 @@
+
 import { SubscriptionPlan } from '@/types/api';
 import { supabase } from '@/lib/supabase';
 import { plansMockDB } from '../mockData';
@@ -8,10 +9,24 @@ export async function getAllPlans(): Promise<SubscriptionPlan[]> {
   try {
     // If we have Supabase configured, use it
     if (supabase?.auth) {
-      // In a real implementation, this would query the Supabase database
-      // const { data, error } = await supabase.from('planos_assinatura').select('*');
-      // if (error) throw error;
-      // return data;
+      // Verificar se temos uma URL e chave configuradas
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        console.log("[PlanAPI] Fetching plans from Supabase");
+        const { data, error } = await supabase.from('planos_assinatura').select('*');
+        
+        if (error) {
+          console.error('[PlanAPI] Supabase error:', error);
+          throw error;
+        }
+        
+        console.log("[PlanAPI] Returned plans from Supabase, count:", data?.length);
+        return data || [];
+      } else {
+        console.log("[PlanAPI] Supabase credentials not found, using mock data");
+      }
     }
     
     // Otherwise use mock data

@@ -25,6 +25,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.info('Para conectar ao Supabase, defina as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
 } else {
   console.log('Cliente Supabase inicializado com sucesso');
+  console.log('Conectado a:', supabaseUrl);
 }
 
 // Helper functions
@@ -52,10 +53,22 @@ export const signOut = async () => {
 export const mockSignIn = async (email: string, password: string) => {
   // Verificar se estamos usando cliente real do Supabase
   if (supabaseUrl && supabaseAnonKey) {
-    // Usar autenticação real
-    return await supabase.auth.signInWithPassword({ email, password });
+    console.log('Usando autenticação real do Supabase');
+    try {
+      // Usar autenticação real
+      const result = await supabase.auth.signInWithPassword({ email, password });
+      console.log('Resultado da autenticação:', result.data.user ? 'Sucesso' : 'Falha');
+      return result;
+    } catch (err) {
+      console.error('Erro na autenticação com Supabase:', err);
+      return {
+        data: { user: null },
+        error: err instanceof Error ? err : new Error("Erro na autenticação")
+      };
+    }
   }
   
+  console.log('Usando autenticação simulada');
   // Simulação para desenvolvimento local
   if (email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) {
     return {

@@ -22,9 +22,29 @@ export async function deletePlan(
     
     // If we have Supabase configured, use it
     if (supabase?.auth) {
-      // In a real implementation, this would delete from the Supabase database
-      // const { error } = await supabase.from('planos_assinatura').delete().eq('id', planId);
-      // if (error) throw error;
+      // Verificar se temos uma URL e chave configuradas
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        console.log(`[PlanAPI] Deleting plan ${planId} from Supabase`);
+        const { error } = await supabase.from('planos_assinatura').delete().eq('id', planId);
+        
+        if (error) {
+          console.error(`[PlanAPI] Supabase error deleting plan ${planId}:`, error);
+          throw error;
+        }
+        
+        // Notify subscribers about the change
+        console.log(`[PlanAPI] Deleted plan ${planId} from Supabase, notifying subscribers`);
+        eventSystem.notify();
+        
+        return {
+          data: null,
+          status: 200,
+          message: 'Plano excluído com sucesso'
+        };
+      }
     }
     
     // Otherwise use mock data

@@ -29,14 +29,33 @@ export async function updatePlan(
     
     // If we have Supabase configured, use it
     if (supabase?.auth) {
-      // In a real implementation, this would update the Supabase database
-      // const { data, error } = await supabase.from('planos_assinatura').update({
-      //   ...planData,
-      //   precos: precos,
-      //   updated_at: new Date().toISOString()
-      // }).eq('id', planId).select().single();
-      // if (error) throw error;
-      // return { data, status: 200, message: 'Plano atualizado com sucesso' };
+      // Verificar se temos uma URL e chave configuradas
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        console.log(`[PlanAPI] Updating plan ${planId} in Supabase`);
+        const { data, error } = await supabase.from('planos_assinatura').update({
+          ...planData,
+          precos: precos,
+          updated_at: new Date().toISOString()
+        }).eq('id', planId).select().single();
+        
+        if (error) {
+          console.error(`[PlanAPI] Supabase error updating plan ${planId}:`, error);
+          throw error;
+        }
+        
+        // Notify subscribers about the change
+        console.log(`[PlanAPI] Updated plan ${planId} in Supabase, notifying subscribers`);
+        eventSystem.notify();
+        
+        return { 
+          data: data as SubscriptionPlan,
+          status: 200,
+          message: 'Plano atualizado com sucesso'
+        };
+      }
     }
     
     // Otherwise use mock data
