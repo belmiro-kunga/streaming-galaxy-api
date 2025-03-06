@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, Film, Calendar } from "lucide-react";
-import { useAdminDashboard } from '@/contexts/AdminDashboardContext';
+import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 
 const HomeTab = () => {
   const { userStats, contentStats } = useAdminDashboard();

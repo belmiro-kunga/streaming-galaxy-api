@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAdminDashboard } from '@/contexts/AdminDashboardContext';
+import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import { TabsContent, Tabs } from "@/components/ui/tabs";
 import OverviewTab from './overview/OverviewTab';
 import UsersTab from './users/UsersTab';

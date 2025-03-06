@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/AdminDashboardContext';
+import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
 import { planAPI } from '@/services/plans';
 

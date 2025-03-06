@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAdminDashboard } from '@/contexts/AdminDashboardContext';
+import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import UserDialog from './dialogs/UserDialog';
 import SubscriptionDialog from './dialogs/SubscriptionDialog';
 import DeleteConfirmationDialog from './dialogs/DeleteConfirmationDialog';
