@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, CreditCard, Smartphone, Download, MonitorPlay, Shield } from 'lucide-react';
@@ -32,17 +33,17 @@ const SubscriptionPlans = () => {
 
   // Function to fetch plans
   const fetchPlans = useCallback(async () => {
-    console.log("Fetching plans for SubscriptionPlans page");
+    console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
       const data = await planAPI.getAllPlans();
-      console.log("Plans fetched successfully:", data.length);
+      console.log("SubscriptionPlans: Plans fetched successfully:", data.length);
       // Only show active plans
       const activePlans = data.filter(plan => plan.ativo);
-      console.log("Active plans:", activePlans.length);
+      console.log("SubscriptionPlans: Active plans:", activePlans.length);
       setPlans(activePlans);
     } catch (error) {
-      console.error('Error fetching plans:', error);
+      console.error('SubscriptionPlans: Error fetching plans:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os planos de assinatura.",
@@ -53,18 +54,19 @@ const SubscriptionPlans = () => {
     }
   }, [toast]);
 
-  // Load subscription plans and set up subscription
+  // Set up subscription to plan changes
   useEffect(() => {
-    console.log("Setting up subscription to plan changes in SubscriptionPlans");
+    console.log("SubscriptionPlans: Setting up subscription to plan changes");
     
     // Subscribe to plan changes
     const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("Plans changed, refreshing data in SubscriptionPlans page");
+      console.log("SubscriptionPlans: Plans changed, refreshing data");
       fetchPlans();
     });
     
     // Cleanup subscription when component unmounts
     return () => {
+      console.log("SubscriptionPlans: Unsubscribing from plan changes");
       unsubscribe();
     };
   }, [fetchPlans]);

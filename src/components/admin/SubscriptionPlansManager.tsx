@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,15 +47,15 @@ const SubscriptionPlansManager: React.FC = () => {
     'anual': 'yearly'
   };
   
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("Fetching plans for admin SubscriptionPlansManager");
+      console.log("SubscriptionPlansManager: Fetching plans");
       const data = await planAPI.getAllPlans();
-      console.log("Admin fetched plans:", data.length);
+      console.log("SubscriptionPlansManager: Plans fetched successfully:", data.length);
       setPlans(data);
     } catch (error) {
-      console.error('Error fetching plans:', error);
+      console.error('SubscriptionPlansManager: Error fetching plans:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar os planos de assinatura',
@@ -64,20 +64,20 @@ const SubscriptionPlansManager: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
   
   useEffect(() => {
-    console.log("Setting up subscription to plan changes in SubscriptionPlansManager");
+    console.log("SubscriptionPlansManager: Setting up subscription to plan changes");
     const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("Plans changed, refreshing data in SubscriptionPlansManager");
+      console.log("SubscriptionPlansManager: Plans changed, refreshing data");
       fetchPlans();
     });
     
     return () => {
-      console.log("Cleaning up subscription in SubscriptionPlansManager");
+      console.log("SubscriptionPlansManager: Cleaning up subscription");
       unsubscribe();
     };
-  }, []);
+  }, [fetchPlans]);
   
   const addPlan = () => {
     setDialogMode("add");
@@ -112,6 +112,7 @@ const SubscriptionPlansManager: React.FC = () => {
   
   const togglePlanStatus = async (planId: string, currentStatus: boolean) => {
     try {
+      console.log(`SubscriptionPlansManager: Toggling plan status for ${planId} to ${!currentStatus}`);
       const response = await planAPI.togglePlanStatus(planId, !currentStatus);
       
       if (response.status === 200) {
@@ -119,7 +120,6 @@ const SubscriptionPlansManager: React.FC = () => {
           title: 'Sucesso',
           description: response.message
         });
-        fetchPlans();
       } else {
         toast({
           title: 'Erro',
@@ -128,7 +128,7 @@ const SubscriptionPlansManager: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error toggling plan status:', error);
+      console.error('SubscriptionPlansManager: Error toggling plan status:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível alterar o status do plano',
@@ -141,7 +141,7 @@ const SubscriptionPlansManager: React.FC = () => {
     if (!currentPlan) return;
     
     try {
-      console.log("Saving plan in admin:", currentPlan.nome);
+      console.log("SubscriptionPlansManager: Saving plan:", currentPlan.nome);
       
       if (dialogMode === "add") {
         const response = await planAPI.createPlan(currentPlan as Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>);
@@ -152,7 +152,7 @@ const SubscriptionPlansManager: React.FC = () => {
             description: 'Plano criado com sucesso'
           });
           setIsPlanDialogOpen(false);
-          console.log("Plan created successfully, changes should be reflected in subscription page");
+          console.log("SubscriptionPlansManager: Plan created successfully");
         } else {
           toast({
             title: 'Erro',
@@ -178,7 +178,7 @@ const SubscriptionPlansManager: React.FC = () => {
             description: 'Plano atualizado com sucesso'
           });
           setIsPlanDialogOpen(false);
-          console.log("Plan updated successfully, changes should be reflected in subscription page");
+          console.log("SubscriptionPlansManager: Plan updated successfully");
         } else {
           toast({
             title: 'Erro',
@@ -188,7 +188,7 @@ const SubscriptionPlansManager: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Error saving plan:', error);
+      console.error('SubscriptionPlansManager: Error saving plan:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar o plano',
@@ -219,6 +219,7 @@ const SubscriptionPlansManager: React.FC = () => {
     if (!planToDelete) return;
     
     try {
+      console.log(`SubscriptionPlansManager: Deleting plan ${planToDelete.id}`);
       const response = await planAPI.deletePlan(planToDelete.id);
       
       if (response.status === 200) {
@@ -235,7 +236,7 @@ const SubscriptionPlansManager: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error deleting plan:', error);
+      console.error('SubscriptionPlansManager: Error deleting plan:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível excluir o plano',
