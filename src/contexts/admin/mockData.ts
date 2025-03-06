@@ -1,4 +1,3 @@
-
 import { User, Payment, UserStats, ContentStats } from './types';
 
 // Mock user data
@@ -70,11 +69,41 @@ export const mockUsers: User[] = [
   }
 ];
 
-// Mock payments data
+// Updated mock payments data to match the Payment interface
 export const mockPendingPayments: Payment[] = [
-  { id: "PAY-001", user: "João Silva", plan: "Premium", amount: "R$ 29,90", date: "2023-11-01" },
-  { id: "PAY-002", user: "Maria Santos", plan: "Familiar", amount: "R$ 39,90", date: "2023-11-03" },
-  { id: "PAY-003", user: "Pedro Alves", plan: "Premium", amount: "R$ 29,90", date: "2023-11-05" }
+  { 
+    id: "PAY-001", 
+    user: "João Silva", 
+    user_id: "USR-001", 
+    plan: "Premium", 
+    plan_id: "PLAN-001", 
+    amount: "AOA 5,000", 
+    date: "2023-11-01", 
+    status: "pendente", 
+    payment_proof_url: "https://example.com/proof1.jpg"
+  },
+  { 
+    id: "PAY-002", 
+    user: "Maria Santos", 
+    user_id: "USR-002", 
+    plan: "Familiar", 
+    plan_id: "PLAN-002", 
+    amount: "AOA 7,500", 
+    date: "2023-11-03", 
+    status: "pendente",
+    payment_proof_url: "https://example.com/proof2.jpg"
+  },
+  { 
+    id: "PAY-003", 
+    user: "Pedro Alves", 
+    user_id: "USR-003", 
+    plan: "Premium", 
+    plan_id: "PLAN-001", 
+    amount: "AOA 5,000", 
+    date: "2023-11-05", 
+    status: "pendente",
+    payment_proof_url: "https://example.com/proof3.jpg"
+  }
 ];
 
 // Mock content stats

@@ -462,6 +462,64 @@ export type Database = {
         }
         Relationships: []
       }
+      pagamentos: {
+        Row: {
+          comprovativo_url: string | null
+          created_at: string
+          id: string
+          moeda_codigo: string
+          plano_id: string
+          status: string
+          updated_at: string
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          comprovativo_url?: string | null
+          created_at?: string
+          id?: string
+          moeda_codigo: string
+          plano_id: string
+          status?: string
+          updated_at?: string
+          usuario_id: string
+          valor: number
+        }
+        Update: {
+          comprovativo_url?: string | null
+          created_at?: string
+          id?: string
+          moeda_codigo?: string
+          plano_id?: string
+          status?: string
+          updated_at?: string
+          usuario_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_moeda_codigo_fkey"
+            columns: ["moeda_codigo"]
+            isOneToOne: false
+            referencedRelation: "moedas"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "pagamentos_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_assinatura"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfis_usuario: {
         Row: {
           created_at: string | null
