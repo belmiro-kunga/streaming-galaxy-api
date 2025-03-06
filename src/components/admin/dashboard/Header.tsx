@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Menu, Search } from 'lucide-react';
+import { Bell, Menu, Search, BookOpen } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -9,9 +9,10 @@ interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
-const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery }: HeaderProps) => {
+const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery, setActiveTab }: HeaderProps) => {
   return (
     <header className="border-b border-gray-800 bg-gray-900 py-3 px-4 flex justify-between items-center">
       <div className="flex items-center gap-2">
@@ -30,6 +31,15 @@ const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery }: He
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-gray-300 hover:text-primary hover:bg-gray-800"
+          onClick={() => setActiveTab && setActiveTab("content")}
+          title="Acessar Conteúdos"
+        >
+          <BookOpen className="h-5 w-5" />
+        </Button>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>

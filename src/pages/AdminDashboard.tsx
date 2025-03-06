@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -267,7 +266,8 @@ const AdminDashboard = () => {
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen} 
         searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
+        setSearchQuery={setSearchQuery}
+        setActiveTab={setActiveTab}
       />
       
       <div className="flex flex-1 overflow-hidden">
