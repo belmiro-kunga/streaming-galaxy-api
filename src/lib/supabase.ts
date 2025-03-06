@@ -5,6 +5,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+// Project ID from config
+const projectId = 'myvoecxoicxhklaxvgdi';
+
+// If no URL is provided, construct it from the project ID
+const finalSupabaseUrl = supabaseUrl || `https://${projectId}.supabase.co`;
+
 // Test admin credentials
 const TEST_ADMIN_EMAIL = 'admin@cineplay.com';
 const TEST_ADMIN_PASSWORD = 'admin123';
@@ -15,17 +21,17 @@ const TEST_SUPER_ADMIN_PASSWORD = 'super123';
 
 // Create the Supabase client
 export const supabase = createClient(
-  supabaseUrl || 'https://sua-url-do-supabase.supabase.co', 
-  supabaseAnonKey || 'sua-chave-anonima-do-supabase'
+  finalSupabaseUrl, 
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15dm9lY3hvaWN4aGtsYXh2Z2RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMTc3OTIsImV4cCI6MjA1NjY5Mzc5Mn0.XWLoIGayQvzdyQlFi8v9ziM991Xt44uOFT3FL58RkP8'
 );
 
 // Verificar a conexão e registrar status
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!finalSupabaseUrl || !supabaseAnonKey) {
   console.warn('Credenciais do Supabase não encontradas - usando cliente simulado.');
   console.info('Para conectar ao Supabase, defina as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
 } else {
   console.log('Cliente Supabase inicializado com sucesso');
-  console.log('Conectado a:', supabaseUrl);
+  console.log('Conectado a:', finalSupabaseUrl);
 }
 
 // Helper functions
@@ -52,7 +58,7 @@ export const signOut = async () => {
 // Auth helpers for testing without Supabase
 export const mockSignIn = async (email: string, password: string) => {
   // Verificar se estamos usando cliente real do Supabase
-  if (supabaseUrl && supabaseAnonKey) {
+  if (finalSupabaseUrl && supabaseAnonKey) {
     console.log('Usando autenticação real do Supabase');
     try {
       // Usar autenticação real
