@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { AdminDashboardProvider } from '@/contexts/AdminDashboardContext';
+import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/AdminDashboardContext';
 import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
 import { planAPI } from '@/services/plans';
 
@@ -14,7 +14,7 @@ const AdminDashboard = () => {
 
 // This internal component allows us to use the context hooks
 const AdminDashboardContent = () => {
-  const { setSubscriptionPlans } = React.useContext(AdminDashboardContext);
+  const { setSubscriptionPlans } = useAdminDashboard();
 
   // Fetch subscription plans
   useEffect(() => {

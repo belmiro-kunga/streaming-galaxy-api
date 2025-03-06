@@ -9,6 +9,7 @@ import PaymentsTab from './payments/PaymentsTab';
 import ReportsTab from './ReportsTab';
 import SettingsTab from './SettingsTab';
 import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
+import HomeTab from './home/HomeTab';
 
 const MainContent = () => {
   const { 
@@ -81,10 +82,7 @@ const MainContent = () => {
           </TabsContent>
           
           <TabsContent value="home">
-            <div className="p-4">
-              <h2 className="text-2xl font-bold mb-4">Página inicial</h2>
-              <p className="text-gray-400">Conteúdo da página inicial será implementado aqui.</p>
-            </div>
+            <HomeTab />
           </TabsContent>
         </Tabs>
       </div>
