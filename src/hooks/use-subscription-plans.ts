@@ -31,12 +31,18 @@ export const useSubscriptionPlans = () => {
     console.log("SubscriptionPlans: Fetching plans");
     setIsLoading(true);
     try {
-      const data = await planAPI.getAllPlans();
-      console.log("SubscriptionPlans: Plans fetched successfully:", data.length);
-      // Only show active plans
-      const activePlans = data.filter(plan => plan.ativo);
-      console.log("SubscriptionPlans: Active plans:", activePlans.length);
-      setPlans(activePlans);
+      const { data: subscriptionPlans, error } = await supabase
+        .from('planos_assinatura')
+        .select(`
+          *,
+          precos:precos_planos(*)
+        `)
+        .eq('ativo', true);
+
+      if (error) throw error;
+
+      console.log("SubscriptionPlans: Plans fetched successfully:", subscriptionPlans?.length);
+      setPlans(subscriptionPlans || []);
     } catch (error) {
       console.error('SubscriptionPlans: Error fetching plans:', error);
       toast({
@@ -49,23 +55,32 @@ export const useSubscriptionPlans = () => {
     }
   }, [toast]);
 
-  // Fetch plans initially and set up subscription for updates
+  // Subscribe to plan changes
   useEffect(() => {
     console.log("SubscriptionPlans: Setting up subscription to plan changes");
     
-    // Initial fetch
     fetchPlans();
     
-    // Subscribe to plan changes
-    const unsubscribe = planAPI.subscribeToChanges(() => {
-      console.log("SubscriptionPlans: Plans changed, refreshing data");
-      fetchPlans();
-    });
+    // Subscribe to changes in planos_assinatura table
+    const subscription = supabase
+      .channel('planos_assinatura_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'planos_assinatura'
+        },
+        () => {
+          console.log("SubscriptionPlans: Plans changed, refreshing data");
+          fetchPlans();
+        }
+      )
+      .subscribe();
     
-    // Cleanup subscription when component unmounts
     return () => {
       console.log("SubscriptionPlans: Unsubscribing from plan changes");
-      unsubscribe();
+      subscription.unsubscribe();
     };
   }, [fetchPlans]);
 

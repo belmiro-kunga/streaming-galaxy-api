@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Upload, FileCheck, AlertCircle } from 'lucide-react';
@@ -18,7 +17,6 @@ const PaymentUpload = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   
-  // Get the plan details from location state
   const planDetails = location.state?.plan as SubscriptionPlan;
   
   if (!planDetails) {
@@ -60,7 +58,6 @@ const PaymentUpload = () => {
     
     setUploading(true);
     
-    // Mock API call to upload the payment proof
     setTimeout(() => {
       setUploading(false);
       setUploadComplete(true);
@@ -69,12 +66,9 @@ const PaymentUpload = () => {
         title: "Comprovativo enviado",
         description: "Seu comprovativo de pagamento foi enviado com sucesso. Aguarde a aprovação.",
       });
-      
-      // In a real app, you would make an API call to update the user's subscription status
     }, 2000);
   };
 
-  // Obter o preço do plano
   const planPrice = planDetails.precos && planDetails.precos.length > 0 
     ? `${planDetails.precos[0].moeda_codigo} ${planDetails.precos[0].preco.toLocaleString()}`
     : "Preço não definido";

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Check } from 'lucide-react';
@@ -26,12 +25,10 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
     }).format(price);
   };
 
-  // Get the price from the first price in the precos array
   const planPrice = plan.precos && plan.precos.length > 0 
     ? plan.precos[0].preco 
     : 0;
 
-  // Tradução do ciclo de cobrança
   const getCycleLabel = (cycle: string): string => {
     const cycles: Record<string, string> = {
       'mensal': '/mês',
@@ -71,13 +68,14 @@ export const PlanCard = ({ plan, index, selectedPlan, onSelectPlan }: PlanCardPr
           <h3 className="text-lg font-bold text-foreground dark:text-white">{plan.nome}</h3>
           <p className="text-3xl font-bold mt-2 text-foreground dark:text-white">
             {formatPrice(planPrice)}
-            <span className="text-sm font-normal text-muted-foreground dark:text-gray-400"> {getCycleLabel(plan.ciclo_cobranca)}</span>
+            <span className="text-sm font-normal text-muted-foreground dark:text-gray-400">
+              {getCycleLabel(plan.ciclo_cobranca)}
+            </span>
           </p>
         </CardHeader>
         
         <CardContent className="pt-4">
           <ul className="space-y-3">
-            {/* Use the descricao field to create feature list if no features available */}
             {plan.descricao ? (
               <li className="flex items-start gap-2">
                 <div className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/10 dark:bg-violet-500/20 text-primary dark:text-violet-500 mt-0.5">
