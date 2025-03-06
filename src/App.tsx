@@ -10,7 +10,6 @@ import { signOut } from '@/lib/supabase/auth';
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Watch from "./pages/Watch";
-import ApiDocs from "./pages/ApiDocs";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -49,7 +48,6 @@ function App() {
                 <Route path="/welcome" element={<Index />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/watch/:id" element={<Watch />} />
-                <Route path="/api-docs" element={<ApiDocs />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/dashboard/downloads" element={<Dashboard />} />

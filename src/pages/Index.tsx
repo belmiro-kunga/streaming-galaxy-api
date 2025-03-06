@@ -58,19 +58,6 @@ const Index = () => {
                 Entrar
               </Link>
             </motion.div>
-            
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Link 
-                to="/api-docs" 
-                className="group inline-flex items-center justify-center px-8 py-3 rounded-md bg-transparent border border-white/70 text-white font-medium text-base transition-all duration-300 hover:bg-white/10"
-              >
-                Documentação da API
-              </Link>
-            </motion.div>
           </div>
         </motion.div>
       </div>
