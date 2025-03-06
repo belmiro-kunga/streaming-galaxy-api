@@ -82,7 +82,14 @@ export const mockSignIn = async (email: string, password: string) => {
         user: {
           id: '1',
           email: TEST_ADMIN_EMAIL,
-          user_metadata: { role: 'admin' }
+          user_metadata: { 
+            role: 'admin',
+            first_name: 'Admin',
+            last_name: 'User',
+            phone: '123456789',
+            country: 'Angola',
+            province: 'Luanda'
+          }
         }
       },
       error: null
@@ -93,7 +100,14 @@ export const mockSignIn = async (email: string, password: string) => {
         user: {
           id: '2',
           email: TEST_EDITOR_EMAIL,
-          user_metadata: { role: 'editor' }
+          user_metadata: { 
+            role: 'editor',
+            first_name: 'Editor',
+            last_name: 'User',
+            phone: '987654321',
+            country: 'Angola',
+            province: 'Benguela'
+          }
         }
       },
       error: null
@@ -104,7 +118,14 @@ export const mockSignIn = async (email: string, password: string) => {
         user: {
           id: '3',
           email: TEST_SUPER_ADMIN_EMAIL,
-          user_metadata: { role: 'super_admin' }
+          user_metadata: { 
+            role: 'super_admin',
+            first_name: 'Super',
+            last_name: 'Admin',
+            phone: '555555555',
+            country: 'Angola',
+            province: 'Huambo'
+          }
         }
       },
       error: null

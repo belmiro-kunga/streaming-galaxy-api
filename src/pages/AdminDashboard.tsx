@@ -42,11 +42,71 @@ const AdminDashboard = () => {
   
   // User management state
   const [users, setUsers] = useState([
-    { id: "USR-001", name: "Carlos Mendes", email: "carlos@email.com", created_at: "2023-11-01", status: "Ativo", subscription: "Premium" },
-    { id: "USR-002", name: "Ana Beatriz", email: "ana@email.com", created_at: "2023-11-02", status: "Pendente", subscription: "Familiar" },
-    { id: "USR-003", name: "Lucas Ferreira", email: "lucas@email.com", created_at: "2023-11-04", status: "Ativo", subscription: "Básico" },
-    { id: "USR-004", name: "Mariana Costa", email: "mariana@email.com", created_at: "2023-11-05", status: "Ativo", subscription: "Gratuito" },
-    { id: "USR-005", name: "Paulo Rodrigues", email: "paulo@email.com", created_at: "2023-11-07", status: "Inativo", subscription: null }
+    { 
+      id: "USR-001", 
+      name: "Carlos Mendes", 
+      email: "carlos@email.com", 
+      first_name: "Carlos", 
+      last_name: "Mendes", 
+      phone: "923456789", 
+      country: "Angola", 
+      province: "Luanda", 
+      created_at: "2023-11-01", 
+      status: "Ativo", 
+      subscription: "Premium" 
+    },
+    { 
+      id: "USR-002", 
+      name: "Ana Beatriz", 
+      email: "ana@email.com", 
+      first_name: "Ana", 
+      last_name: "Beatriz", 
+      phone: "912345678", 
+      country: "Angola", 
+      province: "Benguela", 
+      created_at: "2023-11-02", 
+      status: "Pendente", 
+      subscription: "Familiar" 
+    },
+    { 
+      id: "USR-003", 
+      name: "Lucas Ferreira", 
+      email: "lucas@email.com", 
+      first_name: "Lucas", 
+      last_name: "Ferreira", 
+      phone: "934567890", 
+      country: "Angola", 
+      province: "Huambo", 
+      created_at: "2023-11-04", 
+      status: "Ativo", 
+      subscription: "Básico" 
+    },
+    { 
+      id: "USR-004", 
+      name: "Mariana Costa", 
+      email: "mariana@email.com", 
+      first_name: "Mariana", 
+      last_name: "Costa", 
+      phone: "956789012", 
+      country: "Angola", 
+      province: "Bié", 
+      created_at: "2023-11-05", 
+      status: "Ativo", 
+      subscription: "Gratuito" 
+    },
+    { 
+      id: "USR-005", 
+      name: "Paulo Rodrigues", 
+      email: "paulo@email.com", 
+      first_name: "Paulo", 
+      last_name: "Rodrigues", 
+      phone: "967890123", 
+      country: "Angola", 
+      province: "Cabinda", 
+      created_at: "2023-11-07", 
+      status: "Inativo", 
+      subscription: null 
+    }
   ]);
   
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
@@ -124,7 +184,17 @@ const AdminDashboard = () => {
   // User management functions
   const addUser = () => {
     setDialogMode("add");
-    setCurrentUser({ name: "", email: "", status: "Ativo", subscription: null });
+    setCurrentUser({ 
+      name: "", 
+      email: "", 
+      first_name: "", 
+      last_name: "", 
+      phone: "", 
+      country: "Angola", 
+      province: "", 
+      status: "Ativo", 
+      subscription: null 
+    });
     setIsUserDialogOpen(true);
   };
   
@@ -162,6 +232,7 @@ const AdminDashboard = () => {
       const newUser = {
         ...currentUser,
         id: `USR-${users.length + 1}`.padStart(7, '0'),
+        name: `${currentUser.first_name} ${currentUser.last_name}`,
         created_at: new Date().toISOString().split('T')[0]
       };
       setUsers([...users, newUser]);
@@ -170,10 +241,14 @@ const AdminDashboard = () => {
         description: `${newUser.name} foi adicionado com sucesso.`
       });
     } else {
-      setUsers(users.map(u => u.id === currentUser.id ? currentUser : u));
+      const updatedUser = {
+        ...currentUser,
+        name: `${currentUser.first_name} ${currentUser.last_name}`
+      };
+      setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
       toast({
         title: "Usuário atualizado",
-        description: `As informações de ${currentUser.name} foram atualizadas.`
+        description: `As informações de ${updatedUser.name} foram atualizadas.`
       });
     }
     setIsUserDialogOpen(false);
@@ -477,6 +552,8 @@ const AdminDashboard = () => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nome</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Telefone</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Província</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Assinatura</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Data Registro</th>
@@ -490,6 +567,8 @@ const AdminDashboard = () => {
                                 <td className="px-4 py-3 whitespace-nowrap text-sm">{user.id}</td>
                                 <td className="px-4 py-3 whitespace-nowrap font-medium">{user.name}</td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{user.phone}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">{user.province}</td>
                                 <td className="px-4 py-3 whitespace-nowrap">
                                   <span className={`px-2 py-1 text-xs rounded-full ${
                                     user.status === 'Ativo' ? 'bg-green-900 text-green-400' : 
@@ -540,7 +619,7 @@ const AdminDashboard = () => {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
+                              <td colSpan={9} className="px-4 py-6 text-center text-gray-400">
                                 Nenhum usuário encontrado.
                               </td>
                             </tr>
@@ -654,14 +733,26 @@ const AdminDashboard = () => {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input 
-                id="name" 
-                value={currentUser?.name || ""}
-                onChange={(e) => setCurrentUser({...currentUser, name: e.target.value})}
-                className="bg-gray-800 border-gray-700 text-white"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Primeiro Nome</Label>
+                <Input 
+                  id="firstName" 
+                  value={currentUser?.first_name || ""}
+                  onChange={(e) => setCurrentUser({...currentUser, first_name: e.target.value})}
+                  className="bg-gray-800 border-gray-700 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Último Nome</Label>
+                <Input 
+                  id="lastName" 
+                  value={currentUser?.last_name || ""}
+                  onChange={(e) => setCurrentUser({...currentUser, last_name: e.target.value})}
+                  className="bg-gray-800 border-gray-700 text-white"
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -673,6 +764,49 @@ const AdminDashboard = () => {
                 onChange={(e) => setCurrentUser({...currentUser, email: e.target.value})}
                 className="bg-gray-800 border-gray-700 text-white"
               />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input 
+                id="phone" 
+                type="tel"
+                value={currentUser?.phone || ""}
+                onChange={(e) => setCurrentUser({...currentUser, phone: e.target.value})}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="country">País</Label>
+              <Input 
+                id="country" 
+                value={currentUser?.country || "Angola"}
+                disabled
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="province">Província</Label>
+              <Select 
+                value={currentUser?.province || ""} 
+                onValueChange={(value) => setCurrentUser({...currentUser, province: value})}
+              >
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Selecione uma província" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  {[
+                    'Bengo', 'Benguela', 'Bié', 'Cabinda', 'Cuando Cubango', 
+                    'Cuanza Norte', 'Cuanza Sul', 'Cunene', 'Huambo', 'Huíla', 
+                    'Luanda', 'Lunda Norte', 'Lunda Sul', 'Malanje', 'Moxico', 
+                    'Namibe', 'Uíge', 'Zaire'
+                  ].map((prov) => (
+                    <SelectItem key={prov} value={prov}>{prov}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
@@ -701,7 +835,7 @@ const AdminDashboard = () => {
             </DialogClose>
             <Button 
               onClick={handleSaveUser}
-              disabled={!currentUser?.name || !currentUser?.email}
+              disabled={!currentUser?.first_name || !currentUser?.last_name || !currentUser?.email}
               className="bg-primary hover:bg-primary/90"
             >
               {dialogMode === "add" ? "Adicionar" : "Atualizar"}
