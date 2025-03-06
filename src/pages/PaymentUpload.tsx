@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Upload, FileCheck, AlertCircle } from 'lucide-react';
@@ -8,11 +9,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/ui/Header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SubscriptionPlan } from '@/types/api';
+import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/lib/supabase/client';
 
 const PaymentUpload = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { user } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -56,9 +60,51 @@ const PaymentUpload = () => {
       return;
     }
     
+    if (!user?.id) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para enviar um comprovativo",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setUploading(true);
     
-    setTimeout(() => {
+    try {
+      // 1. Fazer upload do arquivo para o Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `payment-proofs/${fileName}`;
+      
+      // Upload do arquivo
+      const { error: uploadError, data: uploadData } = await supabase.storage
+        .from('payment-proofs')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      // Obter a URL pública do arquivo
+      const { data: urlData } = await supabase.storage
+        .from('payment-proofs')
+        .getPublicUrl(filePath);
+        
+      const fileUrl = urlData?.publicUrl;
+      
+      // 2. Criar um registro de pagamento com status "pendente"
+      const { error: paymentError } = await supabase
+        .from('pagamentos')
+        .insert({
+          usuario_id: user.id,
+          plano_id: planDetails.id,
+          moeda_codigo: planDetails.precos?.[0]?.moeda_codigo || 'AOA',
+          valor: planDetails.precos?.[0]?.preco || 0,
+          status: 'pendente',
+          comprovativo_url: fileUrl
+        });
+        
+      if (paymentError) throw paymentError;
+      
       setUploading(false);
       setUploadComplete(true);
       
@@ -66,7 +112,16 @@ const PaymentUpload = () => {
         title: "Comprovativo enviado",
         description: "Seu comprovativo de pagamento foi enviado com sucesso. Aguarde a aprovação.",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Erro ao enviar comprovativo:', error);
+      setUploading(false);
+      
+      toast({
+        title: "Erro ao enviar comprovativo",
+        description: "Ocorreu um erro ao enviar seu comprovativo. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const planPrice = planDetails.precos && planDetails.precos.length > 0 

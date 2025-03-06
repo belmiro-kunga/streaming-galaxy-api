@@ -1,4 +1,3 @@
-
 // Define types for admin dashboard
 import { SubscriptionPlan } from '@/types/api';
 
@@ -19,9 +18,13 @@ export interface User {
 export interface Payment {
   id: string;
   user: string;
+  user_id: string; // Adicionando ID do usuário para referência
   plan: string;
+  plan_id: string; // Adicionando ID do plano para referência
   amount: string;
   date: string;
+  status: 'pendente' | 'aprovado' | 'rejeitado';
+  payment_proof_url?: string; // URL para o comprovativo de pagamento
 }
 
 export interface UserStats {
