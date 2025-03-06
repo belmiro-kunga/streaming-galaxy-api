@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -41,12 +41,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     setIsLoading(true);
     try {
+      console.log('Attempting login with:', { email, password });
       const { data, error } = await mockSignIn(email, password);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
       
       if (data.user) {
+        console.log('Login successful, user data:', data.user);
         const role = data.user.user_metadata?.role || 'user';
+        console.log('User role:', role);
         
         toast({
           title: 'Login bem-sucedido',
@@ -58,8 +64,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         } else {
           navigate('/');
         }
+      } else {
+        console.log('No user data returned:', data);
+        throw new Error('Falha na autenticação');
       }
     } catch (error: any) {
+      console.error('Login process error:', error);
       toast({
         title: 'Erro no login',
         description: error?.message || 'Verifique suas credenciais e tente novamente.',
@@ -97,6 +107,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleLogin();
+            }
+          }}
         />
       </div>
 
