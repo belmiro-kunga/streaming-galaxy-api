@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { mockSignIn } from '@/lib/supabase/auth';
+import { mockSignIn, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, 
+         TEST_EDITOR_EMAIL, TEST_EDITOR_PASSWORD,
+         TEST_SUPER_ADMIN_EMAIL, TEST_SUPER_ADMIN_PASSWORD } from '@/lib/supabase/auth';
 import { useUser } from '@/contexts/UserContext';
 
 const AdminLogin = () => {
@@ -17,36 +19,31 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { refreshUserData } = useUser();
+  const { refreshUserData, user } = useUser();
 
-  // Credenciais de teste já estão definidas em lib/supabase.ts
-  // TEST_ADMIN_EMAIL = 'admin@cineplay.com';
-  // TEST_ADMIN_PASSWORD = 'admin123';
-  // TEST_EDITOR_EMAIL = 'editor@cineplay.com';
-  // TEST_EDITOR_PASSWORD = 'editor123';
-  // TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
-  // TEST_SUPER_ADMIN_PASSWORD = 'super123';
+  // Handle auto-fill of test credentials
+  const fillTestCredentials = (type: 'admin' | 'editor' | 'super') => {
+    if (type === 'admin') {
+      setEmail(TEST_ADMIN_EMAIL);
+      setPassword(TEST_ADMIN_PASSWORD);
+    } else if (type === 'editor') {
+      setEmail(TEST_EDITOR_EMAIL);
+      setPassword(TEST_EDITOR_PASSWORD);
+    } else if (type === 'super') {
+      setEmail(TEST_SUPER_ADMIN_EMAIL);
+      setPassword(TEST_SUPER_ADMIN_PASSWORD);
+    }
+  };
 
+  // Check if user is already logged in with admin role
   useEffect(() => {
-    // Check if user is already logged in as admin
-    const checkAdminStatus = async () => {
-      const storedProfile = localStorage.getItem('userProfile');
-      if (storedProfile) {
-        try {
-          const profile = JSON.parse(storedProfile);
-          const role = profile?.role;
-          
-          if (['admin', 'editor', 'super_admin'].includes(role)) {
-            navigate('/admin-dashboard');
-          }
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
+    if (user) {
+      const role = user.user_metadata?.role;
+      if (['admin', 'editor', 'super_admin'].includes(role)) {
+        navigate('/admin-dashboard');
       }
-    };
-    
-    checkAdminStatus();
-  }, [navigate]);
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +51,7 @@ const AdminLogin = () => {
 
     try {
       console.log('Attempting admin login with:', { email, password });
-      // Sign in usando nossa função helper que funciona com ou sem Supabase
+      // Sign in using our helper function that works with or without Supabase
       const { data, error } = await mockSignIn(email, password);
 
       if (error) {
@@ -64,7 +61,11 @@ const AdminLogin = () => {
 
       // Check if user has admin role
       const user = data.user;
-      const userRole = user?.user_metadata?.role || 'user';
+      if (!user) {
+        throw new Error("Falha na autenticação. Usuário não encontrado.");
+      }
+      
+      const userRole = user.user_metadata?.role || 'user';
       console.log('User data:', user);
       console.log('User role:', userRole);
 
@@ -173,6 +174,37 @@ const AdminLogin = () => {
                 )}
               </Button>
             </form>
+            
+            {/* Test credentials section */}
+            <div className="mt-4 pt-4 border-t border-gray-800 text-center">
+              <p className="text-sm text-gray-400 mb-2">Credenciais de teste:</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => fillTestCredentials('admin')}
+                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
+                >
+                  Admin
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => fillTestCredentials('editor')}
+                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
+                >
+                  Editor
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => fillTestCredentials('super')}
+                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
+                >
+                  Super Admin
+                </Button>
+              </div>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2 text-center text-sm text-gray-400">
             <p className="w-full">

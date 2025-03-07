@@ -45,10 +45,11 @@ export const getUserProfile = async (userId) => {
 
 export const signOut = async () => {
   try {
-    // Remove any stored sessions
+    // Clear all auth-related data from localStorage
     localStorage.removeItem('cineplay-supabase-auth');
     localStorage.removeItem('userSession');
     localStorage.removeItem('userProfile');
+    
     return await supabase.auth.signOut();
   } catch (error) {
     console.error('Erro ao sair:', error);
@@ -61,11 +62,20 @@ export const mockSignIn = async (email, password) => {
   // First, ensure any previous session is cleared
   await signOut();
   
-  // Verificar se estamos usando cliente real do Supabase
-  if (supabase) {
+  // Check if we're using actual Supabase client
+  if (supabase.auth) {
     console.log('Usando autenticação real do Supabase');
+    
+    // For test credentials, use mock auth instead of real Supabase
+    if ((email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) ||
+        (email === TEST_EDITOR_EMAIL && password === TEST_EDITOR_PASSWORD) ||
+        (email === TEST_SUPER_ADMIN_EMAIL && password === TEST_SUPER_ADMIN_PASSWORD)) {
+      console.log('Usando autenticação simulada para credenciais de teste');
+      return mockTestCredentials(email, password);
+    }
+    
     try {
-      // Usar autenticação real
+      // Use real authentication for non-test credentials
       const result = await supabase.auth.signInWithPassword({ email, password });
       console.log('Resultado da autenticação:', result.data.user ? 'Sucesso' : 'Falha');
       
@@ -88,8 +98,12 @@ export const mockSignIn = async (email, password) => {
     }
   }
   
-  console.log('Usando autenticação simulada');
-  // Simulação para desenvolvimento local
+  console.log('Usando autenticação simulada para todas as credenciais');
+  return mockTestCredentials(email, password);
+};
+
+// Helper function to create mock auth responses for test credentials
+const mockTestCredentials = (email, password) => {
   if (email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) {
     const userData = {
       id: '1',
@@ -111,7 +125,8 @@ export const mockSignIn = async (email, password) => {
       last_name: 'User',
       phone: '123456789',
       country: 'Angola',
-      province: 'Luanda'
+      province: 'Luanda',
+      role: 'admin'
     };
     
     localStorage.setItem('userProfile', JSON.stringify(profileData));
@@ -141,7 +156,8 @@ export const mockSignIn = async (email, password) => {
       last_name: 'User',
       phone: '987654321',
       country: 'Angola',
-      province: 'Benguela'
+      province: 'Benguela',
+      role: 'editor'
     };
     
     localStorage.setItem('userProfile', JSON.stringify(profileData));
@@ -171,7 +187,8 @@ export const mockSignIn = async (email, password) => {
       last_name: 'Admin',
       phone: '555555555',
       country: 'Angola',
-      province: 'Huambo'
+      province: 'Huambo',
+      role: 'super_admin'
     };
     
     localStorage.setItem('userProfile', JSON.stringify(profileData));

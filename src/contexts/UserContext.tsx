@@ -13,6 +13,7 @@ export interface UserProfile {
   country?: string;
   province?: string;
   created_at?: string;
+  // Note: role is stored in user_metadata, not directly in the profile
 }
 
 interface UserContextType {
@@ -47,23 +48,49 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Get current user
       const currentUser = await getUser();
-      setUser(currentUser);
       
       if (currentUser) {
+        console.log('User authenticated:', currentUser);
+        setUser(currentUser);
+        
         // Try to get profile from localStorage first for immediate display
         const cachedProfile = localStorage.getItem('userProfile');
         if (cachedProfile) {
-          setProfile(JSON.parse(cachedProfile));
+          try {
+            const parsedProfile = JSON.parse(cachedProfile);
+            console.log('Using cached profile:', parsedProfile);
+            setProfile(parsedProfile);
+          } catch (e) {
+            console.error('Error parsing cached profile:', e);
+          }
         }
         
         // Then fetch fresh data from the database
         const userProfile = await getUserProfile(currentUser.id);
         if (userProfile) {
+          console.log('Fetched fresh profile:', userProfile);
           setProfile(userProfile);
           localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        } else {
+          console.log('No profile found for user, using user metadata');
+          // If no profile found, use user metadata as profile
+          const metadataProfile = {
+            id: currentUser.id,
+            email: currentUser.email,
+            first_name: currentUser.user_metadata?.first_name,
+            last_name: currentUser.user_metadata?.last_name,
+            phone: currentUser.user_metadata?.phone,
+            country: currentUser.user_metadata?.country,
+            province: currentUser.user_metadata?.province,
+          };
+          setProfile(metadataProfile);
+          localStorage.setItem('userProfile', JSON.stringify(metadataProfile));
         }
       } else {
+        console.log('No authenticated user found');
+        setUser(null);
         setProfile(null);
+        localStorage.removeItem('userProfile');
       }
     } catch (error) {
       console.error('Error refreshing user data:', error);
@@ -101,7 +128,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       async (event, session) => {
         console.log('Auth state changed:', event);
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          refreshUserData();
+          await refreshUserData();
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
