@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { mockSignIn, signOut } from '@/lib/supabase/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 
@@ -29,8 +29,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   setIsLoading
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { refreshUserData } = useUser();
+  
+  // Get the return path from location state
+  const from = location.state?.from?.pathname || '/dashboard';
 
   // Ensure user is logged out when visiting login page
   useEffect(() => {
@@ -78,7 +82,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         if (role === 'admin' || role === 'super_admin') {
           navigate('/admin-dashboard');
         } else {
-          navigate('/dashboard');
+          // Navigate to the original location or dashboard
+          navigate(from);
         }
       } else {
         console.log('No user data returned:', data);
