@@ -36,15 +36,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   // Get the return path from location state
   const from = location.state?.from?.pathname || '/dashboard';
 
-  // Ensure user is logged out when visiting login page
+  // Don't automatically log out when visiting login page
   useEffect(() => {
-    const logoutOnMount = async () => {
-      await signOut();
-      console.log('User logged out on login page load');
+    const checkLoginStatus = async () => {
+      // Instead of logging out, we'll check if there's a profile stored
+      const storedProfile = localStorage.getItem('userProfile');
+      if (storedProfile) {
+        try {
+          const profile = JSON.parse(storedProfile);
+          console.log('Found stored profile:', profile);
+          
+          // If admin role is detected, redirect to admin dashboard
+          if (['admin', 'editor', 'super_admin'].includes(profile?.role)) {
+            navigate('/admin-dashboard');
+          } else {
+            // For regular users, redirect to dashboard
+            navigate('/dashboard');
+          }
+        } catch (e) {
+          console.error('Error parsing stored profile:', e);
+        }
+      }
     };
     
-    logoutOnMount();
-  }, []);
+    checkLoginStatus();
+  }, [navigate]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -79,7 +95,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           description: `Você está logado como ${role}.`,
         });
         
-        if (role === 'admin' || role === 'super_admin') {
+        if (['admin', 'editor', 'super_admin'].includes(role)) {
           navigate('/admin-dashboard');
         } else {
           // Navigate to the original location or dashboard
@@ -155,4 +171,3 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </div>
     </div>
   );
-};

@@ -7,13 +7,15 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   redirectPath?: string;
   children?: React.ReactNode;
+  requiredRole?: 'admin' | 'editor' | 'super_admin';
 }
 
 const ProtectedRoute = ({ 
   redirectPath = '/login',
-  children 
+  children,
+  requiredRole
 }: ProtectedRouteProps) => {
-  const { user, loading } = useUser();
+  const { user, loading, profile } = useUser();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
   
@@ -32,9 +34,29 @@ const ProtectedRoute = ({
     );
   }
 
+  // Check if user is authenticated
   if (!user) {
     // Redirect to login with a return URL
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
+  }
+
+  // If role is required, check if user has the required role
+  if (requiredRole) {
+    const userRole = profile?.role || user?.user_metadata?.role;
+    const isAdmin = userRole === 'admin' || userRole === 'super_admin';
+    const isSuperAdmin = userRole === 'super_admin';
+    const isEditor = userRole === 'editor';
+    
+    // Determine if user has access based on required role
+    const hasAccess = 
+      (requiredRole === 'admin' && isAdmin) ||
+      (requiredRole === 'super_admin' && isSuperAdmin) ||
+      (requiredRole === 'editor' && (isEditor || isAdmin));
+
+    if (!hasAccess) {
+      // Redirect to home if user doesn't have the required role
+      return <Navigate to="/home" replace />;
+    }
   }
 
   return children ? <>{children}</> : <Outlet />;
