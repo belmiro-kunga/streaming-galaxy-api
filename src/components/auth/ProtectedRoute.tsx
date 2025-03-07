@@ -42,7 +42,9 @@ const ProtectedRoute = ({
 
   // If role is required, check if user has the required role
   if (requiredRole) {
-    const userRole = profile?.role || user?.user_metadata?.role;
+    // Check user role from user metadata first, then from profile
+    // Since profile.role doesn't exist in the UserProfile type, we need to access it differently
+    const userRole = user?.user_metadata?.role;
     const isAdmin = userRole === 'admin' || userRole === 'super_admin';
     const isSuperAdmin = userRole === 'super_admin';
     const isEditor = userRole === 'editor';
