@@ -118,6 +118,39 @@ export type Database = {
           },
         ]
       }
+      canais_tv: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          descricao: string | null
+          disponivel: boolean | null
+          id: string
+          logo_url: string | null
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          disponivel?: boolean | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          disponivel?: boolean | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conteudo_generos: {
         Row: {
           conteudo_id: string
