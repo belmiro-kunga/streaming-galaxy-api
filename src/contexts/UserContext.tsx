@@ -45,15 +45,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshUserData = async () => {
     try {
       setLoading(true);
-      console.log("UserContext - Refreshing user data");
       
       // Get current user
       const currentUser = await getUser();
       
       if (currentUser) {
-        console.log('UserContext - User authenticated:', currentUser);
-        console.log('UserContext - User metadata:', currentUser.user_metadata);
-        
+        console.log('User authenticated:', currentUser);
         setUser(currentUser);
         
         // Try to get profile from localStorage first for immediate display
@@ -61,21 +58,21 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (cachedProfile) {
           try {
             const parsedProfile = JSON.parse(cachedProfile);
-            console.log('UserContext - Using cached profile:', parsedProfile);
+            console.log('Using cached profile:', parsedProfile);
             setProfile(parsedProfile);
           } catch (e) {
-            console.error('UserContext - Error parsing cached profile:', e);
+            console.error('Error parsing cached profile:', e);
           }
         }
         
         // Then fetch fresh data from the database
         const userProfile = await getUserProfile(currentUser.id);
         if (userProfile) {
-          console.log('UserContext - Fetched fresh profile:', userProfile);
+          console.log('Fetched fresh profile:', userProfile);
           setProfile(userProfile);
           localStorage.setItem('userProfile', JSON.stringify(userProfile));
         } else {
-          console.log('UserContext - No profile found for user, using user metadata');
+          console.log('No profile found for user, using user metadata');
           // If no profile found, use user metadata as profile
           const metadataProfile = {
             id: currentUser.id,
@@ -90,13 +87,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localStorage.setItem('userProfile', JSON.stringify(metadataProfile));
         }
       } else {
-        console.log('UserContext - No authenticated user found');
+        console.log('No authenticated user found');
         setUser(null);
         setProfile(null);
         localStorage.removeItem('userProfile');
       }
     } catch (error) {
-      console.error('UserContext - Error refreshing user data:', error);
+      console.error('Error refreshing user data:', error);
     } finally {
       setLoading(false);
     }
@@ -104,7 +101,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      console.log("UserContext - Logging out user");
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
@@ -114,7 +110,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         description: "Você foi desconectado da sua conta."
       });
     } catch (error) {
-      console.error('UserContext - Error logging out:', error);
+      console.error('Error logging out:', error);
       toast({
         title: "Erro ao fazer logout",
         description: "Ocorreu um erro ao tentar sair da sua conta.",
@@ -130,16 +126,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('UserContext - Auth state changed:', event, session?.user?.id);
-        
+        console.log('Auth state changed:', event);
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          console.log('UserContext - User signed in or token refreshed, updating user data');
-          if (session?.user) {
-            console.log('UserContext - New session user metadata:', session.user.user_metadata);
-          }
           await refreshUserData();
         } else if (event === 'SIGNED_OUT') {
-          console.log('UserContext - User signed out, clearing user data');
           setUser(null);
           setProfile(null);
           localStorage.removeItem('userProfile');

@@ -36,7 +36,7 @@ function App() {
             <BrowserRouter>
               <AnimatePresence mode="wait">
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<Navigate to="/home" replace />} />
                   <Route path="/welcome" element={<Navigate to="/home" replace />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/watch/:id" element={<Watch />} />
