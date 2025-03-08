@@ -77,7 +77,7 @@ export default function AdminLogin() {
         setTimeout(() => {
           console.log("Admin login - Redirecting to admin dashboard");
           navigate('/admin-dashboard');
-        }, 1500); // Longer delay to ensure context is updated
+        }, 2000); // Increased timeout to ensure context is updated
       } else {
         console.error("Admin login - User doesn't have admin privileges:", userRole);
         await mockSignIn('', ''); // Force logout
