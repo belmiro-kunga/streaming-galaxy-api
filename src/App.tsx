@@ -8,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from 'react';
 import { signOut } from '@/lib/supabase/auth';
 import { UserProvider } from '@/contexts/UserContext';
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Watch from "./pages/Watch";
@@ -51,13 +52,17 @@ function App() {
                   <Route path="/home" element={<Home />} />
                   <Route path="/watch/:id" element={<Watch />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/dashboard/downloads" element={<Dashboard />} />
-                  <Route path="/dashboard/profiles" element={<ProfileManagement />} />
-                  <Route path="/kids" element={<Kids />} />
                   <Route path="/subscription-plans" element={<SubscriptionPlans />} />
-                  <Route path="/user-settings" element={<UserSettingsPage />} />
-                  <Route path="/payment-upload" element={<PaymentUpload />} />
+                  
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard/downloads" element={<Dashboard />} />
+                    <Route path="/dashboard/profiles" element={<ProfileManagement />} />
+                    <Route path="/kids" element={<Kids />} />
+                    <Route path="/user-settings" element={<UserSettingsPage />} />
+                    <Route path="/payment-upload" element={<PaymentUpload />} />
+                  </Route>
                   
                   {/* Admin routes */}
                   <Route path="/admin-login" element={<AdminLogin />} />
