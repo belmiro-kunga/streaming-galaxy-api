@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import React from 'react';
+import React, { useEffect } from 'react';
+import { signOut } from '@/lib/supabase/auth';
 import { UserProvider } from '@/contexts/UserContext';
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
@@ -26,6 +27,17 @@ import AdminDashboard from "./pages/AdminDashboard";
 const queryClient = new QueryClient();
 
 function App() {
+  // Ensure user is logged out on app start
+  useEffect(() => {
+    const logoutOnAppStart = async () => {
+      // Remove this automatic logout to make admin login persist
+      // await signOut();
+      // console.log('User logged out on app start');
+    };
+    
+    logoutOnAppStart();
+  }, []);
+
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

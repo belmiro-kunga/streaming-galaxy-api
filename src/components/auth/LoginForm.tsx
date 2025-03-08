@@ -4,9 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { mockSignIn, signOut, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, 
-         TEST_EDITOR_EMAIL, TEST_EDITOR_PASSWORD, 
-         TEST_SUPER_ADMIN_EMAIL, TEST_SUPER_ADMIN_PASSWORD } from '@/lib/supabase/auth';
+import { mockSignIn, signOut } from '@/lib/supabase/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
@@ -33,37 +31,36 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { refreshUserData, user } = useUser();
+  const { refreshUserData } = useUser();
   
   // Get the return path from location state
   const from = location.state?.from?.pathname || '/dashboard';
 
-  // Check if user is already logged in
+  // Don't automatically log out when visiting login page
   useEffect(() => {
-    if (user) {
-      const role = user.user_metadata?.role || 'user';
-      
-      if (['admin', 'editor', 'super_admin'].includes(role)) {
-        navigate('/admin-dashboard');
-      } else {
-        navigate('/dashboard');
+    const checkLoginStatus = async () => {
+      // Instead of logging out, we'll check if there's a profile stored
+      const storedProfile = localStorage.getItem('userProfile');
+      if (storedProfile) {
+        try {
+          const profile = JSON.parse(storedProfile);
+          console.log('Found stored profile:', profile);
+          
+          // If admin role is detected, redirect to admin dashboard
+          if (['admin', 'editor', 'super_admin'].includes(profile?.role)) {
+            navigate('/admin-dashboard');
+          } else {
+            // For regular users, redirect to dashboard
+            navigate('/dashboard');
+          }
+        } catch (e) {
+          console.error('Error parsing stored profile:', e);
+        }
       }
-    }
-  }, [user, navigate]);
-
-  // For development purposes, provide test credentials
-  const handleTestCredentials = (type: 'admin' | 'editor' | 'super') => {
-    if (type === 'admin') {
-      setEmail(TEST_ADMIN_EMAIL);
-      setPassword(TEST_ADMIN_PASSWORD);
-    } else if (type === 'editor') {
-      setEmail(TEST_EDITOR_EMAIL);
-      setPassword(TEST_EDITOR_PASSWORD);
-    } else if (type === 'super') {
-      setEmail(TEST_SUPER_ADMIN_EMAIL);
-      setPassword(TEST_SUPER_ADMIN_PASSWORD);
-    }
-  };
+    };
+    
+    checkLoginStatus();
+  }, [navigate]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -78,17 +75,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true);
     try {
       console.log('Attempting login with:', { email, password });
-      
-      // Use our test credentials if they match
-      const isTestCredential = 
-        (email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) ||
-        (email === TEST_EDITOR_EMAIL && password === TEST_EDITOR_PASSWORD) ||
-        (email === TEST_SUPER_ADMIN_EMAIL && password === TEST_SUPER_ADMIN_PASSWORD);
-      
-      if (isTestCredential) {
-        console.log('Using test credentials');
-      }
-      
       const { data, error } = await mockSignIn(email, password);
       
       if (error) {
@@ -183,33 +169,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           {isLoading ? 'Processando...' : 'Entrar'}
         </Button>
       </div>
-      
-      {/* Development helpers - remove in production */}
-      {process.env.NODE_ENV !== 'production' && (
-        <div className="mt-6 border-t pt-4 text-xs text-gray-500">
-          <div className="mb-2">Credenciais de teste:</div>
-          <div className="space-x-2">
-            <button 
-              className="text-xs underline" 
-              onClick={() => handleTestCredentials('admin')}
-            >
-              Admin
-            </button>
-            <button 
-              className="text-xs underline" 
-              onClick={() => handleTestCredentials('editor')}
-            >
-              Editor
-            </button>
-            <button 
-              className="text-xs underline" 
-              onClick={() => handleTestCredentials('super')}
-            >
-              Super Admin
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

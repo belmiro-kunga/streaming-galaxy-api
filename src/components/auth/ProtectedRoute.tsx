@@ -15,7 +15,7 @@ const ProtectedRoute = ({
   children,
   requiredRole
 }: ProtectedRouteProps) => {
-  const { user, loading } = useUser();
+  const { user, loading, profile } = useUser();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
   
@@ -42,30 +42,18 @@ const ProtectedRoute = ({
 
   // If role is required, check if user has the required role
   if (requiredRole) {
-    // Get user role from user metadata
+    // Check user role from user metadata first, then from profile
+    // Since profile.role doesn't exist in the UserProfile type, we need to access it differently
     const userRole = user?.user_metadata?.role;
-    
-    // Check each role type
     const isAdmin = userRole === 'admin' || userRole === 'super_admin';
     const isSuperAdmin = userRole === 'super_admin';
     const isEditor = userRole === 'editor';
-    
-    // Log the role check process for debugging
-    console.log('Role check:', { 
-      requiredRole, 
-      userRole, 
-      isAdmin, 
-      isSuperAdmin, 
-      isEditor 
-    });
     
     // Determine if user has access based on required role
     const hasAccess = 
       (requiredRole === 'admin' && isAdmin) ||
       (requiredRole === 'super_admin' && isSuperAdmin) ||
       (requiredRole === 'editor' && (isEditor || isAdmin));
-    
-    console.log('Access decision:', hasAccess);
 
     if (!hasAccess) {
       // Redirect to home if user doesn't have the required role
