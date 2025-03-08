@@ -8,7 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
-import { supabase } from '@/lib/supabase/client';
+import { mockSignIn, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, 
+         TEST_EDITOR_EMAIL, TEST_EDITOR_PASSWORD, 
+         TEST_SUPER_ADMIN_EMAIL, TEST_SUPER_ADMIN_PASSWORD } from '@/lib/supabase/auth';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -44,15 +46,8 @@ export default function AdminLogin() {
     try {
       console.log("Admin login - Attempting login with:", email);
       
-      // For testing purposes, use these credentials:
-      // admin@test.com / admin123 (role: admin)
-      // editor@test.com / editor123 (role: editor)
-      // super@test.com / super123 (role: super_admin)
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Use mockSignIn instead of direct Supabase auth
+      const { data, error } = await mockSignIn(email, password);
       
       if (error) {
         console.error("Admin login - Error signing in:", error.message);
@@ -82,10 +77,10 @@ export default function AdminLogin() {
         setTimeout(() => {
           console.log("Admin login - Redirecting to admin dashboard");
           navigate('/admin-dashboard');
-        }, 1000); // Longer delay to ensure context is updated
+        }, 1500); // Longer delay to ensure context is updated
       } else {
         console.error("Admin login - User doesn't have admin privileges:", userRole);
-        await supabase.auth.signOut();
+        await mockSignIn('', ''); // Force logout
         toast({
           title: "Acesso negado",
           description: "Você não tem permissões de administrador.",
@@ -106,18 +101,18 @@ export default function AdminLogin() {
   
   // For development purposes, provide test credentials
   const handleTestAdminCredentials = () => {
-    setEmail('admin@test.com');
-    setPassword('admin123');
+    setEmail(TEST_ADMIN_EMAIL);
+    setPassword(TEST_ADMIN_PASSWORD);
   };
   
   const handleTestEditorCredentials = () => {
-    setEmail('editor@test.com');
-    setPassword('editor123');
+    setEmail(TEST_EDITOR_EMAIL);
+    setPassword(TEST_EDITOR_PASSWORD);
   };
   
   const handleTestSuperAdminCredentials = () => {
-    setEmail('super@test.com');
-    setPassword('super123');
+    setEmail(TEST_SUPER_ADMIN_EMAIL);
+    setPassword(TEST_SUPER_ADMIN_PASSWORD);
   };
   
   return (
