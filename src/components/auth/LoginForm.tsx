@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { mockSignIn, signOut } from '@/lib/supabase/auth';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 
@@ -29,38 +29,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   setIsLoading
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const { refreshUserData } = useUser();
-  
-  // Get the return path from location state
-  const from = location.state?.from?.pathname || '/dashboard';
 
-  // Don't automatically log out when visiting login page
+  // Ensure user is logged out when visiting login page
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      // Instead of logging out, we'll check if there's a profile stored
-      const storedProfile = localStorage.getItem('userProfile');
-      if (storedProfile) {
-        try {
-          const profile = JSON.parse(storedProfile);
-          console.log('Found stored profile:', profile);
-          
-          // If admin role is detected, redirect to admin dashboard
-          if (['admin', 'editor', 'super_admin'].includes(profile?.role)) {
-            navigate('/admin-dashboard');
-          } else {
-            // For regular users, redirect to dashboard
-            navigate('/dashboard');
-          }
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
-      }
+    const logoutOnMount = async () => {
+      await signOut();
+      console.log('User logged out on login page load');
     };
     
-    checkLoginStatus();
-  }, [navigate]);
+    logoutOnMount();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -95,11 +75,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           description: `Você está logado como ${role}.`,
         });
         
-        if (['admin', 'editor', 'super_admin'].includes(role)) {
+        if (role === 'admin' || role === 'super_admin') {
           navigate('/admin-dashboard');
         } else {
-          // Navigate to the original location or dashboard
-          navigate(from);
+          navigate('/dashboard');
         }
       } else {
         console.log('No user data returned:', data);

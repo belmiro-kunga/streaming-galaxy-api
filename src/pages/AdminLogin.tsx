@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, Lock, Shield } from 'lucide-react';
@@ -8,8 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { mockSignIn } from '@/lib/supabase/auth';
-import { useUser } from '@/contexts/UserContext';
+import { supabase, mockSignIn } from '@/lib/supabase';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -17,7 +15,6 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { refreshUserData } = useUser();
 
   // Credenciais de teste já estão definidas em lib/supabase.ts
   // TEST_ADMIN_EMAIL = 'admin@cineplay.com';
@@ -27,57 +24,29 @@ const AdminLogin = () => {
   // TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
   // TEST_SUPER_ADMIN_PASSWORD = 'super123';
 
-  useEffect(() => {
-    // Check if user is already logged in as admin
-    const checkAdminStatus = async () => {
-      const storedProfile = localStorage.getItem('userProfile');
-      if (storedProfile) {
-        try {
-          const profile = JSON.parse(storedProfile);
-          const role = profile?.role;
-          
-          if (['admin', 'editor', 'super_admin'].includes(role)) {
-            navigate('/admin-dashboard');
-          }
-        } catch (e) {
-          console.error('Error parsing stored profile:', e);
-        }
-      }
-    };
-    
-    checkAdminStatus();
-  }, [navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      console.log('Attempting admin login with:', { email, password });
       // Sign in usando nossa função helper que funciona com ou sem Supabase
       const { data, error } = await mockSignIn(email, password);
 
-      if (error) {
-        console.error('Login error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       // Check if user has admin role
       const user = data.user;
       const userRole = user?.user_metadata?.role || 'user';
-      console.log('User data:', user);
-      console.log('User role:', userRole);
 
       if (['admin', 'editor', 'super_admin'].includes(userRole)) {
-        // Refresh user context data
-        await refreshUserData();
-        
         navigate('/admin-dashboard');
         toast({
           title: "Login realizado com sucesso!",
           description: `Bem-vindo ao painel ${userRole === 'admin' ? 'administrativo' : userRole === 'editor' ? 'de edição' : 'de super administrador'}.`,
         });
       } else {
+        // Sign out if not an admin role
+        await supabase.auth.signOut();
         throw new Error("Você não tem permissão para acessar esta área.");
       }
     } catch (error: any) {

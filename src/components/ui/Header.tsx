@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, User, LogOut, Settings, CreditCard, Gauge, Home, Download, X, Baby, LogIn } from 'lucide-react';
+import { Search, Bell, User, LogOut, Settings, CreditCard, Gauge, Home, Download, X, Baby } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/UserContext';
 
 export const Header = () => {
   const isMobile = useMobile();
@@ -19,7 +18,6 @@ export const Header = () => {
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { isAuthenticated, profile, logout } = useUser();
   
   // Mock search suggestions - this would be replaced with actual API calls
   const mockSuggestions = [
@@ -46,11 +44,6 @@ export const Header = () => {
     );
     setSearchSuggestions(filteredSuggestions);
   }, [searchQuery]);
-  
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,69 +102,56 @@ export const Header = () => {
             <Search className="w-5 h-5" />
           </button>
           
-          {isAuthenticated && (
-            <button className="p-2 text-white" aria-label="Notificações">
-              <Bell className="w-5 h-5" />
-            </button>
-          )}
+          <button className="p-2 text-white" aria-label="Notificações">
+            <Bell className="w-5 h-5" />
+          </button>
           
-          {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center space-x-2">
-                  <Avatar className="w-8 h-8 border-2 border-white/20">
-                    <AvatarImage src="https://source.unsplash.com/random/100x100?face" />
-                    <AvatarFallback>{profile?.first_name?.charAt(0) || 'U'}</AvatarFallback>
-                  </Avatar>
-                  {!isMobile && <span className="text-white text-sm">{profile?.first_name || 'Usuário'}</span>}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-gray-700">
-                <DropdownMenuLabel className="flex items-center">
-                  <Avatar className="w-8 h-8 mr-2">
-                    <AvatarImage src="https://source.unsplash.com/random/100x100?face" />
-                    <AvatarFallback>{profile?.first_name?.charAt(0) || 'U'}</AvatarFallback>
-                  </Avatar>
-                  <span>{profile?.first_name || 'Usuário'}</span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-gray-700" />
-                <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Perfil</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard/profiles')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Gerenciar Perfis</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/user-settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configurações</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/subscription-plans')}>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Planos de Assinatura</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
-                  <Gauge className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-gray-700" />
-                <DropdownMenuItem className="flex items-center cursor-pointer text-red-500" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sair</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button 
-              variant="ghost" 
-              className="text-white hover:bg-white/10" 
-              onClick={() => navigate('/login')}
-            >
-              <LogIn className="w-5 h-5 mr-2" />
-              Entrar
-            </Button>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center space-x-2">
+                <Avatar className="w-8 h-8 border-2 border-white/20">
+                  <AvatarImage src="https://source.unsplash.com/random/100x100?face" />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                {!isMobile && <span className="text-white text-sm">Usuário</span>}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-gray-700">
+              <DropdownMenuLabel className="flex items-center">
+                <Avatar className="w-8 h-8 mr-2">
+                  <AvatarImage src="https://source.unsplash.com/random/100x100?face" />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                <span>Usuário</span>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-700" />
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard/profiles')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Gerenciar Perfis</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/user-settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Configurações</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/subscription-plans')}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Planos de Assinatura</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
+                <Gauge className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-gray-700" />
+              <DropdownMenuItem className="flex items-center cursor-pointer text-red-500" onClick={() => navigate('/login')}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -193,36 +173,24 @@ export const Header = () => {
               <Search className="h-6 w-6 mb-1" />
               <span className="text-xs">Busca</span>
             </Button>
-            
-            {isAuthenticated ? (
-              <>
-                <Link to="/dashboard/downloads">
-                  <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-                    <Download className="h-6 w-6 mb-1" />
-                    <span className="text-xs">Downloads</span>
-                  </Button>
-                </Link>
-                <Link to="/kids">
-                  <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-                    <Baby className="h-6 w-6 mb-1" />
-                    <span className="text-xs">Kids</span>
-                  </Button>
-                </Link>
-                <Link to="/dashboard">
-                  <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-                    <User className="h-6 w-6 mb-1" />
-                    <span className="text-xs">Perfil</span>
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <Link to="/login">
-                <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
-                  <LogIn className="h-6 w-6 mb-1" />
-                  <span className="text-xs">Entrar</span>
-                </Button>
-              </Link>
-            )}
+            <Link to="/dashboard/downloads">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <Download className="h-6 w-6 mb-1" />
+                <span className="text-xs">Downloads</span>
+              </Button>
+            </Link>
+            <Link to="/kids">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <Baby className="h-6 w-6 mb-1" />
+                <span className="text-xs">Kids</span>
+              </Button>
+            </Link>
+            <Link to="/dashboard">
+              <Button variant="ghost" className="flex flex-col items-center text-gray-400 hover:text-white">
+                <User className="h-6 w-6 mb-1" />
+                <span className="text-xs">Perfil</span>
+              </Button>
+            </Link>
           </div>
         </div>
       )}

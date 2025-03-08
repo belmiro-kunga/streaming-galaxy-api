@@ -8,7 +8,6 @@ import { AnimatePresence } from "framer-motion";
 import React, { useEffect } from 'react';
 import { signOut } from '@/lib/supabase/auth';
 import { UserProvider } from '@/contexts/UserContext';
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import Watch from "./pages/Watch";
@@ -30,9 +29,8 @@ function App() {
   // Ensure user is logged out on app start
   useEffect(() => {
     const logoutOnAppStart = async () => {
-      // Remove this automatic logout to make admin login persist
-      // await signOut();
-      // console.log('User logged out on app start');
+      await signOut();
+      console.log('User logged out on app start');
     };
     
     logoutOnAppStart();
@@ -53,28 +51,17 @@ function App() {
                   <Route path="/home" element={<Home />} />
                   <Route path="/watch/:id" element={<Watch />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard/downloads" element={<Dashboard />} />
+                  <Route path="/dashboard/profiles" element={<ProfileManagement />} />
+                  <Route path="/kids" element={<Kids />} />
                   <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+                  <Route path="/user-settings" element={<UserSettingsPage />} />
+                  <Route path="/payment-upload" element={<PaymentUpload />} />
+                  
+                  {/* Admin routes */}
                   <Route path="/admin-login" element={<AdminLogin />} />
-                  
-                  {/* Protected Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/dashboard/downloads" element={<Dashboard />} />
-                    <Route path="/dashboard/profiles" element={<ProfileManagement />} />
-                    <Route path="/kids" element={<Kids />} />
-                    <Route path="/user-settings" element={<UserSettingsPage />} />
-                    <Route path="/payment-upload" element={<PaymentUpload />} />
-                  </Route>
-                  
-                  {/* Admin routes with role requirement */}
-                  <Route 
-                    path="/admin-dashboard/*" 
-                    element={
-                      <ProtectedRoute requiredRole="admin" redirectPath="/admin-login">
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
+                  <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

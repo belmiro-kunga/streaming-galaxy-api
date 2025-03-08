@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getUser, getUserProfile } from '@/lib/supabase/auth';
 import { supabase } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export interface UserProfile {
   id: string;
@@ -19,18 +18,14 @@ interface UserContextType {
   user: any | null;
   profile: UserProfile | null;
   loading: boolean;
-  isAuthenticated: boolean;
   refreshUserData: () => Promise<void>;
-  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType>({
   user: null,
   profile: null,
   loading: true,
-  isAuthenticated: false,
-  refreshUserData: async () => {},
-  logout: async () => {}
+  refreshUserData: async () => {}
 });
 
 export const useUser = () => useContext(UserContext);
@@ -39,7 +34,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const refreshUserData = async () => {
     try {
@@ -72,26 +66,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setProfile(null);
-      localStorage.removeItem('userProfile');
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado da sua conta."
-      });
-    } catch (error) {
-      console.error('Error logging out:', error);
-      toast({
-        title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar sair da sua conta.",
-        variant: "destructive"
-      });
-    }
-  };
-
   useEffect(() => {
     // Initial load
     refreshUserData();
@@ -115,17 +89,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  const isAuthenticated = !!user;
-
   return (
-    <UserContext.Provider value={{ 
-      user, 
-      profile, 
-      loading, 
-      isAuthenticated,
-      refreshUserData,
-      logout
-    }}>
+    <UserContext.Provider value={{ user, profile, loading, refreshUserData }}>
       {children}
     </UserContext.Provider>
   );
