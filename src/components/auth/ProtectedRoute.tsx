@@ -36,6 +36,7 @@ const ProtectedRoute = ({
 
   // Check if user is authenticated
   if (!user) {
+    console.log("ProtectedRoute: No user found, redirecting to", redirectPath);
     // Redirect to login with a return URL
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
@@ -51,7 +52,7 @@ const ProtectedRoute = ({
     const isEditor = userRole === 'editor';
     
     // Log the role check process for debugging
-    console.log('Role check:', { 
+    console.log('ProtectedRoute - Role check:', { 
       requiredRole, 
       userRole, 
       isAdmin, 
@@ -65,14 +66,16 @@ const ProtectedRoute = ({
       (requiredRole === 'super_admin' && isSuperAdmin) ||
       (requiredRole === 'editor' && (isEditor || isAdmin));
     
-    console.log('Access decision:', hasAccess);
+    console.log('ProtectedRoute - Access decision:', hasAccess);
 
     if (!hasAccess) {
+      console.log("ProtectedRoute: User doesn't have required role, redirecting to /home");
       // Redirect to home if user doesn't have the required role
       return <Navigate to="/home" replace />;
     }
   }
 
+  console.log("ProtectedRoute: Access granted");
   return children ? <>{children}</> : <Outlet />;
 };
 

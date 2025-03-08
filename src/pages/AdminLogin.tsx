@@ -1,223 +1,161 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Lock, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { mockSignIn, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, 
-         TEST_EDITOR_EMAIL, TEST_EDITOR_PASSWORD,
-         TEST_SUPER_ADMIN_EMAIL, TEST_SUPER_ADMIN_PASSWORD } from '@/lib/supabase/auth';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { AdminIcon } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/lib/supabase/client';
 
-const AdminLogin = () => {
+export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { refreshUserData, user } = useUser();
-
-  // Handle auto-fill of test credentials
-  const fillTestCredentials = (type: 'admin' | 'editor' | 'super') => {
-    if (type === 'admin') {
-      setEmail(TEST_ADMIN_EMAIL);
-      setPassword(TEST_ADMIN_PASSWORD);
-    } else if (type === 'editor') {
-      setEmail(TEST_EDITOR_EMAIL);
-      setPassword(TEST_EDITOR_PASSWORD);
-    } else if (type === 'super') {
-      setEmail(TEST_SUPER_ADMIN_EMAIL);
-      setPassword(TEST_SUPER_ADMIN_PASSWORD);
-    }
-  };
-
-  // Check if user is already logged in with admin role
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, refreshUserData } = useUser();
+  
+  // Check if user is already logged in and has admin role
   useEffect(() => {
-    if (user) {
-      const role = user.user_metadata?.role;
-      if (['admin', 'editor', 'super_admin'].includes(role)) {
-        navigate('/admin-dashboard');
+    const checkAdminStatus = async () => {
+      if (user) {
+        console.log("Admin login - User data:", user);
+        const userRole = user?.user_metadata?.role;
+        console.log("Admin login - User role:", userRole);
+        
+        if (userRole === 'admin' || userRole === 'super_admin' || userRole === 'editor') {
+          console.log(`Redirecting to admin dashboard - User is ${userRole}`);
+          navigate('/admin-dashboard');
+        }
       }
-    }
+    };
+    
+    checkAdminStatus();
   }, [user, navigate]);
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    setIsLoading(true);
+    
     try {
-      console.log('Attempting admin login with:', { email, password });
-      // Sign in using our helper function that works with or without Supabase
-      const { data, error } = await mockSignIn(email, password);
-
+      console.log("Admin login - Attempting login with:", email);
+      
+      // For testing purposes, use these credentials:
+      // admin@test.com / admin123 (role: admin)
+      // editor@test.com / editor123 (role: editor)
+      // super@test.com / super123 (role: super_admin)
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
       if (error) {
-        console.error('Login error:', error);
+        console.error("Admin login - Error signing in:", error.message);
         throw error;
       }
-
-      // Check if user has admin role
-      const user = data.user;
-      if (!user) {
-        throw new Error("Falha na autenticação. Usuário não encontrado.");
+      
+      if (!data.user) {
+        throw new Error("Admin login - No user data returned");
       }
       
-      const userRole = user.user_metadata?.role || 'user';
-      console.log('User data:', user);
-      console.log('User role:', userRole);
-
-      if (['admin', 'editor', 'super_admin'].includes(userRole)) {
-        // Refresh user context data
-        await refreshUserData();
-        
-        navigate('/admin-dashboard');
+      console.log("Admin login - Login successful, user data:", data.user);
+      
+      // Force refresh user data to get latest metadata
+      await refreshUserData();
+      
+      // Get user role from metadata
+      const userRole = data.user.user_metadata?.role;
+      console.log("Admin login - User role after login:", userRole);
+      
+      if (userRole === 'admin' || userRole === 'super_admin' || userRole === 'editor') {
         toast({
-          title: "Login realizado com sucesso!",
-          description: `Bem-vindo ao painel ${userRole === 'admin' ? 'administrativo' : userRole === 'editor' ? 'de edição' : 'de super administrador'}.`,
+          title: "Login bem-sucedido",
+          description: `Bem-vindo ${userRole === 'super_admin' ? 'Super Admin' : userRole === 'admin' ? 'Administrador' : 'Editor'}!`
         });
+        
+        // Important: Wait a moment for user context to update before redirecting
+        setTimeout(() => {
+          console.log("Admin login - Redirecting to admin dashboard");
+          navigate('/admin-dashboard');
+        }, 500);
       } else {
-        throw new Error("Você não tem permissão para acessar esta área.");
+        console.error("Admin login - User doesn't have admin privileges:", userRole);
+        await supabase.auth.signOut();
+        toast({
+          title: "Acesso negado",
+          description: "Você não tem permissões de administrador.",
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
-      console.error("Admin authentication error:", error);
+      console.error("Admin login - Error during login:", error);
       toast({
-        title: "Falha na autenticação",
-        description: error.message || "Email ou senha incorretos.",
-        variant: "destructive",
+        title: "Erro de login",
+        description: error.message || "Falha na autenticação. Verifique suas credenciais.",
+        variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black to-gray-900 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="border-gray-800 bg-black/70 backdrop-blur-sm shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-2">
-              <Shield className="h-12 w-12 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-bold tracking-tight text-white">
-              Área Administrativa
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Acesso restrito ao painel administrativo
-            </CardDescription>
-          </CardHeader>
+    <div className="flex min-h-screen items-center justify-center bg-black p-4">
+      <Card className="w-full max-w-md bg-gray-900 border-gray-800">
+        <CardHeader className="space-y-1 flex flex-col items-center">
+          <div className="bg-primary rounded-full p-3 mb-2">
+            <AdminIcon className="h-8 w-8 text-white" />
+          </div>
+          <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+          <CardDescription className="text-center text-gray-400">
+            Entre com suas credenciais de administrador
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-200">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="admin@cineplay.com"
-                    required
-                  />
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                placeholder="admin@exemplo.com" 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha</Label>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-200">
-                    Senha
-                  </Label>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <Button
-                type="submit"
-                className="w-full h-12 text-base"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Autenticando...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    Entrar
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </span>
-                )}
-              </Button>
-            </form>
-            
-            {/* Test credentials section */}
-            <div className="mt-4 pt-4 border-t border-gray-800 text-center">
-              <p className="text-sm text-gray-400 mb-2">Credenciais de teste:</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => fillTestCredentials('admin')}
-                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
-                >
-                  Admin
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => fillTestCredentials('editor')}
-                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
-                >
-                  Editor
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => fillTestCredentials('super')}
-                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
-                >
-                  Super Admin
-                </Button>
-              </div>
+              <Input 
+                id="password" 
+                placeholder="••••••••" 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white"
+              />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2 text-center text-sm text-gray-400">
-            <p className="w-full">
-              Área restrita para funcionários autorizados
-            </p>
-            <p className="text-xs text-gray-500">
-              Acesso disponível para: Editor, Administrador e Super Administrador
-            </p>
+          <CardFooter>
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Entrando..." : "Entrar"}
+            </Button>
           </CardFooter>
-        </Card>
-      </motion.div>
+        </form>
+      </Card>
     </div>
   );
-};
-
-export default AdminLogin;
+}
