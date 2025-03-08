@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { AdminIcon } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { supabase } from '@/lib/supabase/client';
@@ -109,7 +109,7 @@ export default function AdminLogin() {
       <Card className="w-full max-w-md bg-gray-900 border-gray-800">
         <CardHeader className="space-y-1 flex flex-col items-center">
           <div className="bg-primary rounded-full p-3 mb-2">
-            <AdminIcon className="h-8 w-8 text-white" />
+            <Shield className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
           <CardDescription className="text-center text-gray-400">
