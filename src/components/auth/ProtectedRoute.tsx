@@ -15,18 +15,27 @@ const ProtectedRoute = ({
   children,
   requiredRole
 }: ProtectedRouteProps) => {
-  const { user, loading } = useUser();
+  const { user, loading, refreshUserData } = useUser();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
   
+  // When component mounts, refresh user data to ensure we have the latest metadata
   useEffect(() => {
-    // Wait for the user context to finish loading
-    if (!loading) {
-      setIsChecking(false);
-    }
-  }, [loading]);
+    const refreshData = async () => {
+      if (!loading) {
+        // Only refresh if not already loading
+        if (user) {
+          console.log("ProtectedRoute - Refreshing user data for role check");
+          await refreshUserData();
+        }
+        setIsChecking(false);
+      }
+    };
+    
+    refreshData();
+  }, [loading, refreshUserData, user]);
 
-  if (isChecking) {
+  if (loading || isChecking) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -45,6 +54,7 @@ const ProtectedRoute = ({
   if (requiredRole) {
     // Get user role from user metadata
     const userRole = user?.user_metadata?.role;
+    console.log("ProtectedRoute - Checking role access:", { requiredRole, userRole });
     
     // Check each role type
     const isAdmin = userRole === 'admin' || userRole === 'super_admin';

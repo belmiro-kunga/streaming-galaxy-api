@@ -2,11 +2,11 @@
 import { supabase } from './client';
 
 // Test admin credentials for development
-export const TEST_ADMIN_EMAIL = 'admin@cineplay.com';
+export const TEST_ADMIN_EMAIL = 'admin@test.com';
 export const TEST_ADMIN_PASSWORD = 'admin123';
-export const TEST_EDITOR_EMAIL = 'editor@cineplay.com';
+export const TEST_EDITOR_EMAIL = 'editor@test.com';
 export const TEST_EDITOR_PASSWORD = 'editor123';
-export const TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
+export const TEST_SUPER_ADMIN_EMAIL = 'super@test.com';
 export const TEST_SUPER_ADMIN_PASSWORD = 'super123';
 
 // Helper functions
@@ -66,7 +66,7 @@ export const mockSignIn = async (email, password) => {
   if (supabase.auth) {
     console.log('Usando autenticação real do Supabase');
     
-    // For test credentials, use mock auth instead of real Supabase
+    // Special handling for test admin credentials
     if ((email === TEST_ADMIN_EMAIL && password === TEST_ADMIN_PASSWORD) ||
         (email === TEST_EDITOR_EMAIL && password === TEST_EDITOR_PASSWORD) ||
         (email === TEST_SUPER_ADMIN_EMAIL && password === TEST_SUPER_ADMIN_PASSWORD)) {

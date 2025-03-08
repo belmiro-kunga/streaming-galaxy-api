@@ -52,6 +52,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (currentUser) {
         console.log('UserContext - User authenticated:', currentUser);
+        console.log('UserContext - User metadata:', currentUser.user_metadata);
+        
         setUser(currentUser);
         
         // Try to get profile from localStorage first for immediate display
@@ -128,9 +130,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('UserContext - Auth state changed:', event);
+        console.log('UserContext - Auth state changed:', event, session?.user?.id);
+        
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           console.log('UserContext - User signed in or token refreshed, updating user data');
+          if (session?.user) {
+            console.log('UserContext - New session user metadata:', session.user.user_metadata);
+          }
           await refreshUserData();
         } else if (event === 'SIGNED_OUT') {
           console.log('UserContext - User signed out, clearing user data');

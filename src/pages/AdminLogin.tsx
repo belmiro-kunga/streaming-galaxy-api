@@ -82,7 +82,7 @@ export default function AdminLogin() {
         setTimeout(() => {
           console.log("Admin login - Redirecting to admin dashboard");
           navigate('/admin-dashboard');
-        }, 500);
+        }, 1000); // Longer delay to ensure context is updated
       } else {
         console.error("Admin login - User doesn't have admin privileges:", userRole);
         await supabase.auth.signOut();
@@ -102,6 +102,22 @@ export default function AdminLogin() {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // For development purposes, provide test credentials
+  const handleTestAdminCredentials = () => {
+    setEmail('admin@test.com');
+    setPassword('admin123');
+  };
+  
+  const handleTestEditorCredentials = () => {
+    setEmail('editor@test.com');
+    setPassword('editor123');
+  };
+  
+  const handleTestSuperAdminCredentials = () => {
+    setEmail('super@test.com');
+    setPassword('super123');
   };
   
   return (
@@ -144,6 +160,36 @@ export default function AdminLogin() {
                 className="bg-gray-800 border-gray-700 text-white"
               />
             </div>
+            
+            {/* Test credentials helper */}
+            {process.env.NODE_ENV !== 'production' && (
+              <div className="pt-2 text-xs text-gray-500">
+                <p className="mb-1">Credenciais de teste:</p>
+                <div className="flex space-x-2">
+                  <button 
+                    type="button"
+                    onClick={handleTestAdminCredentials}
+                    className="text-xs underline"
+                  >
+                    Admin
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleTestEditorCredentials}
+                    className="text-xs underline"
+                  >
+                    Editor
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleTestSuperAdminCredentials}
+                    className="text-xs underline"
+                  >
+                    Super Admin
+                  </button>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button 
