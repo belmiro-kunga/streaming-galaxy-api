@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +14,7 @@
   }
 }
 
-/* Esconde a barra de rolagem em todos os navegadores */
+/* Hide scrollbar in all browsers */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
@@ -23,9 +24,40 @@
   display: none; /* Chrome, Safari and Opera */
 }
 
-/* Estilo para scroll suave */
+/* Smooth scrolling */
 * {
   scroll-behavior: smooth;
 }
 
-/* ... resto do arquivo ... */ 
+/* Netflix specific styles */
+@layer components {
+  .netflix-card {
+    @apply relative overflow-hidden transition-transform duration-200 ease-out;
+  }
+  
+  .netflix-card:hover {
+    @apply z-10 scale-110 shadow-xl;
+  }
+  
+  .netflix-button-primary {
+    @apply bg-white text-black hover:bg-white/90 transition-colors;
+  }
+  
+  .netflix-button-secondary {
+    @apply bg-gray-600/80 text-white hover:bg-gray-600/90 transition-colors;
+  }
+  
+  .netflix-gradient-bottom {
+    @apply bg-gradient-to-t from-black to-transparent;
+  }
+  
+  .netflix-gradient-top {
+    @apply bg-gradient-to-b from-black/70 to-transparent;
+  }
+  
+  .netflix-gradient-left {
+    @apply bg-gradient-to-r from-black/80 to-transparent;
+  }
+}
+
+/* ... resto do arquivo ... */
