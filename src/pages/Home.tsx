@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ContentItem, Genre } from '@/types/api';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +65,7 @@ const Home = () => {
 
       {/* Conteúdo Principal */}
       <motion.main 
-        initial={{ opacity: 0 }}
+        initial={{ opacity: H0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         className="px-4 md:px-8 -mt-40 space-y-6 bg-black min-h-screen relative z-10"
@@ -168,11 +169,25 @@ const Home = () => {
           </div>
         </motion.section>
 
-        {/* Seção Continuar Assistindo */}
+        {/* Seção Populares na Netflix (como no exemplo) */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Populares na CinePlay</h2>
+          <MovieCarousel 
+            items={topRatedContent} 
+            type="popular"
+          />
+        </motion.section>
+
+        {/* Seção Continuar Assistindo */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
           className="space-y-4 pt-4"
         >
           <h2 className="text-xl sm:text-2xl font-bold text-white">Continuar Assistindo</h2>
@@ -186,7 +201,7 @@ const Home = () => {
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.7 }}
           className="space-y-4 pt-4"
         >
           <h2 className="text-xl sm:text-2xl font-bold text-white">Em Alta</h2>
@@ -200,7 +215,7 @@ const Home = () => {
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.8 }}
           className="space-y-4 pt-4"
         >
           <h2 className="text-xl sm:text-2xl font-bold text-white">Recomendados para Você</h2>
@@ -209,23 +224,9 @@ const Home = () => {
             type="recommended"
           />
         </motion.section>
-
-        {/* Seção Mais Populares */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="space-y-4 pt-4"
-        >
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Mais Populares</h2>
-          <MovieCarousel 
-            items={topRatedContent} 
-            type="popular"
-          />
-        </motion.section>
       </motion.main>
     </Layout>
   );
 };
 
-export default Home; 
+export default Home;
