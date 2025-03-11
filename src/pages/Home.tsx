@@ -1,14 +1,18 @@
-
-import React, { useState, useEffect } from 'react';
-import { contentAPI, userInteractionAPI } from '@/services/api';
+import React, { useEffect, useState } from 'react';
+import { ContentItem, Genre } from '@/types/api';
 import { useToast } from '@/hooks/use-toast';
 import { useMobile } from '@/hooks/use-mobile';
-import { ContentItem, Genre } from '@/types/api';
-import { Header } from '@/components/ui/Header';
-import { FeaturedContent } from '@/components/ui/FeaturedContent';
-import { ContentRow } from '@/components/ui/ContentRow';
-import { GenreFilter } from '@/components/ui/GenreFilter';
-import { StreamingServicesRow } from '@/components/ui/StreamingServicesRow';
+import { Layout } from '@/components/ui/Layout';
+import { MovieCarousel } from '@/components/ui/MovieCarousel';
+import { MovieHero } from '@/components/ui/MovieHero';
+import { StreamingCards } from '@/components/ui/StreamingCards';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
+import { IHomeView } from '@/mvp/contracts/HomeContracts';
+import { HomeModel } from '@/mvp/models/HomeModel';
+import { HomePresenter } from '@/mvp/presenters/HomePresenter';
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Home = () => {
   const [featuredContent, setFeaturedContent] = useState<ContentItem | null>(null);
@@ -19,188 +23,209 @@ const Home = () => {
   const [recentContent, setRecentContent] = useState<ContentItem[]>([]);
   const [topRatedContent, setTopRatedContent] = useState<ContentItem[]>([]);
   const [recommendedContent, setRecommendedContent] = useState<ContentItem[]>([]);
-  const [activeGenres, setActiveGenres] = useState<string[]>(['1', '8']); // Default active genres
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const isMobile = useMobile();
-  const isTV = window.innerWidth >= 1920;
+  const navigate = useNavigate();
 
-  const toggleGenre = (genreId: string) => {
-    setActiveGenres(prev => 
-      prev.includes(genreId) 
-        ? prev.filter(id => id !== genreId)
-        : [...prev, genreId]
-    );
+  // Implementação da interface IHomeView
+  const view: IHomeView = {
+    setFeaturedContent: (content) => setFeaturedContent(content),
+    setTrendingContent: (content) => setTrendingContent(content),
+    setContinueWatching: (content) => setContinueWatching(content),
+    setGenres: (genresData) => setGenres(genresData),
+    setContentByGenre: (content) => setContentByGenre(content),
+    setRecentContent: (content) => setRecentContent(content),
+    setTopRatedContent: (content) => setTopRatedContent(content),
+    setRecommendedContent: (content) => setRecommendedContent(content),
+    setLoading: (loading) => setIsLoading(loading),
+    showError: (message) => toast({
+      title: 'Erro',
+      description: message,
+      variant: 'destructive',
+    })
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Get featured content
-        const featuredData = await contentAPI.getFeatureContent();
-        setFeaturedContent(featuredData);
+    const model = new HomeModel();
+    const presenter = new HomePresenter(model, view);
+    
+    presenter.initialize();
 
-        // Get trending content
-        const trending = await contentAPI.getTrendingContent(20);
-        setTrendingContent(trending);
-        
-        // Get recent content
-        const recent = await contentAPI.getRecentContent(15);
-        setRecentContent(recent);
-        
-        // Get top rated content
-        const topRated = await contentAPI.getTopRatedContent(15);
-        setTopRatedContent(topRated);
-
-        // Get all genres
-        const genresData = await contentAPI.getAllGenres();
-        setGenres(genresData);
-
-        // Get content by genre
-        const contentGenres: { [key: string]: ContentItem[] } = {};
-        for (const genre of genresData) {
-          try {
-            const content = await contentAPI.getContentByGenre(genre.id, 10);
-            contentGenres[genre.id] = content;
-          } catch (error) {
-            console.error(`Error fetching content for genre ${genre.nome}:`, error);
-            contentGenres[genre.id] = [];
-          }
-        }
-        setContentByGenre(contentGenres);
-
-        // Get continue watching content
-        try {
-          // This would need authenticated user in real app
-          const userId = localStorage.getItem('userId') || 'mock-user';
-          const watchingData = await userInteractionAPI.getContinueWatching(userId);
-          setContinueWatching(watchingData);
-          
-          // Get recommended content
-          const recommended = await userInteractionAPI.getRecommendedContent(userId);
-          setRecommendedContent(recommended);
-        } catch (error) {
-          console.log('User not authenticated or error fetching user data:', error);
-        }
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar os conteúdos. Tente novamente mais tarde.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      presenter.dispose();
     };
-
-    fetchData();
-  }, [toast]);
-
-  // If we're still loading and no featured content, show a loading state
-  if (isLoading && !featuredContent) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-12 w-48 bg-gray-700 rounded mb-8"></div>
-          <div className="h-64 w-full max-w-4xl bg-gray-800 rounded-lg"></div>
-          <div className="mt-8 grid grid-cols-4 gap-4 w-full max-w-4xl">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-700 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <Header />
+    <Layout>
+      {/* Hero Section */}
+      <MovieHero />
 
-      <div className="pt-16">
-        {/* Featured Content */}
-        {featuredContent && <FeaturedContent content={featuredContent} />}
+      {/* Conteúdo Principal */}
+      <motion.main 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="px-4 md:px-8 -mt-40 space-y-6 bg-black min-h-screen relative z-10"
+      >
+        {/* Seção de Streaming Services */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-2"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Streaming Services</h2>
+          <StreamingCards />
+        </motion.section>
 
-        <div className="px-4 md:px-8 py-8">
-          {/* Genres Filter */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <h2 className="text-xl md:text-2xl font-bold text-white">Descubra</h2>
-                <div className="ml-2 w-2 h-2 rounded-full bg-red-600"></div>
-              </div>
+        {/* Navegação por Categorias */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Categorias</h2>
+          <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 relative group">
+            {/* Botão de navegação esquerda */}
+            <button
+              onClick={() => {
+                const container = document.getElementById('categorias-container');
+                if (container) {
+                  container.scrollBy({
+                    left: -200,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-4 hidden md:block"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+
+            {/* Container das categorias */}
+            <div 
+              id="categorias-container"
+              className="flex overflow-x-auto no-scrollbar gap-2 scroll-smooth snap-x snap-mandatory"
+              style={{ 
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              {[
+                'Ação',
+                'Aventura',
+                'Comédia',
+                'Drama',
+                'Faroeste',
+                'Fantasia',
+                'Ficção científica',
+                'Mistério',
+                'Musical',
+                'Romance',
+                'Terror',
+                'Thriller'
+              ].map((categoria) => (
+                <button
+                  key={categoria}
+                  onClick={() => navigate(
+                    categoria === 'Ação' ? '/acao' : 
+                    categoria === 'Aventura' ? '/aventura' : 
+                    categoria === 'Comédia' ? '/comedia' : 
+                    categoria === 'Drama' ? '/drama' : 
+                    categoria === 'Faroeste' ? '/faroeste' : 
+                    '#'
+                  )}
+                  className="flex-none px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors whitespace-nowrap snap-center"
+                >
+                  {categoria}
+                </button>
+              ))}
             </div>
-            
-            {/* Genre Pills */}
-            <GenreFilter 
-              genres={genres} 
-              activeGenres={activeGenres} 
-              toggleGenre={toggleGenre} 
-            />
+
+            {/* Botão de navegação direita */}
+            <button
+              onClick={() => {
+                const container = document.getElementById('categorias-container');
+                if (container) {
+                  container.scrollBy({
+                    left: 200,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-4 hidden md:block"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            {/* Gradientes para indicar scroll */}
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-black to-transparent pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black to-transparent pointer-events-none" />
           </div>
+        </motion.section>
 
-          {/* Streaming Services Row - Added new component here */}
-          <StreamingServicesRow />
-
-          {/* Continue Watching (if available) */}
-          {continueWatching.length > 0 && (
-            <ContentRow
-              title="Continue Assistindo"
-              content={continueWatching}
-              seeAllLink="/my-list"
-            />
-          )}
-
-          {/* Trending Content Row */}
-          <ContentRow
-            title="Em Alta"
-            content={trendingContent}
-            seeAllLink="/trending"
+        {/* Seção Continuar Assistindo */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Continuar Assistindo</h2>
+          <MovieCarousel 
+            items={continueWatching} 
+            type="continue"
           />
-          
-          {/* Recommended For You */}
-          {recommendedContent.length > 0 && (
-            <ContentRow
-              title="Recomendado Para Você"
-              content={recommendedContent}
-              seeAllLink="/recommended"
-            />
-          )}
-          
-          {/* Recently Added */}
-          <ContentRow
-            title="Adicionados Recentemente"
-            content={recentContent}
-            seeAllLink="/recent"
-          />
-          
-          {/* Top Rated */}
-          <ContentRow
-            title="Mais Bem Avaliados"
-            content={topRatedContent}
-            seeAllLink="/top-rated"
-          />
+        </motion.section>
 
-          {/* Content by Genres */}
-          {genres
-            .filter(genre => activeGenres.includes(genre.id))
-            .map((genre) => (
-              <ContentRow
-                key={genre.id}
-                title={genre.nome}
-                content={contentByGenre[genre.id] || []}
-                seeAllLink={`/genre/${genre.id}`}
-              />
-            ))}
-        </div>
-      </div>
-    </div>
+        {/* Seção Em Alta */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Em Alta</h2>
+          <MovieCarousel 
+            items={trendingContent} 
+            type="trending"
+          />
+        </motion.section>
+
+        {/* Seção Recomendados */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Recomendados para Você</h2>
+          <MovieCarousel 
+            items={recommendedContent} 
+            type="recommended"
+          />
+        </motion.section>
+
+        {/* Seção Mais Populares */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="space-y-4 pt-4"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Mais Populares</h2>
+          <MovieCarousel 
+            items={topRatedContent} 
+            type="popular"
+          />
+        </motion.section>
+      </motion.main>
+    </Layout>
   );
 };
 
-export default Home;
+export default Home; 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Play, Plus, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,27 +8,32 @@ interface FeaturedContentProps {
 }
 
 export const FeaturedContent = ({ content }: FeaturedContentProps) => {
+  const videoId = '7ZzP1vgk5nA';
+
   return (
-    <div className="relative h-[80vh] md:min-h-[85vh]">
+    <div className="relative w-full h-[85vh] mt-[48px]">
       <div className="absolute inset-0">
-        <img 
-          src={`https://images.unsplash.com/photo-1649972904349-6e44c42644a7`}
-          alt={content.titulo}
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
           className="w-full h-full object-cover"
+          style={{ border: 'none' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-black/40 to-black/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
       </div>
-      <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-12 lg:p-16 max-w-2xl">
+      <div className="relative z-10 h-full flex flex-col justify-end p-6 max-w-2xl">
         <div className="mb-4">
-          <span className="text-sm text-gray-300">Duração: 1h 47m</span>
+          <span className="text-sm text-gray-300">Duração: {content.duracao}</span>
         </div>
         <div className="flex items-center space-x-2 mb-2">
           <div className="flex items-center text-yellow-500">
             <Star className="w-4 h-4 fill-current" />
-            <span className="ml-1 text-white font-bold">8.2</span>
+            <span className="ml-1 text-white font-bold">{content.avaliacao}</span>
           </div>
-          <span className="text-sm text-gray-300">Action • Aventura • {content.ano_lancamento}</span>
+          <span className="text-sm text-gray-300">{content.generos?.join(' • ')} • {content.ano_lancamento}</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-4">{content.titulo}</h1>
         <p className="text-sm md:text-base mb-6 text-gray-300 line-clamp-3 md:line-clamp-4">

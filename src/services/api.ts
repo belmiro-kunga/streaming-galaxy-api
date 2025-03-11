@@ -1,4 +1,3 @@
-
 // Mock implementation for the API
 // Replace this with actual API calls in production
 
@@ -14,11 +13,28 @@ const validateContentItem = (item: any): ContentItem => {
     ano_lancamento: item?.ano_lancamento || 2023,
     classificacao_etaria: item?.classificacao_etaria || '16',
     gratuito: item?.gratuito ?? true,
+    duracao: item?.duracao || '2h 15min',
+    video_url: item?.video_url || 'https://www.youtube.com/watch?v=fz0j2lAo4K0'
   };
 };
 
 // Content API mock
 export const contentAPI = {
+  // Get content by ID
+  getContentById: async (id: string): Promise<ContentItem | null> => {
+    return validateContentItem({
+      id: id,
+      tipo: "filme",
+      titulo: "Filme " + id,
+      descricao: "Descrição detalhada do filme " + id,
+      ano_lancamento: 2024,
+      classificacao_etaria: "16",
+      gratuito: true,
+      duracao: "2h 15min",
+      video_url: "https://www.youtube.com/watch?v=fz0j2lAo4K0"
+    });
+  },
+
   // Get featured content for homepage
   getFeatureContent: async (): Promise<ContentItem> => {
     return validateContentItem({
@@ -113,7 +129,6 @@ export const contentAPI = {
     return mockTopRated.map(validateContentItem);
   }
 };
-
 // User interaction API mock
 export const userInteractionAPI = {
   // Get continue watching content
@@ -159,9 +174,7 @@ export const userInteractionAPI = {
       return [];
     }
   }
-};
-
-// Profile management API mock
+};// Profile management API mock
 export const profileAPI = {
   // Get user profiles
   getUserProfiles: async (userId: string): Promise<Profile[]> => {
@@ -275,3 +288,6 @@ export const profileAPI = {
     return true;
   }
 };
+
+
+

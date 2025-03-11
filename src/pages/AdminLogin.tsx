@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase, mockSignIn } from '@/lib/supabase';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -62,29 +63,47 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black to-gray-900 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="border-gray-800 bg-black/70 backdrop-blur-sm shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-2">
-              <Shield className="h-12 w-12 text-primary" />
+    <div className="min-h-screen w-full relative flex items-center justify-center p-4">
+      {/* Background com gradiente e padrão */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-95">
+        {/* Padrão de fundo */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.05) 2%, transparent 0%), 
+                           radial-gradient(circle at 75px 75px, rgba(255,255,255,0.05) 2%, transparent 0%)`,
+          backgroundSize: '100px 100px'
+        }} />
+      </div>
+
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
+      {/* Card de Login */}
+      <Card className="w-full max-w-[380px] sm:max-w-[420px] md:max-w-[440px] shadow-2xl rounded-lg overflow-hidden bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm relative z-10">
+        <CardHeader className="text-center pt-6 sm:pt-8">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Shield className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold tracking-tight text-white">
-              Área Administrativa
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Acesso restrito ao painel administrativo
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          </div>
+          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            Área Administrativa
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+            Acesso restrito ao painel administrativo
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="p-4 sm:p-6 md:p-8">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-200">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Email
                 </Label>
                 <div className="relative">
@@ -94,19 +113,17 @@ const AdminLogin = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="admin@cineplay.com"
+                    className="pl-10 h-12 w-full bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="admin@exemplo.com"
                     required
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-200">
-                    Senha
-                  </Label>
-                </div>
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  Senha
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
                   <Input
@@ -114,7 +131,7 @@ const AdminLogin = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 flex h-12 w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="pl-10 h-12 w-full bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="••••••••"
                     required
                   />
@@ -123,7 +140,7 @@ const AdminLogin = () => {
               
               <Button
                 type="submit"
-                className="w-full h-12 text-base"
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-white font-medium"
                 disabled={loading}
               >
                 {loading ? (
@@ -136,23 +153,30 @@ const AdminLogin = () => {
                   </span>
                 ) : (
                   <span className="flex items-center justify-center">
-                    Entrar
+                    Entrar no Painel
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 )}
               </Button>
             </form>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-2 text-center text-sm text-gray-400">
-            <p className="w-full">
+          </motion.div>
+        </CardContent>
+        
+        <CardFooter className="pb-6 sm:pb-8">
+          <div className="w-full space-y-2 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Área restrita para funcionários autorizados
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-500">
               Acesso disponível para: Editor, Administrador e Super Administrador
             </p>
-          </CardFooter>
-        </Card>
-      </motion.div>
+          </div>
+        </CardFooter>
+      </Card>
+
+      {/* Círculos decorativos */}
+      <div className="fixed bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
+      <div className="fixed top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
     </div>
   );
 };

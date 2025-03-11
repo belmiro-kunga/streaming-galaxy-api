@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -104,30 +103,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-foreground dark:text-gray-200">
-          Email
+        <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+          Username
         </Label>
         <Input
           type="email"
           id="email"
-          placeholder="seuemail@exemplo.com"
+          placeholder="@mail.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00B2FF] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-foreground dark:text-gray-200">
-          Senha
+        <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+          Password
         </Label>
         <Input
           type="password"
           id="password"
-          placeholder="********"
+          placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-background dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00B2FF] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleLogin();
@@ -136,23 +135,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         />
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            className="w-4 h-4 border-2 border-gray-300 rounded text-[#00B2FF] focus:ring-[#00B2FF]"
+          />
+          <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+        </label>
+
         <button
           type="button"
           onClick={() => setView('reset')}
-          className="text-sm text-muted-foreground dark:text-gray-400 hover:text-foreground dark:hover:text-gray-300 hover:underline transition-colors"
+          className="text-sm text-[#00B2FF] hover:text-[#0066FF] hover:underline transition-colors"
         >
-          Esqueceu sua senha?
+          Esqueceu a Senha?
         </button>
-
-        <Button
-          onClick={handleLogin}
-          className="bg-primary dark:bg-violet-500 text-primary-foreground dark:text-white hover:bg-primary/90 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-50 transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Processando...' : 'Entrar'}
-        </Button>
       </div>
+
+      <Button
+        onClick={handleLogin}
+        className="w-full py-3 bg-[#00B2FF] hover:bg-[#0066FF] text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-[#00B2FF] focus:ring-opacity-50"
+        disabled={isLoading}
+      >
+        {isLoading ? 'Processando...' : 'Entrar'}
+      </Button>
     </div>
   );
 };

@@ -1,0 +1,23 @@
+.react-player {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-player > div {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-player iframe {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 130% !important;
+  transform: scale(1.5) !important;
+  transform-origin: center center !important;
+} 

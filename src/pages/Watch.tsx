@@ -1,160 +1,58 @@
-
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  Share2, 
-  ThumbsUp, 
-  Plus, 
-  VolumeX, 
-  Volume2, 
-  Maximize, 
-  Settings,
   Play,
   Pause,
-  SkipForward,
+  Volume2,
+  VolumeX,
+  Maximize,
   SkipBack,
-  Subtitles
+  SkipForward,
+  Settings,
+  ThumbsUp,
+  ThumbsDown,
+  Share2,
+  Plus,
+  Info,
+  X,
+  Download,
+  Cog
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { ContentItem } from '@/types/api';
 import { contentAPI } from '@/services/api';
-import { useMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const Watch = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [content, setContent] = useState<ContentItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isTVMode, setIsTVMode] = useState(false);
-  const [focusedControl, setFocusedControl] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const controlsRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  // Check for TV mode based on screen size
-  useEffect(() => {
-    const checkTVMode = () => {
-      // Screen wider than 1920px is likely a large TV
-      setIsTVMode(window.innerWidth >= 1920);
-    };
-    
-    checkTVMode();
-    window.addEventListener('resize', checkTVMode);
-    
-    return () => window.removeEventListener('resize', checkTVMode);
-  }, []);
-  
-  // Handle keyboard navigation for TV remote compatibility
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isTVMode) return;
-      
-      switch (e.key) {
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-          handleArrowNavigation(e.key);
-          break;
-        case 'Enter':
-          handleEnterKey();
-          break;
-        case 'Escape':
-        case 'Backspace':
-          navigate('/home');
-          break;
-        default:
-          break;
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isTVMode, focusedControl, navigate]);
-  
-  const handleArrowNavigation = (key: string) => {
-    // Simple focus navigation between controls
-    const controls = ['play', 'back', 'forward', 'volume', 'settings', 'fullscreen'];
-    const currentIndex = focusedControl ? controls.indexOf(focusedControl) : -1;
-    
-    let newIndex = currentIndex;
-    
-    if (key === 'ArrowRight') {
-      newIndex = currentIndex < controls.length - 1 ? currentIndex + 1 : 0;
-    } else if (key === 'ArrowLeft') {
-      newIndex = currentIndex > 0 ? currentIndex - 1 : controls.length - 1;
-    } else if (key === 'ArrowUp' || key === 'ArrowDown') {
-      // Toggle play/pause on up/down when on play button
-      if (focusedControl === 'play') {
-        togglePlayPause();
-      }
-      // Adjust volume when on volume button
-      if (focusedControl === 'volume') {
-        setIsMuted(prev => !prev);
-      }
-    }
-    
-    setFocusedControl(controls[newIndex]);
-  };
-  
-  const handleEnterKey = () => {
-    switch (focusedControl) {
-      case 'play':
-        togglePlayPause();
-        break;
-      case 'volume':
-        setIsMuted(prev => !prev);
-        break;
-      case 'back':
-        navigate('/home');
-        break;
-      case 'settings':
-        toast({
-          title: "Configurações",
-          description: "Menu de configurações aberto",
-        });
-        break;
-      case 'fullscreen':
-        toggleFullscreen();
-        break;
-      default:
-        break;
-    }
-  };
-  
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-  
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
+  const [volume, setVolume] = useState(100);
+  const [isHovering, setIsHovering] = useState(false);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const [videoQuality, setVideoQuality] = useState<'720p' | '1080p' | '480p'>('720p');
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
-        // In a real app, you would fetch the specific content by ID
-        // For now, we'll use the featured content as a placeholder
-        const data = await contentAPI.getFeatureContent();
+        const data = await contentAPI.getContentById(id);
         setContent(data);
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -163,10 +61,117 @@ const Watch = () => {
       }
     };
 
-    if (id) {
-      fetchContent();
-    }
+    fetchContent();
   }, [id]);
+
+  // Função para extrair o ID do vídeo do YouTube da URL
+  const getYouTubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const handleMouseMove = () => {
+      setShowControls(true);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (isPlaying) {
+          setShowControls(false);
+        }
+      }, 3000);
+    };
+
+    const container = playerContainerRef.current;
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseenter', () => setShowControls(true));
+      container.addEventListener('mouseleave', () => isPlaying && setShowControls(false));
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
+      }
+      clearTimeout(timeoutId);
+    };
+  }, [isPlaying]);
+
+  const togglePlay = () => {
+    const iframe = document.querySelector<HTMLIFrameElement>('#youtube-player');
+    if (iframe) {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isPlaying ? 'pauseVideo' : 'playVideo'
+        }),
+        '*'
+      );
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = () => {
+    const iframe = document.querySelector<HTMLIFrameElement>('#youtube-player');
+    if (iframe) {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isMuted ? 'unMute' : 'mute'
+        }),
+        '*'
+      );
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const seekTo = (seconds: number) => {
+    const iframe = document.querySelector<HTMLIFrameElement>('#youtube-player');
+    if (iframe) {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: 'seekTo',
+          args: [seconds, true]
+        }),
+        '*'
+      );
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  const toggleFullscreen = () => {
+    if (playerContainerRef.current) {
+    if (!document.fullscreenElement) {
+        playerContainerRef.current.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  const handleVolumeChange = (value: number[]) => {
+    setVolume(value[0]);
+    const iframe = document.querySelector<HTMLIFrameElement>('#youtube-player');
+    if (iframe) {
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: 'setVolume',
+          args: [value[0]]
+        }),
+        '*'
+      );
+    }
+  };
 
   if (isLoading) {
     return (
@@ -178,210 +183,417 @@ const Watch = () => {
 
   if (!content) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
-        <h1 className="text-2xl font-bold mb-4">Conteúdo não encontrado</h1>
-        <Link to="/home" className="text-red-600 hover:underline">
-          Voltar para a página inicial
-        </Link>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
+        <p className="text-xl">Conteúdo não encontrado</p>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/')}
+          className="text-white border-white hover:bg-white/20"
+        >
+          Voltar para Home
+        </Button>
       </div>
     );
   }
 
+  const videoId = content.video_url ? getYouTubeVideoId(content.video_url) : null;
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Video Player */}
-      <div className="relative w-full h-screen">
-        {/* Video placeholder - in real implementation, this would be a video element */}
-        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-          <img 
-            src={`https://source.unsplash.com/random/1920x1080?movie,${content.titulo}`}
-            alt={content.titulo}
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Play button overlay - visible when paused */}
-          {!isPlaying && (
+    <div className="min-h-screen bg-zinc-950 text-white">
+      {/* Container principal com padding responsivo */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        {/* Área do Player */}
+        <div className="relative aspect-video rounded-lg sm:rounded-xl overflow-hidden bg-black shadow-2xl">
+          {/* Player do YouTube */}
+          <div ref={playerContainerRef} className="relative w-full h-full">
+            {videoId ? (
+              <iframe
+                id="youtube-player"
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&color=white&iv_load_policy=3&playsinline=1&origin=${window.location.origin}`}
+                title={content.titulo}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <p className="text-base sm:text-xl text-gray-400">Vídeo não disponível</p>
+              </div>
+            )}
+
+            {/* Gradientes de sobreposição */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60 pointer-events-none" />
+
+            {/* Controles do player responsivos */}
             <div 
-              className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
-              onClick={togglePlayPause}
+              className={cn(
+                "absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300",
+                (showControls || isHovering) ? "opacity-100" : "opacity-0"
+              )}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
             >
+              {/* Área clicável para play/pause */}
               <button 
-                className={`w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm ${focusedControl === 'play' && isTVMode ? 'ring-4 ring-white' : ''}`}
-                onClick={togglePlayPause}
-                data-control="play"
-              >
-                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-                  <Play className="w-8 h-8 text-white fill-current ml-1" />
+                className="absolute inset-0 w-full h-full z-10"
+                onClick={togglePlay}
+              />
+
+              {/* Overlay de gradiente para melhor visibilidade */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/60" />
+
+              {/* Ícone central de play/pause */}
+              <div className="relative z-20 transform transition-transform duration-200 hover:scale-110">
+                {isPlaying ? (
+                  <Pause className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20" />
+                ) : (
+                  <Play className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 ml-2" />
+                )}
+              </div>
+
+              {/* Controles de navegação */}
+              <div className="absolute bottom-4 left-0 right-0 px-4 z-20">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    {/* Tempo atual */}
+                    <span className="text-sm sm:text-base text-white/90">
+                      {formatTime(currentTime)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    {/* Botões de controle */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        seekTo(currentTime - 10);
+                      }}
+                    >
+                      <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        seekTo(currentTime + 10);
+                      }}
+                    >
+                      <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Button>
+
+                    {/* Volume */}
+                    <div className="relative">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleMute();
+                        }}
+                        onMouseEnter={() => setShowVolumeSlider(true)}
+                        onMouseLeave={() => setShowVolumeSlider(false)}
+                      >
+                        {isMuted ? 
+                          <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : 
+                          <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                        }
+                      </Button>
+                      {showVolumeSlider && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-4 bg-zinc-900/95 backdrop-blur-sm rounded-lg">
+                          <div className="h-24">
+                            <Slider
+                              value={[volume]}
+                              max={100}
+                              step={1}
+                              orientation="vertical"
+                              onValueChange={handleVolumeChange}
+                            />
                 </div>
-              </button>
             </div>
           )}
         </div>
         
-        {/* Hidden actual video element for real functionality */}
-        <video 
-          ref={videoRef} 
-          className="hidden" 
-          onTimeUpdate={() => videoRef.current && setCurrentTime(videoRef.current.currentTime)}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          muted={isMuted}
-        />
-        
-        {/* Player controls */}
-        <div className="absolute inset-x-0 top-0 p-4 flex items-center">
+                    {/* Tempo total */}
+                    <span className="text-sm sm:text-base text-white/90">
+                      {formatTime(duration)}
+                    </span>
+
+                    {/* Tela cheia */}
           <Button 
             variant="ghost" 
-            className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'back' && isTVMode ? 'ring-2 ring-white' : ''}`}
-            onClick={() => navigate('/home')}
-            data-control="back"
-          >
-            <ArrowLeft className="w-6 h-6" />
+                      size="icon"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFullscreen();
+                      }}
+                    >
+                      <Maximize className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
-          <h1 className="ml-4 text-xl font-bold">{content.titulo}</h1>
+                  </div>
         </div>
         
-        <div 
-          ref={controlsRef}
-          className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent pt-12 pb-6 px-4"
-        >
-          {/* Progress bar */}
-          <div className="w-full h-1 bg-gray-600 rounded-full mb-4">
-            <div 
-              className="h-full bg-red-600 rounded-full"
-              style={{ width: `${(currentTime / (videoRef.current?.duration || 100)) * 100}%` }}
-            ></div>
+                {/* Barra de progresso */}
+                <div 
+                  className="mt-2 relative w-full h-1 bg-white/20 rounded-full cursor-pointer group"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    seekTo(percent * duration);
+                  }}
+                >
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-red-600 rounded-full"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                  />
+                  <div 
+                    className="absolute h-3 w-3 -top-1 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ left: `calc(${(currentTime / duration) * 100}% - 6px)` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
           </div>
           
-          {/* Controls */}
+        {/* Barra de Controles Externa */}
+        <div className="bg-zinc-900/95 backdrop-blur-sm rounded-lg mt-4 p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            {/* Controles de Reprodução */}
+            <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'play' && isTVMode ? 'ring-2 ring-white' : ''}`}
-                onClick={togglePlayPause}
-                data-control="play"
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10"
+                onClick={() => seekTo(currentTime - 10)}
               >
-                {isPlaying ? (
-                  <Pause className="w-6 h-6" />
-                ) : (
-                  <Play className="w-6 h-6" />
+                <SkipBack className="w-5 h-5" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10"
+                onClick={togglePlay}
+              >
+                {isPlaying ? 
+                  <Pause className="w-5 h-5" /> : 
+                  <Play className="w-5 h-5 ml-0.5" />
+                }
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10"
+                onClick={() => seekTo(currentTime + 10)}
+              >
+                <SkipForward className="w-5 h-5" />
+              </Button>
+              
+              {/* Volume */}
+              <div className="relative">
+              <Button 
+                variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-white/10 rounded-full w-10 h-10"
+                  onClick={toggleMute}
+                  onMouseEnter={() => setShowVolumeSlider(true)}
+                  onMouseLeave={() => setShowVolumeSlider(false)}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </Button>
+                {showVolumeSlider && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-4 bg-zinc-900/95 backdrop-blur-sm rounded-lg">
+                    <div className="h-24">
+                      <Slider
+                        value={[volume]}
+                        max={100}
+                        step={1}
+                        orientation="vertical"
+                        onValueChange={handleVolumeChange}
+                      />
+                    </div>
+                  </div>
                 )}
-              </Button>
-              
-              {/* Skip back 10s */}
-              <Button 
-                variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'back10' && isTVMode ? 'ring-2 ring-white' : ''}`}
-                onClick={() => {
-                  if (videoRef.current) {
-                    videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
-                  }
-                }}
-                data-control="back10"
-              >
-                <SkipBack className="w-6 h-6" />
-              </Button>
-              
-              {/* Skip forward 10s */}
-              <Button 
-                variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'forward10' && isTVMode ? 'ring-2 ring-white' : ''}`}
-                onClick={() => {
-                  if (videoRef.current) {
-                    videoRef.current.currentTime = Math.min(
-                      videoRef.current.duration || 0, 
-                      videoRef.current.currentTime + 10
-                    );
-                  }
-                }}
-                data-control="forward10"
-              >
-                <SkipForward className="w-6 h-6" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'volume' && isTVMode ? 'ring-2 ring-white' : ''}`}
-                onClick={() => setIsMuted(!isMuted)}
-                data-control="volume"
-              >
-                {isMuted ? (
-                  <VolumeX className="w-6 h-6" />
-                ) : (
-                  <Volume2 className="w-6 h-6" />
-                )}
-              </Button>
-              
-              <span className="text-sm">
-                {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} / 1:47:12
+              </div>
+
+              {/* Tempo */}
+              <span className="text-sm text-gray-400 ml-2">
+                {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
             
-            <div className="flex items-center space-x-4">
+            {/* Controles Secundários */}
+            <div className="flex items-center gap-2">
+              {/* Download */}
               <Button 
                 variant="ghost" 
-                className="text-white hover:bg-white/10 rounded-full p-2 hidden md:flex"
-                onClick={() => {
-                  toast({
-                    title: "Adicionado",
-                    description: "Conteúdo adicionado à sua lista",
-                  });
-                }}
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10"
+                onClick={() => window.open(content.video_url, '_blank')}
               >
-                <Plus className="w-6 h-6" />
+                <Download className="w-5 h-5" />
               </Button>
               
+              {/* Qualidade */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:bg-white/10 rounded-lg h-10 px-3 flex items-center gap-2"
+                  onClick={() => setShowQualityMenu(!showQualityMenu)}
+                >
+                  <span className="text-sm font-medium">{videoQuality}</span>
+                  <Cog className="w-4 h-4" />
+                </Button>
+                {showQualityMenu && (
+                  <div className="absolute bottom-full right-0 mb-2 py-2 bg-zinc-900/95 backdrop-blur-sm rounded-lg min-w-[120px] border border-white/10">
+                    {['1080p', '720p', '480p'].map((quality) => (
+                      <button
+                        key={quality}
+                        className={cn(
+                          "w-full px-4 py-2 text-sm text-left transition-colors",
+                          videoQuality === quality 
+                            ? "bg-white/10 text-white" 
+                            : "text-gray-300 hover:bg-white/5 hover:text-white"
+                        )}
+                        onClick={() => {
+                          setVideoQuality(quality as '720p' | '1080p' | '480p');
+                          setShowQualityMenu(false);
+                        }}
+                      >
+                        {quality}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Tela Cheia */}
               <Button 
                 variant="ghost" 
-                className="text-white hover:bg-white/10 rounded-full p-2 hidden md:flex"
-              >
-                <ThumbsUp className="w-6 h-6" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10 rounded-full p-2 hidden md:flex"
-              >
-                <Share2 className="w-6 h-6" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10 rounded-full p-2 hidden sm:flex"
-              >
-                <Subtitles className="w-6 h-6" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'settings' && isTVMode ? 'ring-2 ring-white' : ''}`}
-                data-control="settings"
-              >
-                <Settings className="w-6 h-6" />
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className={`text-white hover:bg-white/10 rounded-full p-2 ${focusedControl === 'fullscreen' && isTVMode ? 'ring-2 ring-white' : ''}`}
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10"
                 onClick={toggleFullscreen}
-                data-control="fullscreen"
               >
-                <Maximize className="w-6 h-6" />
+                <Maximize className="w-5 h-5" />
               </Button>
             </div>
           </div>
+
+          {/* Barra de Progresso */}
+          <div className="mt-4">
+            <div 
+              className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer group"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                seekTo(percent * duration);
+              }}
+            >
+              <div 
+                className="absolute inset-y-0 left-0 bg-red-600 rounded-full"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+              <div className="absolute h-2 w-2 bg-red-600 rounded-full -mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                   style={{ left: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Controles Externos Responsivos */}
+        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          {/* Título e Metadados */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold">{content.titulo}</h1>
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-400">
+                <span>{content.ano_lancamento}</span>
+                <span className="hidden sm:inline">•</span>
+                <span>{content.duracao}</span>
+                <span className="hidden sm:inline">•</span>
+                <span>{content.classificacao_etaria}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11"
+              >
+                <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11"
+              >
+                <ThumbsDown className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11"
+              >
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11"
+              >
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Descrição */}
+          <div className="max-w-3xl">
+            <p className="text-sm sm:text-base text-gray-300 leading-relaxed line-clamp-3 sm:line-clamp-none">
+              {content.descricao}
+            </p>
+          </div>
+
+          {/* Gêneros */}
+          {content.generos && content.generos.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-400">Gêneros</h3>
+              <div className="flex flex-wrap gap-2">
+                {content.generos.map((genero) => (
+                  <span 
+                    key={genero} 
+                    className="px-2 sm:px-3 py-1 bg-zinc-800 rounded-full text-xs sm:text-sm text-gray-300"
+                  >
+                    {genero}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
-      {/* TV mode indicator - just for debugging */}
-      {isTVMode && (
-        <div className="absolute top-20 right-4 bg-red-600/80 px-3 py-1 rounded-full text-sm font-medium">
-          TV Mode
-        </div>
-      )}
+      {/* Botão de Voltar Responsivo */}
+      <Button 
+        variant="ghost" 
+        size="icon"
+        className="fixed top-4 sm:top-6 left-4 sm:left-6 text-white hover:bg-white/10 rounded-full w-10 h-10 sm:w-12 sm:h-12"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+      </Button>
     </div>
   );
 };
 
 export default Watch;
+

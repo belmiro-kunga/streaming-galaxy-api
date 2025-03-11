@@ -1,4 +1,3 @@
-
 // Content types
 export interface ContentItem {
   id: string;
@@ -8,6 +7,12 @@ export interface ContentItem {
   ano_lancamento: number;
   classificacao_etaria: string;
   gratuito: boolean;
+  video_url?: string;
+  trailer_url?: string;
+  poster_url?: string;
+  duracao?: string;
+  avaliacao?: number;
+  generos?: string[];
 }
 
 export interface Content {
