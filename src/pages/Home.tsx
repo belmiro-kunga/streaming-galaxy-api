@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ContentItem, Genre } from '@/types/api';
 import { useToast } from '@/hooks/use-toast';
@@ -29,7 +28,6 @@ const Home = () => {
   const isMobile = useMobile();
   const navigate = useNavigate();
 
-  // Implementação da interface IHomeView
   const view: IHomeView = {
     setFeaturedContent: (content) => setFeaturedContent(content),
     setTrendingContent: (content) => setTrendingContent(content),
@@ -60,17 +58,14 @@ const Home = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
       <MovieHero />
 
-      {/* Conteúdo Principal */}
       <motion.main 
-        initial={{ opacity: H0 }}
+        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         className="px-4 md:px-8 -mt-40 space-y-6 bg-black min-h-screen relative z-10"
       >
-        {/* Seção de Streaming Services */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,7 +76,6 @@ const Home = () => {
           <StreamingCards />
         </motion.section>
 
-        {/* Navegação por Categorias */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,7 +84,6 @@ const Home = () => {
         >
           <h2 className="text-xl sm:text-2xl font-bold text-white">Categorias</h2>
           <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 relative group">
-            {/* Botão de navegação esquerda */}
             <button
               onClick={() => {
                 const container = document.getElementById('categorias-container');
@@ -106,7 +99,6 @@ const Home = () => {
               <ChevronLeft className="h-6 w-6" />
             </button>
 
-            {/* Container das categorias */}
             <div 
               id="categorias-container"
               className="flex overflow-x-auto no-scrollbar gap-2 scroll-smooth snap-x snap-mandatory"
@@ -147,7 +139,6 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Botão de navegação direita */}
             <button
               onClick={() => {
                 const container = document.getElementById('categorias-container');
@@ -163,13 +154,11 @@ const Home = () => {
               <ChevronRight className="h-6 w-6" />
             </button>
 
-            {/* Gradientes para indicar scroll */}
             <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-black to-transparent pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black to-transparent pointer-events-none" />
           </div>
         </motion.section>
 
-        {/* Seção Populares na Netflix (como no exemplo) */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -183,7 +172,6 @@ const Home = () => {
           />
         </motion.section>
 
-        {/* Seção Continuar Assistindo */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -197,7 +185,6 @@ const Home = () => {
           />
         </motion.section>
 
-        {/* Seção Em Alta */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -211,7 +198,6 @@ const Home = () => {
           />
         </motion.section>
 
-        {/* Seção Recomendados */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

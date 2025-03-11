@@ -1,3 +1,4 @@
+
 // Content types
 export interface ContentItem {
   id: string;
@@ -10,6 +11,7 @@ export interface ContentItem {
   video_url?: string;
   trailer_url?: string;
   poster_url?: string;
+  backdrop_url?: string; // Added this field to fix the error
   duracao?: string;
   avaliacao?: number;
   generos?: string[];

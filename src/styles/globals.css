@@ -29,6 +29,23 @@
   scroll-behavior: smooth;
 }
 
+/* Ken Burns animation effect */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1.1) translate(0px, 0px);
+  }
+  50% {
+    transform: scale(1.2) translate(-10px, -15px);
+  }
+  100% {
+    transform: scale(1.1) translate(0px, 0px);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 30s ease-in-out infinite;
+}
+
 /* Netflix-like styles */
 .netflix-hero {
   position: relative;
