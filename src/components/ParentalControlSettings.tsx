@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Trash2, Plus, Clock, Shield, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface TimeRestriction {
   dayOfWeek: string;
@@ -58,7 +57,6 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
     setSettings(updatedSettings);
     onUpdate(updatedSettings);
     
-    // Reset the form
     setNewTimeRestriction({
       dayOfWeek: 'weekdays',
       startTime: '19:00',
@@ -142,16 +140,9 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
             <Label className="font-medium flex items-center">
               <Shield className="h-4 w-4 mr-2" />
               Classificação etária máxima
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-gray-800 text-white border-gray-700">
-                    <p>Restringe o acesso a conteúdos com classificação superior a selecionada</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip content="Restringe o acesso a conteúdos com classificação superior a selecionada">
+                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+              </Tooltip>
             </Label>
             <Select value={settings.maxRating} onValueChange={handleMaxRatingChange}>
               <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700">
@@ -173,16 +164,9 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
           <Label className="font-medium flex items-center">
             <Clock className="h-4 w-4 mr-2" />
             Restrições de horário
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="bg-gray-800 text-white border-gray-700">
-                  <p>Define horários em que o perfil pode assistir a conteúdos</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip content="Define horários em que o perfil pode assistir a conteúdos">
+              <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+            </Tooltip>
           </Label>
 
           {settings.timeRestrictions.length > 0 ? (
@@ -293,3 +277,4 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
     </Card>
   );
 };
+
