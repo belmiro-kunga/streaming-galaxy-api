@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -62,7 +63,7 @@ const Login = () => {
           </CardTitle>
           {view === 'login' && (
             <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-              Bem-vindo de volta! Por favor, entre em sua conta.
+              Bem-vindo de volta! Por favor, entre com seu email.
             </CardDescription>
           )}
         </CardHeader>

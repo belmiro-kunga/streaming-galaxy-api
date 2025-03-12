@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -33,10 +34,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { refreshUserData } = useUser();
   
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!email) {
       toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha todos os campos.',
+        title: 'Campo obrigatório',
+        description: 'Por favor, preencha o email.',
         variant: 'destructive',
       });
       return;
@@ -44,8 +45,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     setIsLoading(true);
     try {
-      console.log('Tentando login com:', { email, password });
-      const { data, error } = await mockSignIn(email, password);
+      console.log('Tentando login sem senha com:', { email });
+      
+      // Use empty password for passwordless login
+      const { data, error } = await mockSignIn(email, password || 'no-password-required');
       
       if (error) {
         console.error('Erro no login:', error);
@@ -101,43 +104,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00B2FF] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-200">
-          Password
-        </Label>
-        <Input
-          type="password"
-          id="password"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#00B2FF] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleLogin();
-            }
-          }}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            className="w-4 h-4 border-2 border-gray-300 rounded text-[#00B2FF] focus:ring-[#00B2FF]"
-          />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-        </label>
-
-        <button
-          type="button"
-          onClick={() => setView('reset')}
-          className="text-sm text-[#00B2FF] hover:text-[#0066FF] hover:underline transition-colors"
-        >
-          Esqueceu a Senha?
-        </button>
       </div>
 
       <Button

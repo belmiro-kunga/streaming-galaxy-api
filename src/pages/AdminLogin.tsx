@@ -1,37 +1,34 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Lock, Shield } from 'lucide-react';
+import { Mail, ArrowRight, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase, mockSignIn } from '@/lib/supabase';
+import { mockSignIn } from '@/lib/supabase';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Credenciais de teste já estão definidas em lib/supabase.ts
   // TEST_ADMIN_EMAIL = 'admin@cineplay.com';
-  // TEST_ADMIN_PASSWORD = 'admin123';
   // TEST_EDITOR_EMAIL = 'editor@cineplay.com';
-  // TEST_EDITOR_PASSWORD = 'editor123';
   // TEST_SUPER_ADMIN_EMAIL = 'super@cineplay.com';
-  // TEST_SUPER_ADMIN_PASSWORD = 'super123';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Sign in usando nossa função helper que funciona com ou sem Supabase
-      const { data, error } = await mockSignIn(email, password);
+      // Sign in usando nossa função helper com login sem senha
+      const { data, error } = await mockSignIn(email, 'no-password-required');
 
       if (error) throw error;
 
@@ -46,15 +43,13 @@ const AdminLogin = () => {
           description: `Bem-vindo ao painel ${userRole === 'admin' ? 'administrativo' : userRole === 'editor' ? 'de edição' : 'de super administrador'}.`,
         });
       } else {
-        // Sign out if not an admin role
-        await supabase.auth.signOut();
         throw new Error("Você não tem permissão para acessar esta área.");
       }
     } catch (error: any) {
       console.error("Admin authentication error:", error);
       toast({
         title: "Falha na autenticação",
-        description: error.message || "Email ou senha incorretos.",
+        description: error.message || "Você não tem permissão para acessar esta área.",
         variant: "destructive",
       });
     } finally {
@@ -115,24 +110,6 @@ const AdminLogin = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 h-12 w-full bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="admin@exemplo.com"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Senha
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 h-12 w-full bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="••••••••"
                     required
                   />
                 </div>
