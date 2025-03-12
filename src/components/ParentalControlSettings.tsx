@@ -1,14 +1,9 @@
 
 import React, { useState } from 'react';
-import { Trash2, Plus, Clock, Shield, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ProfileHeader } from './parental-control/ProfileHeader';
+import { RatingRestriction } from './parental-control/RatingRestriction';
+import { TimeRestrictions } from './parental-control/TimeRestrictions';
 
 interface TimeRestriction {
   dayOfWeek: string;
@@ -78,6 +73,13 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
     onUpdate(updatedSettings);
   };
 
+  const handleTimeRestrictionChange = (field: keyof TimeRestriction, value: string) => {
+    setNewTimeRestriction({
+      ...newTimeRestriction,
+      [field]: value
+    });
+  };
+
   const dayOfWeekOptions = [
     { value: 'weekdays', label: 'Dias de semana (Seg-Sex)' },
     { value: 'weekends', label: 'Fins de semana (Sáb-Dom)' },
@@ -108,180 +110,34 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
   return (
     <Card className="bg-gray-900/50 border-gray-800">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-12 w-12 mr-4 border-2 border-gray-700">
-              <AvatarImage src={profile.avatar} />
-              <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle>{profile.name}</CardTitle>
-              <CardDescription className="text-gray-400">
-                Perfil infantil
-              </CardDescription>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Label htmlFor={`enable-parental-${profile.id}`} className="mr-2">
-              Controle parental
-            </Label>
-            <Switch 
-              id={`enable-parental-${profile.id}`} 
-              checked={settings.enabled}
-              onCheckedChange={handleToggleEnabled}
-            />
-          </div>
-        </div>
+        <ProfileHeader 
+          name={profile.name}
+          avatar={profile.avatar}
+          enabled={settings.enabled}
+          onToggleEnabled={handleToggleEnabled}
+          profileId={profile.id}
+        />
       </CardHeader>
       
       <CardContent className="pt-4 space-y-6">
         {/* Rating Restriction */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="font-medium flex items-center">
-              <Shield className="h-4 w-4 mr-2" />
-              Classificação etária máxima
-              <Tooltip 
-                content="Restringe o acesso a conteúdos com classificação superior a selecionada"
-                delayDuration={300}
-              >
-                <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-              </Tooltip>
-            </Label>
-            <Select value={settings.maxRating} onValueChange={handleMaxRatingChange}>
-              <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700">
-                <SelectValue placeholder="Selecione a classificação" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                {ratingOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <RatingRestriction 
+          maxRating={settings.maxRating}
+          onMaxRatingChange={handleMaxRatingChange}
+          ratingOptions={ratingOptions}
+        />
 
         {/* Time Restrictions */}
-        <div className="space-y-4">
-          <Label className="font-medium flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
-            Restrições de horário
-            <Tooltip
-              content="Define horários em que o perfil pode assistir a conteúdos"
-              delayDuration={300}
-            >
-              <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-            </Tooltip>
-          </Label>
-
-          {settings.timeRestrictions.length > 0 ? (
-            <div className="space-y-2">
-              {settings.timeRestrictions.map((restriction, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{getDayOfWeekLabel(restriction.dayOfWeek)}</p>
-                    <p className="text-sm text-gray-400">
-                      {restriction.startTime} até {restriction.endTime}
-                    </p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removeTimeRestriction(index)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-4 bg-gray-800/30 rounded-lg text-center text-gray-400">
-              Nenhuma restrição de horário definida
-            </div>
-          )}
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full border-gray-700 hover:bg-gray-800">
-                <Plus className="mr-2 h-4 w-4" />
-                Adicionar restrição de horário
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-96 bg-gray-900 border-gray-800 p-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Nova restrição de horário</h4>
-                
-                <div className="space-y-2">
-                  <Label>Dias da semana</Label>
-                  <Select 
-                    value={newTimeRestriction.dayOfWeek} 
-                    onValueChange={(value) => setNewTimeRestriction({...newTimeRestriction, dayOfWeek: value})}
-                  >
-                    <SelectTrigger className="w-full bg-gray-800 border-gray-700">
-                      <SelectValue placeholder="Selecione os dias" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
-                      {dayOfWeekOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Horário inicial</Label>
-                    <Select 
-                      value={newTimeRestriction.startTime} 
-                      onValueChange={(value) => setNewTimeRestriction({...newTimeRestriction, startTime: value})}
-                    >
-                      <SelectTrigger className="w-full bg-gray-800 border-gray-700">
-                        <SelectValue placeholder="Início" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-700">
-                        {Array.from({ length: 24 }).map((_, hour) => (
-                          <SelectItem key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                            {`${hour.toString().padStart(2, '0')}:00`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Horário final</Label>
-                    <Select 
-                      value={newTimeRestriction.endTime} 
-                      onValueChange={(value) => setNewTimeRestriction({...newTimeRestriction, endTime: value})}
-                    >
-                      <SelectTrigger className="w-full bg-gray-800 border-gray-700">
-                        <SelectValue placeholder="Fim" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-700">
-                        {Array.from({ length: 24 }).map((_, hour) => (
-                          <SelectItem key={hour} value={`${hour.toString().padStart(2, '0')}:00`}>
-                            {`${hour.toString().padStart(2, '0')}:00`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <Button className="w-full" onClick={addTimeRestriction}>
-                  Adicionar
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+        <TimeRestrictions 
+          timeRestrictions={settings.timeRestrictions}
+          newTimeRestriction={newTimeRestriction}
+          onTimeRestrictionChange={handleTimeRestrictionChange}
+          onAddTimeRestriction={addTimeRestriction}
+          onRemoveTimeRestriction={removeTimeRestriction}
+          dayOfWeekOptions={dayOfWeekOptions}
+          getDayOfWeekLabel={getDayOfWeekLabel}
+        />
       </CardContent>
     </Card>
   );
 };
-
