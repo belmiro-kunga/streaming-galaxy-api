@@ -44,11 +44,9 @@ import ComediaPage from './pages/Comedia';
 import DramaPage from './pages/Drama';
 import FaroestePage from './pages/Faroeste';
 
-// Create query client outside of the component
 const queryClient = new QueryClient();
 
 function App() {
-  // Ensure user is logged out on app start
   useEffect(() => {
     const logoutOnAppStart = async () => {
       await signOut();
@@ -59,7 +57,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Força o tema escuro permanentemente
     document.documentElement.classList.add('dark');
   }, []);
 
@@ -88,7 +85,6 @@ function App() {
                   <Route path="/anime" element={<Anime />} />
                   <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                   
-                  {/* Protected Routes */}
                   <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/dashboard/profiles" element={<ProfileManagement />} />
@@ -96,9 +92,9 @@ function App() {
                     <Route path="/payment-upload" element={<PaymentUpload />} />
                   </Route>
                   
-                  {/* Admin routes */}
-                  <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                  <Route element={<ProtectedRoute requiresAdmin={true} />}>
+                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                  </Route>
                   
                   <Route path="/animation" element={<Animation />} />
                   <Route path="/dorama" element={<Dorama />} />

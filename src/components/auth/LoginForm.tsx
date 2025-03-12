@@ -32,19 +32,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { toast } = useToast();
   const { refreshUserData } = useUser();
   
-  // Get the return path from location state
-  const from = location.state?.from?.pathname || '/dashboard';
-
-  // Ensure user is logged out when visiting login page
-  useEffect(() => {
-    const logoutOnMount = async () => {
-      await signOut();
-      console.log('User logged out on login page load');
-    };
-    
-    logoutOnMount();
-  }, []);
-
   const handleLogin = async () => {
     if (!email || !password) {
       toast({
@@ -57,20 +44,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     setIsLoading(true);
     try {
-      console.log('Attempting login with:', { email, password });
+      console.log('Tentando login com:', { email, password });
       const { data, error } = await mockSignIn(email, password);
       
       if (error) {
-        console.error('Login error:', error);
+        console.error('Erro no login:', error);
         throw error;
       }
       
       if (data.user) {
-        console.log('Login successful, user data:', data.user);
+        console.log('Login bem-sucedido, dados do usuário:', data.user);
         const role = data.user.user_metadata?.role || 'user';
-        console.log('User role:', role);
+        console.log('Role do usuário:', role);
         
-        // Refresh user data in context
+        // Atualizar dados do usuário no contexto
         await refreshUserData();
         
         toast({
@@ -78,18 +65,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           description: `Você está logado como ${role}.`,
         });
         
-        if (role === 'admin' || role === 'super_admin') {
+        // Redirecionar baseado na role
+        if (role === 'admin' || role === 'super_admin' || role === 'editor') {
           navigate('/admin-dashboard');
         } else {
-          // Navigate to the original location or dashboard
-          navigate(from);
+          navigate('/dashboard');
         }
       } else {
-        console.log('No user data returned:', data);
+        console.log('Nenhum dado de usuário retornado:', data);
         throw new Error('Falha na autenticação');
       }
     } catch (error: any) {
-      console.error('Login process error:', error);
+      console.error('Erro no processo de login:', error);
       toast({
         title: 'Erro no login',
         description: error?.message || 'Verifique suas credenciais e tente novamente.',

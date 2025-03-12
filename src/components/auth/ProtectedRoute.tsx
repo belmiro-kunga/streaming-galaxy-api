@@ -7,18 +7,19 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   redirectPath?: string;
   children?: React.ReactNode;
+  requiresAdmin?: boolean;
 }
 
 const ProtectedRoute = ({ 
   redirectPath = '/login',
-  children 
+  children,
+  requiresAdmin = false
 }: ProtectedRouteProps) => {
   const { user, loading } = useUser();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
   
   useEffect(() => {
-    // Wait for the user context to finish loading
     if (!loading) {
       setIsChecking(false);
     }
@@ -33,8 +34,18 @@ const ProtectedRoute = ({
   }
 
   if (!user) {
-    // Redirect to login with a return URL
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
+  }
+
+  // Verificar permissões de admin se necessário
+  if (requiresAdmin) {
+    const userRole = user.user_metadata?.role;
+    const isAdmin = ['admin', 'super_admin', 'editor'].includes(userRole);
+    
+    if (!isAdmin) {
+      // Se não for admin, redirecionar para o dashboard do usuário
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return children ? <>{children}</> : <Outlet />;
