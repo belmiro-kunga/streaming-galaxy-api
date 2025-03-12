@@ -41,6 +41,125 @@ export interface ContentStats {
   recent: number;
 }
 
+export interface StorageConfig {
+  driverName: string;
+  apiKey: string;
+  secretKey: string;
+  region: string;
+  bucketName: string;
+  endpoint: string;
+  isDefault: boolean;
+}
+
+export interface SystemSettings {
+  siteName: string;
+  siteDescription: string;
+  siteEmail: string;
+  sitePhone: string;
+  siteAddress: string;
+  timezone: string;
+  dateFormat: string;
+  timeFormat: string;
+}
+
+export interface LogoSettings {
+  logo: string;
+  favicon: string;
+  footerLogo: string;
+}
+
+export interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  smsNotifications: boolean;
+  notificationSound: boolean;
+}
+
+export interface PaymentGatewaySettings {
+  stripe: boolean;
+  paypal: boolean;
+  mercadoPago: boolean;
+  pix: boolean;
+  manualPayment: boolean;
+}
+
+export interface TemplateSettings {
+  activeTemplate: string;
+  colorScheme: string;
+  fontFamily: string;
+}
+
+export interface SocialLoginSettings {
+  google: boolean;
+  facebook: boolean;
+  apple: boolean;
+}
+
+export interface MaintenanceSettings {
+  enabled: boolean;
+  message: string;
+  allowedIPs: string[];
+}
+
+export interface PolicySettings {
+  termsOfService: string;
+  privacyPolicy: string;
+  cookiePolicy: string;
+  refundPolicy: string;
+}
+
+export interface GDPRSettings {
+  enabled: boolean;
+  cookieMessage: string;
+  policyUrl: string;
+}
+
+export interface GeneralConfig {
+  // Informações Básicas
+  siteName: string;
+  siteDescription: string;
+  siteKeywords: string;
+
+  // Layout e Aparência
+  desktopLayout: boolean;
+  mobileLayout: boolean;
+  primaryFont: string;
+  fontSize: 'small' | 'medium' | 'large';
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+
+  // Cabeçalho
+  showMainMenu: boolean;
+  showSearchBar: boolean;
+  showLoginButton: boolean;
+  menuItems: string;
+
+  // Rodapé
+  showFooterLinks: boolean;
+  showSocialIcons: boolean;
+  footerText: string;
+  socialLinks: string;
+
+  // Configurações Regionais (mantidas do original)
+  timezone: string;
+  dateFormat: string;
+  timeFormat: string;
+}
+
+export interface SystemConfig {
+  general: GeneralConfig;
+  logo: LogoSettings;
+  notifications: NotificationSettings;
+  paymentGateways: PaymentGatewaySettings;
+  templates: TemplateSettings;
+  socialLogin: SocialLoginSettings;
+  maintenance: MaintenanceSettings;
+  policies: PolicySettings;
+  gdpr: GDPRSettings;
+  robotsTxt: string;
+}
+
 export interface AdminDashboardContextType {
   // Tab state
   activeTab: string;
@@ -87,6 +206,38 @@ export interface AdminDashboardContextType {
   setIsDeleteDialogOpen: (open: boolean) => void;
   userToDelete: User | null;
   setUserToDelete: React.Dispatch<React.SetStateAction<User | null>>;
+  
+  // File Store state
+  wasabiConfig: StorageConfig;
+  cloudflareConfig: StorageConfig;
+  setWasabiConfig: (config: StorageConfig) => void;
+  setCloudflareConfig: (config: StorageConfig) => void;
+  
+  // System Settings
+  systemConfig: {
+    general: GeneralConfig;
+    logo: LogoSettings;
+    notifications: NotificationSettings;
+    paymentGateways: PaymentGatewaySettings;
+    templates: TemplateSettings;
+    socialLogin: SocialLoginSettings;
+    maintenance: MaintenanceSettings;
+    policies: PolicySettings;
+    gdpr: GDPRSettings;
+    robotsTxt: string;
+  };
+  setSystemConfig: React.Dispatch<React.SetStateAction<{
+    general: GeneralConfig;
+    logo: LogoSettings;
+    notifications: NotificationSettings;
+    paymentGateways: PaymentGatewaySettings;
+    templates: TemplateSettings;
+    socialLogin: SocialLoginSettings;
+    maintenance: MaintenanceSettings;
+    policies: PolicySettings;
+    gdpr: GDPRSettings;
+    robotsTxt: string;
+  }>>;
   
   // Actions
   handleLogout: () => void;

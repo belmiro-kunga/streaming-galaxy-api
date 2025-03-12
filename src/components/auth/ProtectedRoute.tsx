@@ -1,6 +1,4 @@
-
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
@@ -15,15 +13,22 @@ const ProtectedRoute = ({
   children,
   requiresAdmin = false
 }: ProtectedRouteProps) => {
-  const { user, loading } = useUser();
-  const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
+  const [user, setUser] = useState<any>(null);
   
   useEffect(() => {
-    if (!loading) {
-      setIsChecking(false);
+    // Verifica se existe usuário no localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        setUser(userData);
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
     }
-  }, [loading]);
+    setIsChecking(false);
+  }, []);
 
   if (isChecking) {
     return (
@@ -34,7 +39,7 @@ const ProtectedRoute = ({
   }
 
   if (!user) {
-    return <Navigate to={redirectPath} state={{ from: location }} replace />;
+    return <Navigate to={redirectPath} replace />;
   }
 
   // Verificar permissões de admin se necessário

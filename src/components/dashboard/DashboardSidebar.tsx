@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, Film, TrendingUp, Clock, BookmarkCheck, Download, 
@@ -25,7 +24,7 @@ const DashboardSidebar = ({
     if (id === 'home') {
       navigate('/home');
     } else if (id === 'downloads') {
-      navigate('/dashboard/downloads');
+      navigate('/downloads');
     } else if (id === 'profiles') {
       navigate('/dashboard/profiles');
     } else {

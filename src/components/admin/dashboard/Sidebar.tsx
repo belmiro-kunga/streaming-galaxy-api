@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, Package, CreditCard, Settings, BarChart3, 
-  FileText, LogOut, PackageOpen, BookOpen, Home
+  FileText, LogOut, PackageOpen, BookOpen, Home,
+  Database
 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -82,11 +82,19 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, handleLogout }: Sidebar
           </Button>
           <Button
             variant="ghost"
+            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "filestore" ? "bg-gray-800" : ""}`}
+            onClick={() => setActiveTab("filestore")}
+          >
+            <Database className="h-5 w-5" />
+            {sidebarOpen && <span>File Store</span>}
+          </Button>
+          <Button
+            variant="ghost"
             className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "settings" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("settings")}
           >
             <Settings className="h-5 w-5" />
-            {sidebarOpen && <span>Configurações</span>}
+            {sidebarOpen && <span>Configurações do Sistema</span>}
           </Button>
         </nav>
         

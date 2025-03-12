@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import { TabsContent, Tabs } from "@/components/ui/tabs";
@@ -7,9 +6,10 @@ import UsersTab from './users/UsersTab';
 import ContentTab from './ContentTab';
 import PaymentsTab from './payments/PaymentsTab';
 import ReportsTab from './ReportsTab';
-import SettingsTab from './SettingsTab';
+import SettingsTab from './settings/SystemSettings';
 import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
 import HomeTab from './home/HomeTab';
+import FileStoreForm from './FileStoreForm';
 
 const MainContent = () => {
   const { 
@@ -27,7 +27,10 @@ const MainContent = () => {
     addUser,
     editUser,
     deleteUser,
-    manageSubscription
+    manageSubscription,
+    subscriptionPlans,
+    setSubscriptionPlans,
+    paymentStats
   } = useAdminDashboard();
 
   return (
@@ -83,6 +86,10 @@ const MainContent = () => {
           
           <TabsContent value="home">
             <HomeTab />
+          </TabsContent>
+          
+          <TabsContent value="filestore">
+            <FileStoreForm />
           </TabsContent>
         </Tabs>
       </div>

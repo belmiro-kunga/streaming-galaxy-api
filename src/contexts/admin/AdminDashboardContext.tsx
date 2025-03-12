@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { AdminDashboardContextType } from './types';
+import { AdminDashboardContextType, StorageConfig, SystemConfig } from './types';
 import { SubscriptionPlan } from '@/types/api';
 import { useUsersManagement } from './useUsersManagement';
 import { usePaymentsManagement } from './usePaymentsManagement';
@@ -18,6 +17,86 @@ export const useAdminDashboard = () => {
     throw new Error('useAdminDashboard must be used within an AdminDashboardProvider');
   }
   return context;
+};
+
+const initialSystemConfig = {
+  general: {
+    // Informações Básicas
+    siteName: "",
+    siteDescription: "",
+    siteKeywords: "",
+
+    // Layout e Aparência
+    desktopLayout: true,
+    mobileLayout: true,
+    primaryFont: "inter",
+    fontSize: "medium" as const,
+    primaryColor: "#0066FF",
+    secondaryColor: "#1A1A1A",
+    accentColor: "#FF3366",
+
+    // Cabeçalho
+    showMainMenu: true,
+    showSearchBar: true,
+    showLoginButton: true,
+    menuItems: "Home, Filmes, Séries, Categorias",
+
+    // Rodapé
+    showFooterLinks: true,
+    showSocialIcons: true,
+    footerText: "© 2024 Streaming Galaxy. Todos os direitos reservados.",
+    socialLinks: "Facebook: https://facebook.com/streaminggalaxy\nInstagram: https://instagram.com/streaminggalaxy\nTwitter: https://twitter.com/streaminggalaxy",
+
+    // Configurações Regionais
+    timezone: "America/Sao_Paulo",
+    dateFormat: "DD/MM/YYYY",
+    timeFormat: "24h"
+  },
+  logo: {
+    logo: '',
+    favicon: '',
+    footerLogo: ''
+  },
+  notifications: {
+    emailNotifications: true,
+    pushNotifications: true,
+    smsNotifications: false,
+    notificationSound: true
+  },
+  paymentGateways: {
+    stripe: false,
+    paypal: false,
+    mercadoPago: true,
+    pix: true,
+    manualPayment: true
+  },
+  templates: {
+    activeTemplate: 'default',
+    colorScheme: 'dark',
+    fontFamily: 'Inter'
+  },
+  socialLogin: {
+    google: false,
+    facebook: false,
+    apple: false
+  },
+  maintenance: {
+    enabled: false,
+    message: '',
+    allowedIPs: []
+  },
+  policies: {
+    termsOfService: '',
+    privacyPolicy: '',
+    cookiePolicy: '',
+    refundPolicy: ''
+  },
+  gdpr: {
+    enabled: false,
+    cookieMessage: '',
+    policyUrl: ''
+  },
+  robotsTxt: ''
 };
 
 // Provider component
@@ -41,6 +120,30 @@ export const AdminDashboardProvider: React.FC<{ children: ReactNode }> = ({ chil
   
   // Calculate user stats based on current users
   const userStats = generateUserStats(userManagement.users);
+  
+  // File Store state
+  const [wasabiConfig, setWasabiConfig] = useState<StorageConfig>({
+    driverName: 'wasabi',
+    apiKey: '',
+    secretKey: '',
+    region: '',
+    bucketName: '',
+    endpoint: '',
+    isDefault: false
+  });
+
+  const [cloudflareConfig, setCloudflareConfig] = useState<StorageConfig>({
+    driverName: 'cloudflare',
+    apiKey: '',
+    secretKey: '',
+    region: '',
+    bucketName: '',
+    endpoint: '',
+    isDefault: false
+  });
+
+  // System Settings state
+  const [systemConfig, setSystemConfig] = useState(initialSystemConfig);
   
   // Logout handler
   const handleLogout = () => {
@@ -74,6 +177,16 @@ export const AdminDashboardProvider: React.FC<{ children: ReactNode }> = ({ chil
     // Subscription plans
     subscriptionPlans,
     setSubscriptionPlans,
+    
+    // File Store
+    wasabiConfig,
+    cloudflareConfig,
+    setWasabiConfig,
+    setCloudflareConfig,
+    
+    // System Settings
+    systemConfig,
+    setSystemConfig,
     
     // Logout function
     handleLogout

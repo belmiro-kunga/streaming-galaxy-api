@@ -79,6 +79,7 @@ function App() {
                   <Route path="/kids" element={<Kids />} />
                   <Route path="/watch/:id" element={<Watch />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/admin-login" element={<AdminLogin />} />
                   <Route path="/downloads" element={<Downloads />} />
                   <Route path="/free" element={<FreeContent />} />
                   <Route path="/free-content" element={<Navigate to="/free" replace />} />
