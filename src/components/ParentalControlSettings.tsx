@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trash2, Plus, Clock, Shield, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -140,7 +141,10 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
             <Label className="font-medium flex items-center">
               <Shield className="h-4 w-4 mr-2" />
               Classificação etária máxima
-              <Tooltip content="Restringe o acesso a conteúdos com classificação superior a selecionada">
+              <Tooltip 
+                content="Restringe o acesso a conteúdos com classificação superior a selecionada"
+                delayDuration={300}
+              >
                 <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
               </Tooltip>
             </Label>
@@ -164,7 +168,10 @@ export const ParentalControlSettings: React.FC<ParentalControlProps> = ({ profil
           <Label className="font-medium flex items-center">
             <Clock className="h-4 w-4 mr-2" />
             Restrições de horário
-            <Tooltip content="Define horários em que o perfil pode assistir a conteúdos">
+            <Tooltip
+              content="Define horários em que o perfil pode assistir a conteúdos"
+              delayDuration={300}
+            >
               <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
             </Tooltip>
           </Label>
