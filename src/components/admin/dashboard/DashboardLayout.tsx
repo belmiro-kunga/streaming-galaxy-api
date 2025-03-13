@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
+import { useAdminDashboard } from '@/contexts/admin';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';

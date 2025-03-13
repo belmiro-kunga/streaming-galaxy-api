@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
+import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/admin';
 import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { planAPI } from '@/services/plans';

@@ -2,8 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFileStore } from './filestore/useFileStore';
-import { ProviderConfigForm } from './filestore/ProviderConfigForm';
+import { useFileStore } from './useFileStore';
+import { ProviderConfigForm } from './ProviderConfigForm';
 
 const FileStoreForm = () => {
   const { 
