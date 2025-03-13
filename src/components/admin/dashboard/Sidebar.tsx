@@ -1,10 +1,7 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Users, Package, CreditCard, Settings, BarChart3, 
-  FileText, LogOut, PackageOpen, BookOpen, Home,
-  Database
-} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 
@@ -26,86 +23,77 @@ const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, handleLogout }: Sidebar
         <nav className="px-3 space-y-1">
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "overview" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "overview" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("overview")}
           >
-            <BarChart3 className="h-5 w-5" />
-            {sidebarOpen && <span>Visão Geral</span>}
+            <span>Visão Geral</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "home" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "home" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("home")}
           >
-            <Home className="h-5 w-5" />
-            {sidebarOpen && <span>Home</span>}
+            <span>Home</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "users" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "users" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("users")}
           >
-            <Users className="h-5 w-5" />
-            {sidebarOpen && <span>Usuários</span>}
+            <span>Usuários</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "plans" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "plans" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("plans")}
           >
-            <PackageOpen className="h-5 w-5" />
-            {sidebarOpen && <span>Planos</span>}
+            <span>Planos</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "content" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "content" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("content")}
           >
-            <BookOpen className="h-5 w-5" />
-            {sidebarOpen && <span>Conteúdos</span>}
+            <span>Conteúdos</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "payments" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "payments" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("payments")}
           >
-            <CreditCard className="h-5 w-5" />
-            {sidebarOpen && <span>Pagamentos</span>}
+            <span>Pagamentos</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "reports" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "reports" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("reports")}
           >
-            <FileText className="h-5 w-5" />
-            {sidebarOpen && <span>Relatórios</span>}
+            <span>Relatórios</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "filestore" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "filestore" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("filestore")}
           >
-            <Database className="h-5 w-5" />
-            {sidebarOpen && <span>File Store</span>}
+            <span>File Store</span>
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start gap-3 py-2 px-3 ${activeTab === "settings" ? "bg-gray-800" : ""}`}
+            className={`w-full justify-start py-2 px-3 ${activeTab === "settings" ? "bg-gray-800" : ""}`}
             onClick={() => setActiveTab("settings")}
           >
-            <Settings className="h-5 w-5" />
-            {sidebarOpen && <span>Configurações do Sistema</span>}
+            <span>Configurações do Sistema</span>
           </Button>
         </nav>
         
         <div className="px-3 mt-6 pt-6 border-t border-gray-800">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 py-2 px-3 text-red-400 hover:text-red-300 hover:bg-gray-800"
+            className="w-full justify-start py-2 px-3 text-red-400 hover:text-red-300 hover:bg-gray-800"
             onClick={handleLogout}
           >
-            <LogOut className="h-5 w-5" />
-            {sidebarOpen && <span>Sair</span>}
+            <LogOut className="h-5 w-5 mr-2" />
+            <span>Sair</span>
           </Button>
         </div>
       </ScrollArea>
