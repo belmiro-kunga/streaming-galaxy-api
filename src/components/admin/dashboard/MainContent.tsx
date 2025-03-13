@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import { TabsContent, Tabs } from "@/components/ui/tabs";
@@ -29,8 +30,7 @@ const MainContent = () => {
     deleteUser,
     manageSubscription,
     subscriptionPlans,
-    setSubscriptionPlans,
-    paymentStats
+    setSubscriptionPlans
   } = useAdminDashboard();
 
   return (
