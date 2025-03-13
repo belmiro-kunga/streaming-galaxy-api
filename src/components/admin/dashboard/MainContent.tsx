@@ -10,7 +10,7 @@ import ReportsTab from './ReportsTab';
 import SettingsTab from './settings/SystemSettings';
 import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
 import HomeTab from './home/HomeTab';
-import FileStoreForm from './FileStoreForm';
+import FileStoreForm from './filestore/FileStoreForm';
 
 const MainContent = () => {
   const { 
