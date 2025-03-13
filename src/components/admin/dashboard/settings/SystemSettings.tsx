@@ -2300,46 +2300,1821 @@ const PaymentSettings = ({ config, setConfig }: any) => {
   );
 };
 
-const TemplateSettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar configurações de template */}
-  </div>
-);
+const TemplateSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.template || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-const SocialLoginSettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar configurações de login social */}
-  </div>
-);
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
 
-const MaintenanceSettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar configurações de modo manutenção */}
-  </div>
-);
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        template: localConfig
+      });
+      
+      if (error) throw error;
 
-const PolicySettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar configurações de políticas */}
-  </div>
-);
+      setConfig({ ...config, template: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "As configurações do template foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Configurações do Template</CardTitle>
+          <CardDescription>
+            Personalize a aparência e o layout do frontend do sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="layout" className="w-full">
+            <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+              <TabsTrigger value="layout" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <Layout className="h-4 w-4" />
+                Layout
+              </TabsTrigger>
+              <TabsTrigger value="cards" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <PackageOpen className="h-4 w-4" />
+                Cards
+              </TabsTrigger>
+              <TabsTrigger value="hero" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <Image className="h-4 w-4" />
+                Hero
+              </TabsTrigger>
+              <TabsTrigger value="sections" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <ScrollText className="h-4 w-4" />
+                Seções
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="mt-6 space-y-6">
+              <TabsContent value="layout" className="m-0">
+                <div className="space-y-6">
+                  {/* Layout Principal */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="layoutStyle">Estilo do Layout</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Escolha o estilo de layout principal
+                        </p>
+                      </div>
+                      <Select
+                        value={localConfig.layout_style || 'netflix'}
+                        onValueChange={(value) => handleChange('layout_style', value)}
+                      >
+                        <SelectTrigger id="layoutStyle" className="w-[180px]">
+                          <SelectValue placeholder="Selecione o estilo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="netflix">Estilo Netflix</SelectItem>
+                          <SelectItem value="prime">Estilo Prime Video</SelectItem>
+                          <SelectItem value="disney">Estilo Disney+</SelectItem>
+                          <SelectItem value="custom">Personalizado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="stickyHeader">Cabeçalho Fixo</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Mantém o cabeçalho fixo durante a rolagem
+                        </p>
+                      </div>
+                      <Switch
+                        id="stickyHeader"
+                        checked={localConfig.sticky_header}
+                        onCheckedChange={(checked) => handleChange('sticky_header', checked)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="transparentHeader">Cabeçalho Transparente</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Aplica transparência ao cabeçalho sobre o hero
+                        </p>
+                      </div>
+                      <Switch
+                        id="transparentHeader"
+                        checked={localConfig.transparent_header}
+                        onCheckedChange={(checked) => handleChange('transparent_header', checked)}
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="containerWidth">Largura do Container</Label>
+                      <Select
+                        value={localConfig.container_width || 'xl'}
+                        onValueChange={(value) => handleChange('container_width', value)}
+                      >
+                        <SelectTrigger id="containerWidth">
+                          <SelectValue placeholder="Selecione a largura" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sm">Pequeno (640px)</SelectItem>
+                          <SelectItem value="md">Médio (768px)</SelectItem>
+                          <SelectItem value="lg">Grande (1024px)</SelectItem>
+                          <SelectItem value="xl">Extra Grande (1280px)</SelectItem>
+                          <SelectItem value="2xl">2XL (1536px)</SelectItem>
+                          <SelectItem value="full">Largura Total</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Navegação */}
+                  <div className="space-y-4">
+                    <Label>Navegação</Label>
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="infiniteScroll">Rolagem Infinita</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Carrega mais conteúdo automaticamente ao rolar
+                          </p>
+                        </div>
+                        <Switch
+                          id="infiniteScroll"
+                          checked={localConfig.infinite_scroll}
+                          onCheckedChange={(checked) => handleChange('infinite_scroll', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="smoothScroll">Rolagem Suave</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Ativa animação suave na rolagem da página
+                          </p>
+                        </div>
+                        <Switch
+                          id="smoothScroll"
+                          checked={localConfig.smooth_scroll}
+                          onCheckedChange={(checked) => handleChange('smooth_scroll', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="backToTop">Botão Voltar ao Topo</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe botão para retornar ao topo da página
+                          </p>
+                        </div>
+                        <Switch
+                          id="backToTop"
+                          checked={localConfig.back_to_top}
+                          onCheckedChange={(checked) => handleChange('back_to_top', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="cards" className="m-0">
+                <div className="space-y-6">
+                  {/* Estilo dos Cards */}
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="cardStyle">Estilo dos Cards</Label>
+                      <Select
+                        value={localConfig.card_style || 'modern'}
+                        onValueChange={(value) => handleChange('card_style', value)}
+                      >
+                        <SelectTrigger id="cardStyle">
+                          <SelectValue placeholder="Selecione o estilo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="modern">Moderno</SelectItem>
+                          <SelectItem value="classic">Clássico</SelectItem>
+                          <SelectItem value="minimal">Minimalista</SelectItem>
+                          <SelectItem value="gradient">Gradiente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="cardSize">Tamanho dos Cards</Label>
+                      <Select
+                        value={localConfig.card_size || 'medium'}
+                        onValueChange={(value) => handleChange('card_size', value)}
+                      >
+                        <SelectTrigger id="cardSize">
+                          <SelectValue placeholder="Selecione o tamanho" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Pequeno</SelectItem>
+                          <SelectItem value="medium">Médio</SelectItem>
+                          <SelectItem value="large">Grande</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="cardHoverEffect">Efeito Hover</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Aplica efeito de hover nos cards
+                        </p>
+                      </div>
+                      <Switch
+                        id="cardHoverEffect"
+                        checked={localConfig.card_hover_effect}
+                        onCheckedChange={(checked) => handleChange('card_hover_effect', checked)}
+                      />
+                    </div>
+
+                    {localConfig.card_hover_effect && (
+                      <div className="grid gap-2">
+                        <Label htmlFor="hoverEffectStyle">Estilo do Efeito Hover</Label>
+                        <Select
+                          value={localConfig.hover_effect_style || 'scale'}
+                          onValueChange={(value) => handleChange('hover_effect_style', value)}
+                        >
+                          <SelectTrigger id="hoverEffectStyle">
+                            <SelectValue placeholder="Selecione o efeito" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="scale">Escala</SelectItem>
+                            <SelectItem value="lift">Elevação</SelectItem>
+                            <SelectItem value="glow">Brilho</SelectItem>
+                            <SelectItem value="rotate">Rotação</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Informações do Card */}
+                  <div className="space-y-4">
+                    <Label>Informações Exibidas</Label>
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showTitle">Título</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe o título do conteúdo
+                          </p>
+                        </div>
+                        <Switch
+                          id="showTitle"
+                          checked={localConfig.show_title}
+                          onCheckedChange={(checked) => handleChange('show_title', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showYear">Ano</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe o ano de lançamento
+                          </p>
+                        </div>
+                        <Switch
+                          id="showYear"
+                          checked={localConfig.show_year}
+                          onCheckedChange={(checked) => handleChange('show_year', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showRating">Classificação</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe a classificação indicativa
+                          </p>
+                        </div>
+                        <Switch
+                          id="showRating"
+                          checked={localConfig.show_rating}
+                          onCheckedChange={(checked) => handleChange('show_rating', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showDuration">Duração</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe a duração do conteúdo
+                          </p>
+                        </div>
+                        <Switch
+                          id="showDuration"
+                          checked={localConfig.show_duration}
+                          onCheckedChange={(checked) => handleChange('show_duration', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="hero" className="m-0">
+                <div className="space-y-6">
+                  {/* Configurações do Hero */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="enableHero">Habilitar Hero</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Exibe seção hero na página inicial
+                        </p>
+                      </div>
+                      <Switch
+                        id="enableHero"
+                        checked={localConfig.enable_hero}
+                        onCheckedChange={(checked) => handleChange('enable_hero', checked)}
+                      />
+                    </div>
+
+                    {localConfig.enable_hero && (
+                      <>
+                        <div className="grid gap-2">
+                          <Label htmlFor="heroStyle">Estilo do Hero</Label>
+                          <Select
+                            value={localConfig.hero_style || 'fullscreen'}
+                            onValueChange={(value) => handleChange('hero_style', value)}
+                          >
+                            <SelectTrigger id="heroStyle">
+                              <SelectValue placeholder="Selecione o estilo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="fullscreen">Tela Cheia</SelectItem>
+                              <SelectItem value="contained">Contido</SelectItem>
+                              <SelectItem value="boxed">Em Caixa</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="autoplayHero">Autoplay</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Alterna automaticamente os itens do hero
+                            </p>
+                          </div>
+                          <Switch
+                            id="autoplayHero"
+                            checked={localConfig.hero_autoplay}
+                            onCheckedChange={(checked) => handleChange('hero_autoplay', checked)}
+                          />
+                        </div>
+
+                        {localConfig.hero_autoplay && (
+                          <div className="grid gap-2">
+                            <Label htmlFor="autoplayInterval">Intervalo do Autoplay (segundos)</Label>
+                            <Input
+                              id="autoplayInterval"
+                              type="number"
+                              min="3"
+                              max="15"
+                              value={localConfig.hero_autoplay_interval || 5}
+                              onChange={(e) => handleChange('hero_autoplay_interval', parseInt(e.target.value))}
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="heroOverlay">Overlay Gradiente</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Aplica overlay gradiente sobre a imagem
+                            </p>
+                          </div>
+                          <Switch
+                            id="heroOverlay"
+                            checked={localConfig.hero_overlay}
+                            onCheckedChange={(checked) => handleChange('hero_overlay', checked)}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="sections" className="m-0">
+                <div className="space-y-6">
+                  {/* Configurações das Seções */}
+                  <div className="space-y-4">
+                    <Label>Seções da Página Inicial</Label>
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showContinueWatching">Continuar Assistindo</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe seção de conteúdos em progresso
+                          </p>
+                        </div>
+                        <Switch
+                          id="showContinueWatching"
+                          checked={localConfig.show_continue_watching}
+                          onCheckedChange={(checked) => handleChange('show_continue_watching', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showTrending">Em Alta</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe seção de conteúdos populares
+                          </p>
+                        </div>
+                        <Switch
+                          id="showTrending"
+                          checked={localConfig.show_trending}
+                          onCheckedChange={(checked) => handleChange('show_trending', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showNewReleases">Lançamentos</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe seção de novos conteúdos
+                          </p>
+                        </div>
+                        <Switch
+                          id="showNewReleases"
+                          checked={localConfig.show_new_releases}
+                          onCheckedChange={(checked) => handleChange('show_new_releases', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="showCategories">Categorias</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Exibe seções por categoria
+                          </p>
+                        </div>
+                        <Switch
+                          id="showCategories"
+                          checked={localConfig.show_categories}
+                          onCheckedChange={(checked) => handleChange('show_categories', checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="sectionStyle">Estilo das Seções</Label>
+                      <Select
+                        value={localConfig.section_style || 'carousel'}
+                        onValueChange={(value) => handleChange('section_style', value)}
+                      >
+                        <SelectTrigger id="sectionStyle">
+                          <SelectValue placeholder="Selecione o estilo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="carousel">Carrossel</SelectItem>
+                          <SelectItem value="grid">Grade</SelectItem>
+                          <SelectItem value="list">Lista</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="itemsPerRow">Itens por Linha</Label>
+                      <Select
+                        value={localConfig.items_per_row || '6'}
+                        onValueChange={(value) => handleChange('items_per_row', value)}
+                      >
+                        <SelectTrigger id="itemsPerRow">
+                          <SelectValue placeholder="Selecione a quantidade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4">4 Itens</SelectItem>
+                          <SelectItem value="5">5 Itens</SelectItem>
+                          <SelectItem value="6">6 Itens</SelectItem>
+                          <SelectItem value="7">7 Itens</SelectItem>
+                          <SelectItem value="8">8 Itens</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const SocialLoginSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.social_login || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleChange = (provider: string, field: string, value: any) => {
+    setLocalConfig({
+      ...localConfig,
+      [provider]: {
+        ...(localConfig[provider] || {}),
+        [field]: value
+      }
+    });
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        social_login: localConfig
+      });
+      
+      if (error) throw error;
+
+      setConfig({ ...config, social_login: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "As configurações de login social foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Login Social</CardTitle>
+          <CardDescription>
+            Configure os provedores de autenticação social
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Google */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enableGoogle">Google</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Permitir login com conta Google
+                  </p>
+                </div>
+                <Switch
+                  id="enableGoogle"
+                  checked={localConfig.google?.enabled}
+                  onCheckedChange={(checked) => handleChange('google', 'enabled', checked)}
+                />
+              </div>
+
+              {localConfig.google?.enabled && (
+                <div className="pl-6 space-y-4 border-l-2 border-gray-800">
+                  <div className="grid gap-2">
+                    <Label htmlFor="googleClientId">Client ID</Label>
+                    <Input
+                      id="googleClientId"
+                      value={localConfig.google?.client_id || ''}
+                      onChange={(e) => handleChange('google', 'client_id', e.target.value)}
+                      placeholder="Seu Google Client ID"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="googleClientSecret">Client Secret</Label>
+                    <Input
+                      id="googleClientSecret"
+                      type="password"
+                      value={localConfig.google?.client_secret || ''}
+                      onChange={(e) => handleChange('google', 'client_secret', e.target.value)}
+                      placeholder="Seu Google Client Secret"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="googleRedirectUri">URI de Redirecionamento</Label>
+                    <Input
+                      id="googleRedirectUri"
+                      value={localConfig.google?.redirect_uri || ''}
+                      onChange={(e) => handleChange('google', 'redirect_uri', e.target.value)}
+                      placeholder="https://seu-dominio.com/auth/google/callback"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Facebook */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enableFacebook">Facebook</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Permitir login com conta Facebook
+                  </p>
+                </div>
+                <Switch
+                  id="enableFacebook"
+                  checked={localConfig.facebook?.enabled}
+                  onCheckedChange={(checked) => handleChange('facebook', 'enabled', checked)}
+                />
+              </div>
+
+              {localConfig.facebook?.enabled && (
+                <div className="pl-6 space-y-4 border-l-2 border-gray-800">
+                  <div className="grid gap-2">
+                    <Label htmlFor="facebookAppId">App ID</Label>
+                    <Input
+                      id="facebookAppId"
+                      value={localConfig.facebook?.app_id || ''}
+                      onChange={(e) => handleChange('facebook', 'app_id', e.target.value)}
+                      placeholder="Seu Facebook App ID"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="facebookAppSecret">App Secret</Label>
+                    <Input
+                      id="facebookAppSecret"
+                      type="password"
+                      value={localConfig.facebook?.app_secret || ''}
+                      onChange={(e) => handleChange('facebook', 'app_secret', e.target.value)}
+                      placeholder="Seu Facebook App Secret"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="facebookRedirectUri">URI de Redirecionamento</Label>
+                    <Input
+                      id="facebookRedirectUri"
+                      value={localConfig.facebook?.redirect_uri || ''}
+                      onChange={(e) => handleChange('facebook', 'redirect_uri', e.target.value)}
+                      placeholder="https://seu-dominio.com/auth/facebook/callback"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Configurações Gerais */}
+            <div className="space-y-4">
+              <Label>Configurações Gerais</Label>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="defaultProvider">Provedor Padrão</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Provedor exibido por padrão no botão de login
+                    </p>
+                  </div>
+                  <Select
+                    value={localConfig.default_provider || 'none'}
+                    onValueChange={(value) => handleChange('default_provider', '', value)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Selecione o provedor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      <SelectItem value="google">Google</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="rememberUser">Lembrar Usuário</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Mantém o usuário conectado entre sessões
+                    </p>
+                  </div>
+                  <Switch
+                    id="rememberUser"
+                    checked={localConfig.remember_user}
+                    onCheckedChange={(checked) => handleChange('remember_user', '', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="linkAccounts">Vincular Contas</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Permite vincular múltiplos provedores à mesma conta
+                    </p>
+                  </div>
+                  <Switch
+                    id="linkAccounts"
+                    checked={localConfig.link_accounts}
+                    onCheckedChange={(checked) => handleChange('link_accounts', '', checked)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const MaintenanceSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.maintenance || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        maintenance: localConfig
+      });
+      
+      if (error) throw error;
+
+      setConfig({ ...config, maintenance: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "As configurações do modo de manutenção foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Modo de Manutenção</CardTitle>
+          <CardDescription>
+            Configure o modo de manutenção do sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Ativar/Desativar Modo Manutenção */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enableMaintenance">Modo de Manutenção</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Ativa o modo de manutenção para todos os usuários
+                  </p>
+                </div>
+                <Switch
+                  id="enableMaintenance"
+                  checked={localConfig.enabled}
+                  onCheckedChange={(checked) => handleChange('enabled', checked)}
+                />
+              </div>
+
+              {localConfig.enabled && (
+                <div className="pl-6 space-y-4 border-l-2 border-gray-800">
+                  <div className="grid gap-2">
+                    <Label htmlFor="maintenanceMessage">Mensagem de Manutenção</Label>
+                    <Textarea
+                      id="maintenanceMessage"
+                      value={localConfig.message || ''}
+                      onChange={(e) => handleChange('message', e.target.value)}
+                      placeholder="Sistema em manutenção. Voltaremos em breve!"
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="maintenanceEndTime">Previsão de Término</Label>
+                    <Input
+                      id="maintenanceEndTime"
+                      type="datetime-local"
+                      value={localConfig.end_time || ''}
+                      onChange={(e) => handleChange('end_time', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="allowAdminAccess">Permitir Acesso Admin</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Permite que administradores acessem o sistema
+                      </p>
+                    </div>
+                    <Switch
+                      id="allowAdminAccess"
+                      checked={localConfig.allow_admin_access}
+                      onCheckedChange={(checked) => handleChange('allow_admin_access', checked)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="showProgressBar">Barra de Progresso</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Exibe uma barra de progresso estimado
+                      </p>
+                    </div>
+                    <Switch
+                      id="showProgressBar"
+                      checked={localConfig.show_progress_bar}
+                      onCheckedChange={(checked) => handleChange('show_progress_bar', checked)}
+                    />
+                  </div>
+
+                  {localConfig.show_progress_bar && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="maintenanceProgress">Progresso Atual (%)</Label>
+                      <Input
+                        id="maintenanceProgress"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={localConfig.progress || 0}
+                        onChange={(e) => handleChange('progress', parseInt(e.target.value))}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid gap-2">
+                    <Label>Páginas Acessíveis</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="accessHomepage"
+                          checked={localConfig.accessible_pages?.includes('home')}
+                          onCheckedChange={(checked) => {
+                            const pages = new Set(localConfig.accessible_pages || []);
+                            checked ? pages.add('home') : pages.delete('home');
+                            handleChange('accessible_pages', Array.from(pages));
+                          }}
+                        />
+                        <Label htmlFor="accessHomepage">Página Inicial</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="accessContact"
+                          checked={localConfig.accessible_pages?.includes('contact')}
+                          onCheckedChange={(checked) => {
+                            const pages = new Set(localConfig.accessible_pages || []);
+                            checked ? pages.add('contact') : pages.delete('contact');
+                            handleChange('accessible_pages', Array.from(pages));
+                          }}
+                        />
+                        <Label htmlFor="accessContact">Contato</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="accessStatus"
+                          checked={localConfig.accessible_pages?.includes('status')}
+                          onCheckedChange={(checked) => {
+                            const pages = new Set(localConfig.accessible_pages || []);
+                            checked ? pages.add('status') : pages.delete('status');
+                            handleChange('accessible_pages', Array.from(pages));
+                          }}
+                        />
+                        <Label htmlFor="accessStatus">Página de Status</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Notificações</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="notifyEmail"
+                          checked={localConfig.notifications?.email}
+                          onCheckedChange={(checked) => handleChange('notifications', {
+                            ...localConfig.notifications,
+                            email: checked
+                          })}
+                        />
+                        <Label htmlFor="notifyEmail">Notificar por Email</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="notifyPush"
+                          checked={localConfig.notifications?.push}
+                          onCheckedChange={(checked) => handleChange('notifications', {
+                            ...localConfig.notifications,
+                            push: checked
+                          })}
+                        />
+                        <Label htmlFor="notifyPush">Notificações Push</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="customCss">CSS Personalizado</Label>
+                    <Textarea
+                      id="customCss"
+                      value={localConfig.custom_css || ''}
+                      onChange={(e) => handleChange('custom_css', e.target.value)}
+                      placeholder="Adicione CSS personalizado para a página de manutenção"
+                      className="font-mono min-h-[100px]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const PolicySettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.policies || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        policies: localConfig
+      });
+      
+      if (error) throw error;
+
+      setConfig({ ...config, policies: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "As políticas do sistema foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as políticas.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Políticas do Sistema</CardTitle>
+          <CardDescription>
+            Configure as políticas e termos do seu sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="terms" className="w-full">
+            <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+              <TabsTrigger value="terms" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <ScrollText className="h-4 w-4" />
+                Termos de Uso
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <Lock className="h-4 w-4" />
+                Política de Privacidade
+              </TabsTrigger>
+              <TabsTrigger value="cookies" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <Cookie className="h-4 w-4" />
+                Política de Cookies
+              </TabsTrigger>
+              <TabsTrigger value="refund" className={cn(
+                "data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none",
+                "flex items-center gap-2 px-4 py-2"
+              )}>
+                <CreditCard className="h-4 w-4" />
+                Política de Reembolso
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="mt-6 space-y-6">
+              <TabsContent value="terms" className="m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="requireTerms">Exigir Aceitação</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Exige que usuários aceitem os termos ao se registrar
+                      </p>
+                    </div>
+                    <Switch
+                      id="requireTerms"
+                      checked={localConfig.require_terms_acceptance}
+                      onCheckedChange={(checked) => handleChange('require_terms_acceptance', checked)}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="termsVersion">Versão dos Termos</Label>
+                    <Input
+                      id="termsVersion"
+                      value={localConfig.terms_version || '1.0'}
+                      onChange={(e) => handleChange('terms_version', e.target.value)}
+                      placeholder="1.0"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="termsLastUpdate">Última Atualização</Label>
+                    <Input
+                      id="termsLastUpdate"
+                      type="date"
+                      value={localConfig.terms_last_update || ''}
+                      onChange={(e) => handleChange('terms_last_update', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="termsContent">Conteúdo dos Termos de Uso</Label>
+                    <Textarea
+                      id="termsContent"
+                      value={localConfig.terms_content || ''}
+                      onChange={(e) => handleChange('terms_content', e.target.value)}
+                      placeholder="Digite os termos de uso do sistema..."
+                      className="min-h-[300px]"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="privacy" className="m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="requirePrivacy">Exigir Aceitação</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Exige que usuários aceitem a política de privacidade
+                      </p>
+                    </div>
+                    <Switch
+                      id="requirePrivacy"
+                      checked={localConfig.require_privacy_acceptance}
+                      onCheckedChange={(checked) => handleChange('require_privacy_acceptance', checked)}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="privacyVersion">Versão da Política</Label>
+                    <Input
+                      id="privacyVersion"
+                      value={localConfig.privacy_version || '1.0'}
+                      onChange={(e) => handleChange('privacy_version', e.target.value)}
+                      placeholder="1.0"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="privacyLastUpdate">Última Atualização</Label>
+                    <Input
+                      id="privacyLastUpdate"
+                      type="date"
+                      value={localConfig.privacy_last_update || ''}
+                      onChange={(e) => handleChange('privacy_last_update', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Dados Coletados</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="collectEmail"
+                          checked={localConfig.collected_data?.includes('email')}
+                          onCheckedChange={(checked) => {
+                            const data = new Set(localConfig.collected_data || []);
+                            checked ? data.add('email') : data.delete('email');
+                            handleChange('collected_data', Array.from(data));
+                          }}
+                        />
+                        <Label htmlFor="collectEmail">Email</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="collectName"
+                          checked={localConfig.collected_data?.includes('name')}
+                          onCheckedChange={(checked) => {
+                            const data = new Set(localConfig.collected_data || []);
+                            checked ? data.add('name') : data.delete('name');
+                            handleChange('collected_data', Array.from(data));
+                          }}
+                        />
+                        <Label htmlFor="collectName">Nome</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="collectLocation"
+                          checked={localConfig.collected_data?.includes('location')}
+                          onCheckedChange={(checked) => {
+                            const data = new Set(localConfig.collected_data || []);
+                            checked ? data.add('location') : data.delete('location');
+                            handleChange('collected_data', Array.from(data));
+                          }}
+                        />
+                        <Label htmlFor="collectLocation">Localização</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="collectDevice"
+                          checked={localConfig.collected_data?.includes('device')}
+                          onCheckedChange={(checked) => {
+                            const data = new Set(localConfig.collected_data || []);
+                            checked ? data.add('device') : data.delete('device');
+                            handleChange('collected_data', Array.from(data));
+                          }}
+                        />
+                        <Label htmlFor="collectDevice">Informações do Dispositivo</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="privacyContent">Política de Privacidade</Label>
+                    <Textarea
+                      id="privacyContent"
+                      value={localConfig.privacy_content || ''}
+                      onChange={(e) => handleChange('privacy_content', e.target.value)}
+                      placeholder="Digite a política de privacidade..."
+                      className="min-h-[300px]"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="cookies" className="m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="showCookieConsent">Aviso de Cookies</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Exibe banner de consentimento de cookies
+                      </p>
+                    </div>
+                    <Switch
+                      id="showCookieConsent"
+                      checked={localConfig.show_cookie_consent}
+                      onCheckedChange={(checked) => handleChange('show_cookie_consent', checked)}
+                    />
+                  </div>
+
+                  {localConfig.show_cookie_consent && (
+                    <>
+                      <div className="grid gap-2">
+                        <Label htmlFor="cookieConsentMessage">Mensagem do Banner</Label>
+                        <Textarea
+                          id="cookieConsentMessage"
+                          value={localConfig.cookie_consent_message || ''}
+                          onChange={(e) => handleChange('cookie_consent_message', e.target.value)}
+                          placeholder="Este site usa cookies para melhorar sua experiência..."
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>Tipos de Cookies</Label>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="necessaryCookies"
+                              checked={localConfig.cookie_types?.includes('necessary')}
+                              onCheckedChange={(checked) => {
+                                const types = new Set(localConfig.cookie_types || []);
+                                checked ? types.add('necessary') : types.delete('necessary');
+                                handleChange('cookie_types', Array.from(types));
+                              }}
+                            />
+                            <Label htmlFor="necessaryCookies">Necessários</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="analyticsCookies"
+                              checked={localConfig.cookie_types?.includes('analytics')}
+                              onCheckedChange={(checked) => {
+                                const types = new Set(localConfig.cookie_types || []);
+                                checked ? types.add('analytics') : types.delete('analytics');
+                                handleChange('cookie_types', Array.from(types));
+                              }}
+                            />
+                            <Label htmlFor="analyticsCookies">Análise</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="marketingCookies"
+                              checked={localConfig.cookie_types?.includes('marketing')}
+                              onCheckedChange={(checked) => {
+                                const types = new Set(localConfig.cookie_types || []);
+                                checked ? types.add('marketing') : types.delete('marketing');
+                                handleChange('cookie_types', Array.from(types));
+                              }}
+                            />
+                            <Label htmlFor="marketingCookies">Marketing</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="cookiePolicy">Política de Cookies</Label>
+                    <Textarea
+                      id="cookiePolicy"
+                      value={localConfig.cookie_policy || ''}
+                      onChange={(e) => handleChange('cookie_policy', e.target.value)}
+                      placeholder="Digite a política de cookies..."
+                      className="min-h-[300px]"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="refund" className="m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="enableRefunds">Permitir Reembolsos</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Habilita política de reembolso no sistema
+                      </p>
+                    </div>
+                    <Switch
+                      id="enableRefunds"
+                      checked={localConfig.enable_refunds}
+                      onCheckedChange={(checked) => handleChange('enable_refunds', checked)}
+                    />
+                  </div>
+
+                  {localConfig.enable_refunds && (
+                    <>
+                      <div className="grid gap-2">
+                        <Label htmlFor="refundPeriod">Período de Reembolso (dias)</Label>
+                        <Input
+                          id="refundPeriod"
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={localConfig.refund_period || 7}
+                          onChange={(e) => handleChange('refund_period', parseInt(e.target.value))}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>Motivos de Reembolso Aceitos</Label>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="technicalIssues"
+                              checked={localConfig.refund_reasons?.includes('technical')}
+                              onCheckedChange={(checked) => {
+                                const reasons = new Set(localConfig.refund_reasons || []);
+                                checked ? reasons.add('technical') : reasons.delete('technical');
+                                handleChange('refund_reasons', Array.from(reasons));
+                              }}
+                            />
+                            <Label htmlFor="technicalIssues">Problemas Técnicos</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="qualityIssues"
+                              checked={localConfig.refund_reasons?.includes('quality')}
+                              onCheckedChange={(checked) => {
+                                const reasons = new Set(localConfig.refund_reasons || []);
+                                checked ? reasons.add('quality') : reasons.delete('quality');
+                                handleChange('refund_reasons', Array.from(reasons));
+                              }}
+                            />
+                            <Label htmlFor="qualityIssues">Problemas de Qualidade</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="wrongPurchase"
+                              checked={localConfig.refund_reasons?.includes('wrong_purchase')}
+                              onCheckedChange={(checked) => {
+                                const reasons = new Set(localConfig.refund_reasons || []);
+                                checked ? reasons.add('wrong_purchase') : reasons.delete('wrong_purchase');
+                                handleChange('refund_reasons', Array.from(reasons));
+                              }}
+                            />
+                            <Label htmlFor="wrongPurchase">Compra Acidental</Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="refundPolicy">Política de Reembolso</Label>
+                        <Textarea
+                          id="refundPolicy"
+                          value={localConfig.refund_policy || ''}
+                          onChange={(e) => handleChange('refund_policy', e.target.value)}
+                          placeholder="Digite a política de reembolso..."
+                          className="min-h-[300px]"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const GDPRSettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
+    <div className="space-y-6">
     {/* Implementar configurações GDPR */}
-  </div>
+                </div>
 );
 
-const RobotsSettings = ({ robotsTxt, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar configurações do robots.txt */}
-  </div>
-);
+const RobotsSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.robots || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-const ExtensionsSettings = () => (
-  <div className="space-y-6">
-    {/* Implementar gerenciamento de extensões */}
-  </div>
-);
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        robots: localConfig
+      });
+      
+      if (error) throw error;
+
+      setConfig({ ...config, robots: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "O conteúdo do robots.txt foi atualizado.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar o robots.txt.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gray-950 border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-gray-100">Configurações do Robots.txt</CardTitle>
+          <CardDescription className="text-gray-400">
+            Configure o arquivo robots.txt para controlar o acesso dos motores de busca ao seu site
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enableRobots" className="text-gray-100">Ativar Robots.txt Personalizado</Label>
+                  <p className="text-xs text-gray-400">
+                    Permite personalizar as regras de acesso dos motores de busca
+                  </p>
+                </div>
+                <Switch
+                  id="enableRobots"
+                  checked={localConfig.enabled}
+                  onCheckedChange={(checked) => handleChange('enabled', checked)}
+                />
+              </div>
+
+              {localConfig.enabled && (
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="robotsContent" className="text-gray-100">Conteúdo do Robots.txt</Label>
+                    <Textarea
+                      id="robotsContent"
+                      value={localConfig.content || defaultRobotsContent}
+                      onChange={(e) => handleChange('content', e.target.value)}
+                      placeholder={`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nSitemap: https://seusite.com/sitemap.xml`}
+                      className="min-h-[300px] font-mono bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                    />
+                  </div>
+
+                  <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-100 mb-2">Exemplos de Regras Comuns:</h4>
+                    <div className="space-y-2 text-xs text-gray-400">
+                      <p>• Permitir todos os robôs: User-agent: * / Allow: /</p>
+                      <p>• Bloquear pasta admin: Disallow: /admin/</p>
+                      <p>• Bloquear robô específico: User-agent: Googlebot / Disallow: /privado/</p>
+                      <p>• Adicionar sitemap: Sitemap: https://seusite.com/sitemap.xml</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleChange('content', defaultRobotsContent)}
+                      className="text-gray-100 border-gray-700 hover:bg-gray-800"
+                    >
+                      Restaurar Padrão
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open('/robots.txt', '_blank')}
+                      className="text-gray-100 border-gray-700 hover:bg-gray-800"
+                    >
+                      Visualizar Atual
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const defaultRobotsContent = `User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Bloquear diretórios sensíveis
+Disallow: /private/
+Disallow: /admin/
+Disallow: /backend/
+Disallow: /wp-admin/
+
+# Permitir arquivos estáticos
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.gif$
+Allow: /*.svg$
+
+# Adicione seu sitemap aqui
+Sitemap: https://seusite.com/sitemap.xml`;
+
+const ExtensionsSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config?.extensions || {});
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
+
+  const handleCountryChange = (action: 'block' | 'allow', country: string) => {
+    const currentList = localConfig[`${action}ed_countries`] || [];
+    const updatedList = currentList.includes(country)
+      ? currentList.filter((c: string) => c !== country)
+      : [...currentList, country];
+    
+    handleChange(`${action}ed_countries`, updatedList);
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await siteConfigAPI.updateConfig({
+        ...config,
+        extensions: localConfig
+      });
+      
+      if (error) throw error;
+
+      setConfig({ ...config, extensions: localConfig });
+      toast({
+        title: "Sucesso!",
+        description: "As configurações de extensões foram atualizadas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const countries = [
+    { code: 'BR', name: 'Brasil' },
+    { code: 'US', name: 'Estados Unidos' },
+    { code: 'PT', name: 'Portugal' },
+    { code: 'ES', name: 'Espanha' },
+    { code: 'FR', name: 'França' },
+    { code: 'DE', name: 'Alemanha' },
+    { code: 'IT', name: 'Itália' },
+    { code: 'GB', name: 'Reino Unido' },
+    { code: 'JP', name: 'Japão' },
+    { code: 'CN', name: 'China' },
+    { code: 'RU', name: 'Rússia' },
+    { code: 'IN', name: 'Índia' },
+    { code: 'CA', name: 'Canadá' },
+    { code: 'AU', name: 'Austrália' },
+    { code: 'MX', name: 'México' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-gray-950 border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-gray-100">Bloqueio Geográfico</CardTitle>
+          <CardDescription className="text-gray-400">
+            Controle o acesso ao site por localização geográfica
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enableGeoBlocking" className="text-gray-100">Ativar Bloqueio Geográfico</Label>
+                  <p className="text-xs text-gray-400">
+                    Permite controlar o acesso ao site por país
+                  </p>
+                </div>
+                <Switch
+                  id="enableGeoBlocking"
+                  checked={localConfig.geo_blocking_enabled}
+                  onCheckedChange={(checked) => handleChange('geo_blocking_enabled', checked)}
+                />
+              </div>
+
+              {localConfig.geo_blocking_enabled && (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Select
+                        value={localConfig.geo_blocking_mode || 'blacklist'}
+                        onValueChange={(value) => handleChange('geo_blocking_mode', value)}
+                      >
+                        <SelectTrigger className="w-[200px] bg-gray-900 border-gray-700 text-gray-100">
+                          <SelectValue placeholder="Selecione o modo" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900 border-gray-700">
+                          <SelectItem value="blacklist">Lista de Bloqueio</SelectItem>
+                          <SelectItem value="whitelist">Lista de Permissão</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-gray-400">
+                        {localConfig.geo_blocking_mode === 'blacklist' 
+                          ? 'Bloquear acesso dos países selecionados'
+                          : 'Permitir acesso apenas dos países selecionados'}
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4">
+                      <Label className="text-gray-100">
+                        {localConfig.geo_blocking_mode === 'blacklist' 
+                          ? 'Países Bloqueados'
+                          : 'Países Permitidos'}
+                      </Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {countries.map((country) => (
+                          <div
+                            key={country.code}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`country-${country.code}`}
+                              checked={localConfig[`${localConfig.geo_blocking_mode === 'blacklist' ? 'block' : 'allow'}ed_countries`]?.includes(country.code)}
+                              onCheckedChange={() => handleCountryChange(
+                                localConfig.geo_blocking_mode === 'blacklist' ? 'block' : 'allow',
+                                country.code
+                              )}
+                              className="border-gray-700 data-[state=checked]:bg-primary"
+                            />
+                            <Label
+                              htmlFor={`country-${country.code}`}
+                              className="text-sm text-gray-100"
+                            >
+                              {country.name} ({country.code})
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-100 mb-2">Mensagem de Bloqueio</h4>
+                      <Textarea
+                        value={localConfig.blocking_message || 'Desculpe, o acesso a este site não está disponível em sua região.'}
+                        onChange={(e) => handleChange('blocking_message', e.target.value)}
+                        placeholder="Mensagem exibida para usuários bloqueados"
+                        className="bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="enableRedirect"
+                        checked={localConfig.enable_redirect}
+                        onCheckedChange={(checked) => handleChange('enable_redirect', checked)}
+                      />
+                      <div className="grid gap-1.5">
+                        <Label htmlFor="enableRedirect" className="text-gray-100">
+                          Redirecionar usuários bloqueados
+                        </Label>
+                        <p className="text-xs text-gray-400">
+                          Redireciona para uma URL alternativa em vez de mostrar mensagem de bloqueio
+                        </p>
+                      </div>
+                    </div>
+
+                    {localConfig.enable_redirect && (
+                      <div className="grid gap-2">
+                        <Label htmlFor="redirectUrl" className="text-gray-100">URL de Redirecionamento</Label>
+                        <Input
+                          id="redirectUrl"
+                          value={localConfig.redirect_url || ''}
+                          onChange={(e) => handleChange('redirect_url', e.target.value)}
+                          placeholder="https://exemplo.com/blocked"
+                          className="bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave} 
+          disabled={isLoading}
+          className="min-w-[200px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            'Salvar Alterações'
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export default SystemSettings; 
