@@ -173,28 +173,42 @@ const SystemSettings = () => {
 };
 
 const GeneralSettings = ({ config, setConfig }: any) => {
+  const [localConfig, setLocalConfig] = useState(config || {});
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [localConfig, setLocalConfig] = React.useState(config.general);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Carregar configurações existentes
+  useEffect(() => {
+    const loadConfig = async () => {
+      const { data, error } = await siteConfigAPI.getConfig();
+      if (data) {
+        setLocalConfig(data);
+        setConfig(data);
+      }
+    };
+    loadConfig();
+  }, []);
+
+  // Atualizar configurações locais
+  const handleChange = (field: string, value: any) => {
+    setLocalConfig({ ...localConfig, [field]: value });
+  };
+
+  // Salvar configurações
+  const handleSave = async () => {
     setIsLoading(true);
-    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setConfig((prev: any) => ({
-        ...prev,
-        general: localConfig
-      }));
+      const { error } = await siteConfigAPI.updateConfig(localConfig);
+      if (error) throw error;
 
+      setConfig(localConfig);
       toast({
-        title: "Configurações salvas",
-        description: "As configurações gerais foram atualizadas com sucesso.",
+        title: "Sucesso!",
+        description: "As configurações gerais foram atualizadas.",
       });
     } catch (error) {
       toast({
-        title: "Erro ao salvar",
+        title: "Erro",
         description: "Ocorreu um erro ao salvar as configurações.",
         variant: "destructive",
       });
@@ -204,343 +218,248 @@ const GeneralSettings = ({ config, setConfig }: any) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-900">
-          <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
-          <TabsTrigger value="layout">Layout</TabsTrigger>
-          <TabsTrigger value="header">Cabeçalho</TabsTrigger>
-          <TabsTrigger value="footer">Rodapé</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-6">
-          {/* Informações Básicas */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Building2 className="h-5 w-5" />
-              <h2>Informações do Site</h2>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="siteName">Nome do Site</Label>
-                <Input
-                  id="siteName"
-                  value={localConfig.siteName}
-                  onChange={(e) => setLocalConfig({ ...localConfig, siteName: e.target.value })}
-                  placeholder="Ex: Streaming Galaxy"
-                  className="bg-gray-900 border-gray-800"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="siteDescription">Descrição do Site</Label>
-                <Input
-                  id="siteDescription"
-                  value={localConfig.siteDescription}
-                  onChange={(e) => setLocalConfig({ ...localConfig, siteDescription: e.target.value })}
-                  placeholder="Uma breve descrição do seu site"
-                  className="bg-gray-900 border-gray-800"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="siteKeywords">Palavras-chave (SEO)</Label>
-              <Input
-                id="siteKeywords"
-                value={localConfig.siteKeywords}
-                onChange={(e) => setLocalConfig({ ...localConfig, siteKeywords: e.target.value })}
-                placeholder="streaming, filmes, séries, etc"
-                className="bg-gray-900 border-gray-800"
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="layout" className="space-y-6">
-          {/* Layout e Aparência */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Layout className="h-5 w-5" />
-              <h2>Layout e Aparência</h2>
-            </div>
-            
-            <div className="grid gap-6">
-              {/* Layout Responsivo */}
-              <div className="space-y-4">
-                <Label className="text-base">Layout Responsivo</Label>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Monitor className="h-4 w-4" />
-                        <span>Layout Desktop</span>
-                      </div>
-                      <p className="text-sm text-gray-400">Configurar visualização desktop</p>
-                    </div>
-                    <Switch
-                      checked={localConfig.desktopLayout}
-                      onCheckedChange={(checked) => 
-                        setLocalConfig({ ...localConfig, desktopLayout: checked })
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Smartphone className="h-4 w-4" />
-                        <span>Layout Mobile</span>
-                      </div>
-                      <p className="text-sm text-gray-400">Configurar visualização mobile</p>
-                    </div>
-                    <Switch
-                      checked={localConfig.mobileLayout}
-                      onCheckedChange={(checked) => 
-                        setLocalConfig({ ...localConfig, mobileLayout: checked })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Tipografia */}
-              <div className="space-y-4">
-                <Label className="text-base">Tipografia</Label>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryFont">Fonte Principal</Label>
-                    <Select
-                      value={localConfig.primaryFont}
-                      onValueChange={(value) => setLocalConfig({ ...localConfig, primaryFont: value })}
-                    >
-                      <SelectTrigger className="bg-gray-900 border-gray-800">
-                        <SelectValue placeholder="Selecione a fonte" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="inter">Inter</SelectItem>
-                        <SelectItem value="roboto">Roboto</SelectItem>
-                        <SelectItem value="poppins">Poppins</SelectItem>
-                        <SelectItem value="opensans">Open Sans</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="fontSize">Tamanho da Fonte Base</Label>
-                    <Select
-                      value={localConfig.fontSize}
-                      onValueChange={(value) => setLocalConfig({ ...localConfig, fontSize: value })}
-                    >
-                      <SelectTrigger className="bg-gray-900 border-gray-800">
-                        <SelectValue placeholder="Selecione o tamanho" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="small">Pequeno (14px)</SelectItem>
-                        <SelectItem value="medium">Médio (16px)</SelectItem>
-                        <SelectItem value="large">Grande (18px)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cores */}
-              <div className="space-y-4">
-                <Label className="text-base">Esquema de Cores</Label>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Cor Primária</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        id="primaryColor"
-                        value={localConfig.primaryColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, primaryColor: e.target.value })}
-                        className="w-12 h-12 p-1 bg-gray-900 border-gray-800"
-                      />
-                      <Input
-                        value={localConfig.primaryColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, primaryColor: e.target.value })}
-                        className="bg-gray-900 border-gray-800"
-                        placeholder="#000000"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryColor">Cor Secundária</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        id="secondaryColor"
-                        value={localConfig.secondaryColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, secondaryColor: e.target.value })}
-                        className="w-12 h-12 p-1 bg-gray-900 border-gray-800"
-                      />
-                      <Input
-                        value={localConfig.secondaryColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, secondaryColor: e.target.value })}
-                        className="bg-gray-900 border-gray-800"
-                        placeholder="#000000"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="accentColor">Cor de Destaque</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        id="accentColor"
-                        value={localConfig.accentColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, accentColor: e.target.value })}
-                        className="w-12 h-12 p-1 bg-gray-900 border-gray-800"
-                      />
-                      <Input
-                        value={localConfig.accentColor}
-                        onChange={(e) => setLocalConfig({ ...localConfig, accentColor: e.target.value })}
-                        className="bg-gray-900 border-gray-800"
-                        placeholder="#000000"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="header" className="space-y-6">
-          {/* Configurações do Cabeçalho */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Layout className="h-5 w-5" />
-              <h2>Configurações do Cabeçalho</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                <div className="space-y-1">
-                  <span>Menu Principal</span>
-                  <p className="text-sm text-gray-400">Exibir menu de navegação principal</p>
-                </div>
-                <Switch
-                  checked={localConfig.showMainMenu}
-                  onCheckedChange={(checked) => 
-                    setLocalConfig({ ...localConfig, showMainMenu: checked })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                <div className="space-y-1">
-                  <span>Barra de Busca</span>
-                  <p className="text-sm text-gray-400">Exibir barra de busca no cabeçalho</p>
-                </div>
-                <Switch
-                  checked={localConfig.showSearchBar}
-                  onCheckedChange={(checked) => 
-                    setLocalConfig({ ...localConfig, showSearchBar: checked })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                <div className="space-y-1">
-                  <span>Botão de Login</span>
-                  <p className="text-sm text-gray-400">Exibir botão de login/registro</p>
-                </div>
-                <Switch
-                  checked={localConfig.showLoginButton}
-                  onCheckedChange={(checked) => 
-                    setLocalConfig({ ...localConfig, showLoginButton: checked })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="menuItems">Itens do Menu</Label>
-              <Textarea
-                id="menuItems"
-                value={localConfig.menuItems}
-                onChange={(e) => setLocalConfig({ ...localConfig, menuItems: e.target.value })}
-                placeholder="Home, Filmes, Séries, Categorias"
-                className="min-h-[100px] bg-gray-900 border-gray-800"
-              />
-              <p className="text-sm text-gray-400">Separe os itens do menu por vírgula</p>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="footer" className="space-y-6">
-          {/* Configurações do Rodapé */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Layout className="h-5 w-5" />
-              <h2>Configurações do Rodapé</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                <div className="space-y-1">
-                  <span>Links do Rodapé</span>
-                  <p className="text-sm text-gray-400">Exibir links de navegação no rodapé</p>
-                </div>
-                <Switch
-                  checked={localConfig.showFooterLinks}
-                  onCheckedChange={(checked) => 
-                    setLocalConfig({ ...localConfig, showFooterLinks: checked })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg border border-gray-800">
-                <div className="space-y-1">
-                  <span>Redes Sociais</span>
-                  <p className="text-sm text-gray-400">Exibir ícones de redes sociais</p>
-                </div>
-                <Switch
-                  checked={localConfig.showSocialIcons}
-                  onCheckedChange={(checked) => 
-                    setLocalConfig({ ...localConfig, showSocialIcons: checked })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="footerText">Texto do Rodapé</Label>
-              <Textarea
-                id="footerText"
-                value={localConfig.footerText}
-                onChange={(e) => setLocalConfig({ ...localConfig, footerText: e.target.value })}
-                placeholder=" 2024 Streaming Galaxy. Todos os direitos reservados."
-                className="min-h-[100px] bg-gray-900 border-gray-800"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="socialLinks">Links Sociais</Label>
-              <Textarea
-                id="socialLinks"
-                value={localConfig.socialLinks}
-                onChange={(e) => setLocalConfig({ ...localConfig, socialLinks: e.target.value })}
-                placeholder="Facebook: url, Instagram: url, Twitter: url"
-                className="min-h-[100px] bg-gray-900 border-gray-800"
-              />
-              <p className="text-sm text-gray-400">Formato: Nome: URL (um por linha)</p>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Botão de Salvar */}
-      <div className="flex justify-end">
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          {isLoading ? "Salvando..." : "Salvar Alterações"}
-        </Button>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Configurações Gerais</h3>
+        <p className="text-sm text-muted-foreground">
+          Configure as informações básicas do seu site de streaming.
+        </p>
       </div>
-    </form>
+
+      <Separator />
+
+      <div className="grid gap-6">
+        {/* Informações Básicas */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Informações Básicas</h4>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="siteName">Nome do Site</Label>
+              <Input
+                id="siteName"
+                value={localConfig.site_name || ''}
+                onChange={(e) => handleChange('site_name', e.target.value)}
+                placeholder="Streaming Galaxy"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="siteDescription">Descrição do Site</Label>
+              <Textarea
+                id="siteDescription"
+                value={localConfig.site_description || ''}
+                onChange={(e) => handleChange('site_description', e.target.value)}
+                placeholder="Sua plataforma de streaming"
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Informações de Contato */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Informações de Contato</h4>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="contactEmail">Email de Contato</Label>
+              <Input
+                id="contactEmail"
+                type="email"
+                value={localConfig.contact_email || ''}
+                onChange={(e) => handleChange('contact_email', e.target.value)}
+                placeholder="contato@streamingalaxy.com"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="contactPhone">Telefone de Contato</Label>
+              <Input
+                id="contactPhone"
+                value={localConfig.contact_phone || ''}
+                onChange={(e) => handleChange('contact_phone', e.target.value)}
+                placeholder="(00) 0000-0000"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="address">Endereço</Label>
+              <Textarea
+                id="address"
+                value={localConfig.address || ''}
+                onChange={(e) => handleChange('address', e.target.value)}
+                placeholder="Rua Example, 123"
+                className="min-h-[80px]"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="businessHours">Horário de Funcionamento</Label>
+              <Input
+                id="businessHours"
+                value={localConfig.business_hours || ''}
+                onChange={(e) => handleChange('business_hours', e.target.value)}
+                placeholder="Seg-Sex: 9h às 18h"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Aparência */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Aparência</h4>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="themeColor">Cor Principal</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="themeColor"
+                  type="color"
+                  value={localConfig.theme_color || '#000000'}
+                  onChange={(e) => handleChange('theme_color', e.target.value)}
+                  className="w-20 p-1 h-10"
+                />
+                <Input
+                  value={localConfig.theme_color || '#000000'}
+                  onChange={(e) => handleChange('theme_color', e.target.value)}
+                  placeholder="#000000"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="accentColor">Cor de Destaque</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="accentColor"
+                  type="color"
+                  value={localConfig.accent_color || '#FF0000'}
+                  onChange={(e) => handleChange('accent_color', e.target.value)}
+                  className="w-20 p-1 h-10"
+                />
+                <Input
+                  value={localConfig.accent_color || '#FF0000'}
+                  onChange={(e) => handleChange('accent_color', e.target.value)}
+                  placeholder="#FF0000"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="fontFamily">Fonte Principal</Label>
+              <Select
+                value={localConfig.font_family || 'Inter'}
+                onValueChange={(value) => handleChange('font_family', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma fonte" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Inter">Inter</SelectItem>
+                  <SelectItem value="Roboto">Roboto</SelectItem>
+                  <SelectItem value="Open Sans">Open Sans</SelectItem>
+                  <SelectItem value="Montserrat">Montserrat</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="darkMode"
+                checked={localConfig.enable_dark_mode}
+                onCheckedChange={(checked) => handleChange('enable_dark_mode', checked)}
+              />
+              <Label htmlFor="darkMode">Habilitar Modo Escuro</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="mobileVersion"
+                checked={localConfig.enable_mobile_version}
+                onCheckedChange={(checked) => handleChange('enable_mobile_version', checked)}
+              />
+              <Label htmlFor="mobileVersion">Habilitar Versão Mobile</Label>
+            </div>
+          </div>
+        </div>
+
+        {/* Rodapé */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Rodapé</h4>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="footerText">Texto do Rodapé</Label>
+            <Textarea
+              id="footerText"
+              value={localConfig.footer_text || ''}
+              onChange={(e) => handleChange('footer_text', e.target.value)}
+              placeholder=" 2024 Streaming Galaxy. Todos os direitos reservados."
+              className="min-h-[100px]"
+            />
+          </div>
+        </div>
+
+        {/* Modo de Manutenção */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Modo de Manutenção</h4>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="maintenanceMode"
+                checked={localConfig.maintenance_mode}
+                onCheckedChange={(checked) => handleChange('maintenance_mode', checked)}
+              />
+              <Label htmlFor="maintenanceMode">Ativar Modo de Manutenção</Label>
+            </div>
+
+            {localConfig.maintenance_mode && (
+              <div className="grid gap-2">
+                <Label htmlFor="maintenanceMessage">Mensagem de Manutenção</Label>
+                <Textarea
+                  id="maintenanceMessage"
+                  value={localConfig.maintenance_message || ''}
+                  onChange={(e) => handleChange('maintenance_message', e.target.value)}
+                  placeholder="Site em manutenção. Voltaremos em breve!"
+                  className="min-h-[100px]"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <Button 
+        onClick={handleSave} 
+        disabled={isLoading}
+        className="min-w-[200px]"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          'Salvar Alterações'
+        )}
+      </Button>
+    </div>
   );
 };
 
