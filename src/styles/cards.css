@@ -1,3 +1,4 @@
+
 /* Estilos globais para cards de conteúdo */
 .content-grid {
   display: flex;
@@ -123,4 +124,4 @@
   .nav-button {
     display: none;
   }
-} 
+}

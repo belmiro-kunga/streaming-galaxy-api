@@ -26,7 +26,7 @@ export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
           </button>
         )}
       </div>
-      <ScrollArea className="overflow-x-auto">
+      <ScrollArea className="overflow-x-auto scrollbar-hide">
         <div className="flex space-x-4 pb-4">
           {content.map((item) => (
             <ContentCard key={item.id} item={item} />

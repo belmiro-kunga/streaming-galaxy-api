@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -140,4 +141,4 @@ export const StreamingCards = () => {
       <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black to-transparent pointer-events-none" />
     </div>
   );
-}; 
+};

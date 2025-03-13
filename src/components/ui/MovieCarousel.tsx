@@ -74,7 +74,7 @@ export const MovieCarousel = ({ items, type }: MovieCarouselProps) => {
       {/* Container dos cards */}
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto no-scrollbar py-4 gap-2 scroll-smooth"
+        className="flex overflow-x-auto scrollbar-hide py-4 gap-2 scroll-smooth"
         onScroll={checkScrollButtons}
       >
         {/* Cards de filmes */}
