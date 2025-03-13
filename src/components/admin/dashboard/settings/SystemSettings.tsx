@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Settings, Image, Bell, CreditCard, 
   Palette, Share2, Loader2,
   ShieldCheck, ScrollText, Bot, 
-  PackageOpen, Lock
+  PackageOpen, Lock, Moon, Laptop
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
@@ -24,6 +25,59 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/lib/supabase';
+
+// APIs
+const siteConfigAPI = {
+  getConfig: async () => {
+    const { data, error } = await supabase
+      .from('system_config')
+      .select('*')
+      .single();
+    return { data, error };
+  },
+  updateConfig: async (config: any) => {
+    const { error } = await supabase
+      .from('system_config')
+      .upsert(config);
+    return { error };
+  }
+};
+
+const uploadAPI = {
+  getSiteConfig: async () => {
+    const { data, error } = await supabase
+      .from('system_config')
+      .select('logo, favicon')
+      .single();
+    return { data, error };
+  },
+  uploadImage: async (file: File, folder: string) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('public')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      return { error: uploadError };
+    }
+
+    const { data } = supabase.storage
+      .from('public')
+      .getPublicUrl(filePath);
+
+    return { url: data.publicUrl, error: null };
+  },
+  updateSiteConfig: async (config: any) => {
+    const { error } = await supabase
+      .from('system_config')
+      .upsert(config);
+    return { error };
+  }
+};
 
 const SystemSettings = () => {
   const { systemConfig, setSystemConfig } = useAdminDashboard();
@@ -567,7 +621,7 @@ const LogoSettings = ({ config, setConfig }: any) => {
 
       // Atualizar o favicon no documento
       if (config.favicon) {
-        const linkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        const linkElement = document.querySelector("link[rel*='icon']") as HTMLLinkElement || document.createElement('link');
         linkElement.type = 'image/x-icon';
         linkElement.rel = 'shortcut icon';
         linkElement.href = config.favicon;
