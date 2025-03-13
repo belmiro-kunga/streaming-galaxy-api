@@ -1,18 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
+import { 
+  Settings, Image, Bell, CreditCard, 
+  Palette, Share2, Loader2,
+  ShieldCheck, ScrollText, Bot, 
+  PackageOpen, Lock
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import { 
-  Settings, Image, Bell, CreditCard, Palette, Share2, 
   Power, FileText, Cookie, FileCode, Globe, ChevronRight,
   Building2, Mail, Phone, MapPin, Clock, Layout, 
   Monitor, Smartphone, Type, Palette as ColorPalette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
@@ -504,7 +510,7 @@ const GeneralSettings = ({ config, setConfig }: any) => {
                 id="footerText"
                 value={localConfig.footerText}
                 onChange={(e) => setLocalConfig({ ...localConfig, footerText: e.target.value })}
-                placeholder="© 2024 Streaming Galaxy. Todos os direitos reservados."
+                placeholder=" 2024 Streaming Galaxy. Todos os direitos reservados."
                 className="min-h-[100px] bg-gray-900 border-gray-800"
               />
             </div>
@@ -538,11 +544,223 @@ const GeneralSettings = ({ config, setConfig }: any) => {
   );
 };
 
-const LogoSettings = ({ config, setConfig }: any) => (
-  <div className="space-y-6">
-    {/* Implementar upload de imagens */}
-  </div>
-);
+const LogoSettings = ({ config, setConfig }: any) => {
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Carregar configurações existentes
+  useEffect(() => {
+    const loadConfig = async () => {
+      const { data, error } = await uploadAPI.getSiteConfig();
+      if (data) {
+        if (data.logo) setLogoPreview(data.logo);
+        if (data.favicon) setFaviconPreview(data.favicon);
+        setConfig(data);
+      }
+    };
+    loadConfig();
+  }, []);
+
+  const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validar tamanho (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Erro",
+          description: "O arquivo deve ter no máximo 2MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Preview local
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      try {
+        const { url, error } = await uploadAPI.uploadImage(file, 'logos');
+        if (error) throw error;
+        setConfig({ ...config, logo: url });
+      } catch (error) {
+        toast({
+          title: "Erro no upload",
+          description: "Não foi possível fazer o upload do logo.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleFaviconChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validar tamanho (500KB)
+      if (file.size > 500 * 1024) {
+        toast({
+          title: "Erro",
+          description: "O favicon deve ter no máximo 500KB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Preview local
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFaviconPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      try {
+        const { url, error } = await uploadAPI.uploadImage(file, 'favicons');
+        if (error) throw error;
+        setConfig({ ...config, favicon: url });
+      } catch (error) {
+        toast({
+          title: "Erro no upload",
+          description: "Não foi possível fazer o upload do favicon.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await uploadAPI.updateSiteConfig({
+        logo: config.logo,
+        favicon: config.favicon
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "As configurações de logo foram atualizadas.",
+      });
+
+      // Atualizar o favicon no documento
+      if (config.favicon) {
+        const linkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        linkElement.type = 'image/x-icon';
+        linkElement.rel = 'shortcut icon';
+        linkElement.href = config.favicon;
+        document.getElementsByTagName('head')[0].appendChild(linkElement);
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Configurações de Logo</h3>
+        <p className="text-sm text-muted-foreground">
+          Gerencie a identidade visual do seu streaming.
+        </p>
+      </div>
+
+      <Separator />
+
+      <div className="grid gap-6">
+        {/* Logo Principal */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Logo Principal</h4>
+            <p className="text-sm text-muted-foreground">
+              Este logo será exibido no cabeçalho e áreas principais do site.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="w-32 h-32 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-900">
+              {logoPreview ? (
+                <img src={logoPreview} alt="Logo Preview" className="max-w-full max-h-full object-contain" />
+              ) : (
+                <Image className="w-12 h-12 text-gray-500" />
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Input
+                type="file"
+                accept="image/png,image/svg+xml"
+                onChange={handleLogoChange}
+                className="max-w-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Recomendado: PNG ou SVG com fundo transparente. Tamanho máximo: 2MB
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Favicon */}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Favicon</h4>
+            <p className="text-sm text-muted-foreground">
+              Ícone exibido na aba do navegador.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 border rounded-lg overflow-hidden flex items-center justify-center bg-gray-900">
+              {faviconPreview ? (
+                <img src={faviconPreview} alt="Favicon Preview" className="max-w-full max-h-full object-contain" />
+              ) : (
+                <Image className="w-8 h-8 text-gray-500" />
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Input
+                type="file"
+                accept="image/x-icon,image/png"
+                onChange={handleFaviconChange}
+                className="max-w-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Formato: ICO ou PNG. Tamanho recomendado: 32x32px ou 16x16px. Máximo: 500KB
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <Button 
+        onClick={handleSave} 
+        disabled={isLoading}
+        className="min-w-[200px]"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          'Salvar Alterações'
+        )}
+      </Button>
+    </div>
+  );
+};
 
 const NotificationSettings = ({ config, setConfig }: any) => (
   <div className="space-y-6">
