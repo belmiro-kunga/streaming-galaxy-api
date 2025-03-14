@@ -1,4 +1,3 @@
-
 // Content types
 export interface ContentItem {
   id: string;
@@ -9,9 +8,12 @@ export interface ContentItem {
   classificacao_etaria: string;
   gratuito: boolean;
   video_url?: string;
+  video_url_480p?: string;
+  video_url_720p?: string;
+  video_url_1080p?: string;
   trailer_url?: string;
   poster_url?: string;
-  backdrop_url?: string; // Added this field to fix the error
+  backdrop_url?: string;
   duracao?: string;
   avaliacao?: number;
   generos?: string[];

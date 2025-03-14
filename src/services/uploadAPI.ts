@@ -1,8 +1,15 @@
+
 import { supabase } from '@/lib/supabase';
 
 export interface UploadResponse {
   url: string;
   error: Error | null;
+}
+
+export interface VideoQualityUrls {
+  url480p: string;
+  url720p: string;
+  url1080p: string;
 }
 
 export const uploadAPI = {
