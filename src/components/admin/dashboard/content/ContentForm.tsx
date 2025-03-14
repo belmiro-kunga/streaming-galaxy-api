@@ -99,6 +99,7 @@ const LANGUAGES = [
 interface ContentFormProps {
   editMode?: boolean;
   contentData?: any;
+  contentType?: string;  // Add this line to fix the build error
   onSubmit?: (data: any) => void;
   onCancel?: () => void;
 }
@@ -120,6 +121,7 @@ interface Episode {
 const ContentForm: React.FC<ContentFormProps> = ({ 
   editMode = false, 
   contentData, 
+  contentType = 'Filme',
   onSubmit,
   onCancel
 }) => {
