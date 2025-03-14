@@ -21,24 +21,33 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('site-assets', 'site-assets', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- Criar bucket específico para trailers de séries
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('series-trailers', 'series-trailers', true)
+ON CONFLICT (id) DO NOTHING;
+
 -- Políticas para acesso público ao bucket de imagens
 CREATE POLICY "Public Access" ON storage.objects 
-FOR SELECT USING (bucket_id = 'site-assets');
+FOR SELECT USING (bucket_id = 'site-assets' OR bucket_id = 'series-trailers')
+ON CONFLICT DO NOTHING;
 
 CREATE POLICY "Insert site-assets by authenticated users" ON storage.objects
 FOR INSERT WITH CHECK (
-  bucket_id = 'site-assets' AND
+  (bucket_id = 'site-assets' OR bucket_id = 'series-trailers') AND
   auth.role() = 'authenticated'
-);
+)
+ON CONFLICT DO NOTHING;
 
 CREATE POLICY "Update site-assets by authenticated users" ON storage.objects
 FOR UPDATE USING (
-  bucket_id = 'site-assets' AND
+  (bucket_id = 'site-assets' OR bucket_id = 'series-trailers') AND
   auth.role() = 'authenticated'
-);
+)
+ON CONFLICT DO NOTHING;
 
 CREATE POLICY "Delete site-assets by authenticated users" ON storage.objects
 FOR DELETE USING (
-  bucket_id = 'site-assets' AND
+  (bucket_id = 'site-assets' OR bucket_id = 'series-trailers') AND
   auth.role() = 'authenticated'
-);
+)
+ON CONFLICT DO NOTHING;

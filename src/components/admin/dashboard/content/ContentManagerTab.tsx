@@ -12,6 +12,12 @@ import ContentForm from './ContentForm';
 export default function ContentManagerTab() {
   const [activeTab, setActiveTab] = useState("media");
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [formType, setFormType] = useState<'movie' | 'serie' | 'channel'>('movie');
+  
+  const handleAddContent = (type: 'movie' | 'serie' | 'channel') => {
+    setFormType(type);
+    setIsFormDialogOpen(true);
+  };
   
   return (
     <div>
@@ -22,9 +28,20 @@ export default function ContentManagerTab() {
             Gerencie filmes, séries e canais de TV disponíveis na plataforma
           </p>
         </div>
-        <Button className="bg-primary dark:bg-violet-600" onClick={() => setIsFormDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Adicionar Conteúdo
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            className="bg-primary dark:bg-violet-600" 
+            onClick={() => handleAddContent('movie')}
+          >
+            <Film className="mr-2 h-4 w-4" /> Adicionar Filme
+          </Button>
+          <Button 
+            className="bg-primary dark:bg-violet-600" 
+            onClick={() => handleAddContent('serie')}
+          >
+            <Tv className="mr-2 h-4 w-4" /> Adicionar Série
+          </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="media" value={activeTab} onValueChange={setActiveTab}>
@@ -48,8 +65,9 @@ export default function ContentManagerTab() {
 
       {/* Dialog para adicionar novo conteúdo */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800 p-0">
+        <DialogContent className="max-w-6xl bg-gray-900 border-gray-800 p-0">
           <ContentForm 
+            contentType={formType === 'serie' ? 'Série' : 'Filme'}
             onCancel={() => setIsFormDialogOpen(false)}
             onSubmit={(data) => {
               console.log('Conteúdo salvo:', data);
