@@ -32,7 +32,32 @@ export const uploadAPI = {
     }
   },
 
-  // Função para atualizar as configurações do site
+  uploadVideo: async (file: File, folder: string) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.floor(Math.random() * 10000)}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
+      
+      const { data, error } = await supabase.storage
+        .from('site-assets')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) throw error;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('site-assets')
+        .getPublicUrl(filePath);
+      
+      return { url: publicUrl, error: null };
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      return { url: '', error };
+    }
+  },
+
   updateSiteConfig: async (config: { logo?: string; favicon?: string }) => {
     try {
       const { data, error } = await supabase
@@ -53,7 +78,6 @@ export const uploadAPI = {
     }
   },
 
-  // Função para buscar as configurações atuais
   getSiteConfig: async () => {
     try {
       const { data, error } = await supabase

@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Upload, Film, Tv, Trash2 } from 'lucide-react';
+import { X, Plus, Upload, Film, Tv, Trash2, Link as LinkIcon, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadAPI } from '@/services/uploadAPI';
 import { supabase } from '@/lib/supabase';
@@ -94,6 +94,12 @@ const LANGUAGES = [
   'Italiano'
 ];
 
+const VIDEO_SOURCE_TYPES = [
+  'Wasabi',
+  'Cloudflare',
+  'Outros'
+];
+
 interface ContentFormProps {
   editMode?: boolean;
   contentData?: any;
@@ -114,6 +120,8 @@ interface Episode {
   title: string;
   description: string;
   duration: number;
+  videoUrl?: string;
+  videoSource?: string;
 }
 
 const ContentForm: React.FC<ContentFormProps> = ({ 
@@ -142,7 +150,10 @@ const ContentForm: React.FC<ContentFormProps> = ({
       genres: [],
       languages: [],
       tags: [],
-      description: ''
+      description: '',
+      videoUrl: '',
+      videoSource: 'Wasabi',
+      trailerUrl: ''
     }
   });
 
@@ -158,8 +169,13 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const [newCastMember, setNewCastMember] = useState('');
   const [newLanguage, setNewLanguage] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [trailerFile, setTrailerFile] = useState<File | null>(null);
+  const [uploadingTrailer, setUploadingTrailer] = useState(false);
+  const [trailerPreviewUrl, setTrailerPreviewUrl] = useState('');
 
   const currentContentType = form.watch('type');
+  const videoUrl = form.watch('videoUrl');
+  const trailerUrl = form.watch('trailerUrl');
 
   const handleAddGenre = () => {
     if (newGenre && !form.getValues('genres')?.includes(newGenre)) {
@@ -243,6 +259,71 @@ const ContentForm: React.FC<ContentFormProps> = ({
       setLandscapeImage(file);
       setLandscapeImageUrl(URL.createObjectURL(file));
     }
+  };
+
+  const handleTrailerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Check if file is a video file (including m3u8)
+      const validTypes = ['video/mp4', 'video/webm', 'application/vnd.apple.mpegurl', 'application/x-mpegurl'];
+      const isM3u8 = file.name.endsWith('.m3u8');
+      
+      if (!validTypes.includes(file.type) && !isM3u8) {
+        toast({
+          title: "Formato não suportado",
+          description: "Por favor, selecione um arquivo de vídeo válido (MP4, WebM, M3U8).",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setTrailerFile(file);
+      
+      // Create a preview URL for the trailer
+      if (file.type !== 'application/vnd.apple.mpegurl' && !isM3u8) {
+        setTrailerPreviewUrl(URL.createObjectURL(file));
+      }
+    }
+  };
+
+  const uploadTrailer = async () => {
+    if (!trailerFile) return '';
+    
+    setUploadingTrailer(true);
+    try {
+      let bucketPath = 'trailers';
+      if (currentContentType === 'Série') {
+        bucketPath = 'series-trailers';
+      }
+      
+      const { url, error } = await uploadAPI.uploadVideo(trailerFile, bucketPath);
+      if (error) throw error;
+      setUploadingTrailer(false);
+      return url;
+    } catch (error) {
+      console.error('Error uploading trailer:', error);
+      toast({
+        title: "Erro ao fazer upload do trailer",
+        description: "Ocorreu um erro ao fazer upload do trailer.",
+        variant: "destructive",
+      });
+      setUploadingTrailer(false);
+      return '';
+    }
+  };
+
+  const handlePreviewVideo = (url: string) => {
+    if (!url) {
+      toast({
+        title: "Não há URL para visualizar",
+        description: "Por favor, insira uma URL válida para visualizar o vídeo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    window.open(url, '_blank');
   };
 
   const addSeason = () => {
@@ -389,8 +470,10 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
 
     try {
+      // Upload images
       let finalPortraitUrl = portraitImageUrl;
       let finalLandscapeUrl = landscapeImageUrl;
+      let finalTrailerUrl = data.trailerUrl;
       
       if (portraitImage) {
         finalPortraitUrl = await uploadPortraitImage();
@@ -399,17 +482,25 @@ const ContentForm: React.FC<ContentFormProps> = ({
       if (landscapeImage) {
         finalLandscapeUrl = await uploadLandscapeImage();
       }
+      
+      if (trailerFile) {
+        finalTrailerUrl = await uploadTrailer();
+      }
 
+      // Prepare final object with all data
       const contentToSave = {
         ...data,
         portraitImageUrl: finalPortraitUrl,
         landscapeImageUrl: finalLandscapeUrl,
+        trailerUrl: finalTrailerUrl,
         seasons: data.type === 'Série' ? seasons : [],
       };
 
+      // Send to callback or API
       if (onSubmit) {
         onSubmit(contentToSave);
       } else {
+        // Default implementation if no callback
         const { data: savedContent, error } = await supabase
           .from('conteudos')
           .upsert({
@@ -431,7 +522,10 @@ const ContentForm: React.FC<ContentFormProps> = ({
               genres: contentToSave.genres,
               languages: contentToSave.languages,
               tags: contentToSave.tags,
-              seasons: contentToSave.seasons
+              seasons: contentToSave.seasons,
+              videoUrl: contentToSave.videoUrl,
+              videoSource: contentToSave.videoSource,
+              trailerUrl: contentToSave.trailerUrl
             }
           })
           .select();
@@ -460,12 +554,14 @@ const ContentForm: React.FC<ContentFormProps> = ({
           <TabsList className="mb-6">
             <TabsTrigger value="info">Informações Gerais</TabsTrigger>
             <TabsTrigger value="media">Mídia</TabsTrigger>
+            <TabsTrigger value="video">Vídeo</TabsTrigger>
             <TabsTrigger value="details">Detalhes</TabsTrigger>
             {currentContentType === 'Série' && (
               <TabsTrigger value="seasons">Temporadas</TabsTrigger>
             )}
           </TabsList>
 
+          {/* Tab: Informações Gerais */}
           <TabsContent value="info" className="space-y-4">
             <Card>
               <CardHeader>
@@ -693,6 +789,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </Card>
           </TabsContent>
 
+          {/* Tab: Mídia */}
           <TabsContent value="media" className="space-y-4">
             <Card>
               <CardHeader>
@@ -790,388 +887,145 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </Card>
           </TabsContent>
 
-          <TabsContent value="details" className="space-y-4">
+          {/* Nova Tab: Vídeo */}
+          <TabsContent value="video" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Detalhes do Conteúdo</CardTitle>
+                <CardTitle>Vídeos do Conteúdo</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="director"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Diretor</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome do diretor" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="genres"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gêneros</FormLabel>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {field.value?.map((genre: string) => (
-                          <Badge 
-                            key={genre} 
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                          >
-                            {genre}
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveGenre(genre)}
-                              className="ml-1 text-gray-500 hover:text-gray-700"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Fonte do Vídeo */}
+                  <FormField
+                    control={form.control}
+                    name="videoSource"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fonte do Vídeo</FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            setNewGenre(value);
-                            setTimeout(() => handleAddGenre(), 10);
-                          }}
-                          value={newGenre}
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione ou digite gêneros" />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione a fonte do vídeo" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {GENRES.map(genre => (
-                              <SelectItem key={genre} value={genre}>
-                                {genre}
+                            {VIDEO_SOURCE_TYPES.map(source => (
+                              <SelectItem key={source} value={source}>
+                                {source}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddGenre} 
-                          variant="outline" 
-                          className="ml-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormDescription>
+                          Selecione de onde o vídeo está sendo hospedado
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="cast"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Elenco</FormLabel>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {field.value?.map((castMember: string) => (
-                          <Badge 
-                            key={castMember} 
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                          >
-                            {castMember}
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveCastMember(castMember)}
-                              className="ml-1 text-gray-500 hover:text-gray-700"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex">
-                        <Input 
-                          placeholder="Adicionar pessoa do elenco" 
-                          value={newCastMember}
-                          onChange={(e) => setNewCastMember(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddCastMember();
-                            }
-                          }}
-                        />
-                        <Button 
-                          type="button" 
-                          onClick={handleAddCastMember} 
-                          variant="outline" 
-                          className="ml-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="languages"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Idiomas (Dublado/Legendado)</FormLabel>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {field.value?.map((language: string) => (
-                          <Badge 
-                            key={language} 
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                          >
-                            {language}
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveLanguage(language)}
-                              className="ml-1 text-gray-500 hover:text-gray-700"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex">
-                        <Select
-                          onValueChange={(value) => {
-                            setNewLanguage(value);
-                            setTimeout(() => handleAddLanguage(), 10);
-                          }}
-                          value={newLanguage}
-                        >
+                  {/* URL do Vídeo Principal */}
+                  <FormField
+                    control={form.control}
+                    name="videoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL do Vídeo</FormLabel>
+                        <div className="flex gap-2">
                           <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione um idioma" />
-                            </SelectTrigger>
+                            <Input 
+                              placeholder="Exemplo: https://storage.wasabisys.com/video.mp4 ou https://watch.cloudflare.com/video.m3u8" 
+                              {...field} 
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {LANGUAGES.map(language => (
-                              <SelectItem key={language} value={language}>
-                                {language}
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="Português (Dublado)">Português (Dublado)</SelectItem>
-                            <SelectItem value="Português (Legendado)">Português (Legendado)</SelectItem>
-                            <SelectItem value="Inglês (Legendado)">Inglês (Legendado)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button 
-                          type="button" 
-                          onClick={handleAddLanguage} 
-                          variant="outline" 
-                          className="ml-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tags</FormLabel>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {field.value?.map((tag: string) => (
-                          <Badge 
-                            key={tag} 
-                            variant="outline"
-                            className="flex items-center gap-1"
-                          >
-                            {tag}
-                            <button 
+                          {videoUrl && (
+                            <Button 
                               type="button" 
-                              onClick={() => handleRemoveTag(tag)}
-                              className="ml-1 text-gray-500 hover:text-gray-700"
+                              variant="outline" 
+                              onClick={() => handlePreviewVideo(videoUrl)}
+                              className="flex items-center gap-1"
                             >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex">
-                        <Input 
-                          placeholder="Adicionar tag (pressione Enter)" 
-                          value={newTag}
-                          onChange={(e) => setNewTag(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddTag();
-                            }
-                          }}
-                        />
-                        <Button 
-                          type="button" 
-                          onClick={handleAddTag} 
-                          variant="outline" 
-                          className="ml-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormDescription>
-                        Digite e pressione Enter para adicionar várias tags
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {currentContentType === 'Série' && (
-            <TabsContent value="seasons" className="space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Temporadas e Episódios</CardTitle>
-                  <Button 
-                    type="button" 
-                    onClick={addSeason}
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
-                    <Plus className="h-4 w-4" /> Adicionar Temporada
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {seasons.length === 0 ? (
-                    <div className="text-center py-6 text-gray-500">
-                      <Tv className="h-12 w-12 mx-auto mb-2" />
-                      <p>Nenhuma temporada adicionada ainda.</p>
-                      <p className="text-sm">Clique no botão acima para adicionar uma temporada.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {seasons.map((season) => (
-                        <div key={season.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-medium">Temporada {season.number}</h3>
-                            <div className="flex gap-2">
-                              <Button 
-                                type="button" 
-                                onClick={() => addEpisode(season.id)}
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-1"
-                              >
-                                <Plus className="h-3 w-3" /> Episódio
-                              </Button>
-                              <Button 
-                                type="button" 
-                                onClick={() => removeSeason(season.id)}
-                                variant="destructive"
-                                size="sm"
-                                className="flex items-center gap-1"
-                              >
-                                <Trash2 className="h-3 w-3" /> Remover
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          <Separator className="mb-4" />
-                          
-                          {season.episodes.length === 0 ? (
-                            <div className="text-center py-4 text-gray-500 text-sm">
-                              <p>Nenhum episódio adicionado nesta temporada.</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {season.episodes.map((episode) => (
-                                <div key={episode.id} className="border rounded-md p-3 bg-black/20">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <h4 className="font-medium">Episódio {episode.number}</h4>
-                                    <Button 
-                                      type="button" 
-                                      onClick={() => removeEpisode(season.id, episode.id)}
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <Trash2 className="h-3 w-3 text-gray-500" />
-                                    </Button>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="text-xs text-gray-500">Título</label>
-                                      <Input 
-                                        placeholder="Título do episódio"
-                                        value={episode.title}
-                                        onChange={(e) => updateEpisode(season.id, episode.id, 'title', e.target.value)}
-                                        className="mt-1"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-xs text-gray-500">Duração (minutos)</label>
-                                      <Input 
-                                        type="number"
-                                        placeholder="Duração em minutos"
-                                        value={episode.duration === 0 ? '' : episode.duration}
-                                        onChange={(e) => updateEpisode(season.id, episode.id, 'duration', parseInt(e.target.value) || 0)}
-                                        className="mt-1"
-                                      />
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="mt-3">
-                                    <label className="text-xs text-gray-500">Descrição</label>
-                                    <Textarea 
-                                      placeholder="Descrição do episódio"
-                                      value={episode.description}
-                                      onChange={(e) => updateEpisode(season.id, episode.id, 'description', e.target.value)}
-                                      className="mt-1"
-                                      rows={2}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                              <Eye className="h-4 w-4" /> Visualizar
+                            </Button>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-        </Tabs>
-        
-        <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-            >
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit">
-            {editMode ? 'Atualizar Conteúdo' : 'Adicionar Conteúdo'}
-          </Button>
-        </div>
-      </form>
-    </Form>
-  );
-};
+                        <FormDescription>
+                          Insira a URL completa do vídeo. Suporta links diretos e streams HLS (m3u8)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-export default ContentForm;
+                  {/* URL do Trailer */}
+                  <FormField
+                    control={form.control}
+                    name="trailerUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL do Trailer</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input 
+                              placeholder="URL do trailer" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          {trailerUrl && (
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => handlePreviewVideo(trailerUrl)}
+                              className="flex items-center gap-1"
+                            >
+                              <Eye className="h-4 w-4" /> Visualizar
+                            </Button>
+                          )}
+                        </div>
+                        <FormDescription>
+                          Insira a URL do trailer ou faça upload abaixo
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Upload de Trailer */}
+                  <div className="space-y-2">
+                    <FormLabel>Upload de Trailer</FormLabel>
+                    <div className="flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg h-40 overflow-hidden relative">
+                      {trailerPreviewUrl ? (
+                        <div className="w-full h-full relative">
+                          <video 
+                            src={trailerPreviewUrl} 
+                            controls
+                            className="w-full h-full object-contain" 
+                          />
+                          <Button 
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setTrailerFile(null);
+                              setTrailerPreviewUrl('');
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center p-4">
+                          <Upload className="h-12 w-12 mx-auto text-gray-500 mb-2" />
+                          <p className="text-gray-500 text-sm">
+                            Clique para fazer upload do trailer (suporta MP4, WebM e M3U8)
+                          </p>
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,application/vnd.apple.mpegurl,.m3u8"
+                            onChange={handleTrailerChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
