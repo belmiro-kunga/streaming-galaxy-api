@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
@@ -30,7 +29,6 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadAPI } from '@/services/uploadAPI';
 import { supabase } from '@/lib/supabase';
 
-// Conteúdo categorias e subcategorias
 const STREAMING_SERVICES = [
   'Netflix',
   'Prime Video',
@@ -99,7 +97,7 @@ const LANGUAGES = [
 interface ContentFormProps {
   editMode?: boolean;
   contentData?: any;
-  contentType?: string;  // Add this line to fix the build error
+  contentType?: string;
   onSubmit?: (data: any) => void;
   onCancel?: () => void;
 }
@@ -131,7 +129,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
       ...contentData
     } : {
       title: '',
-      type: 'Filme',
+      type: contentType,
       isFree: false,
       category: '',
       streamingService: '',
@@ -161,9 +159,8 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const [newLanguage, setNewLanguage] = useState('');
   const [newTag, setNewTag] = useState('');
 
-  const contentType = form.watch('type');
+  const currentContentType = form.watch('type');
 
-  // Manipuladores para tags, elenco, gêneros, etc.
   const handleAddGenre = () => {
     if (newGenre && !form.getValues('genres')?.includes(newGenre)) {
       const currentGenres = form.getValues('genres') || [];
@@ -216,11 +213,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
     form.setValue('tags', currentTags.filter(t => t !== tag));
   };
 
-  // Manipulador de imagens
   const handlePortraitImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Verificar se é um arquivo webp
       if (!file.type.includes('webp')) {
         toast({
           title: "Formato não suportado",
@@ -237,7 +232,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
   const handleLandscapeImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Verificar se é um arquivo webp
       if (!file.type.includes('webp')) {
         toast({
           title: "Formato não suportado",
@@ -251,7 +245,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
   };
 
-  // Manipuladores para temporadas e episódios
   const addSeason = () => {
     const newSeason: Season = {
       id: `season-${Date.now()}`,
@@ -325,7 +318,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
     setSeasons(updatedSeasons);
   };
 
-  // Upload de imagens
   const uploadPortraitImage = async () => {
     if (!portraitImage) return '';
     
@@ -369,7 +361,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
   };
 
   const handleFormSubmit = async (data: any) => {
-    // Validar os campos obrigatórios
     if (!data.title || !data.type || !data.category) {
       toast({
         title: "Campos obrigatórios",
@@ -379,7 +370,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
       return;
     }
 
-    // Verificar se há imagens selecionadas (obrigatório para novo conteúdo)
     if (!editMode && (!portraitImage || !landscapeImage)) {
       toast({
         title: "Imagens obrigatórias",
@@ -389,7 +379,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
       return;
     }
 
-    // Verificar se é série e se tem pelo menos uma temporada
     if (data.type === 'Série' && seasons.length === 0) {
       toast({
         title: "Temporadas necessárias",
@@ -400,7 +389,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
     }
 
     try {
-      // Upload de imagens
       let finalPortraitUrl = portraitImageUrl;
       let finalLandscapeUrl = landscapeImageUrl;
       
@@ -412,7 +400,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
         finalLandscapeUrl = await uploadLandscapeImage();
       }
 
-      // Preparar objeto final com todos os dados
       const contentToSave = {
         ...data,
         portraitImageUrl: finalPortraitUrl,
@@ -420,11 +407,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
         seasons: data.type === 'Série' ? seasons : [],
       };
 
-      // Enviar para callback ou API
       if (onSubmit) {
         onSubmit(contentToSave);
       } else {
-        // Implementação padrão caso não haja callback
         const { data: savedContent, error } = await supabase
           .from('conteudos')
           .upsert({
@@ -476,19 +461,17 @@ const ContentForm: React.FC<ContentFormProps> = ({
             <TabsTrigger value="info">Informações Gerais</TabsTrigger>
             <TabsTrigger value="media">Mídia</TabsTrigger>
             <TabsTrigger value="details">Detalhes</TabsTrigger>
-            {contentType === 'Série' && (
+            {currentContentType === 'Série' && (
               <TabsTrigger value="seasons">Temporadas</TabsTrigger>
             )}
           </TabsList>
 
-          {/* Tab: Informações Gerais */}
           <TabsContent value="info" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Informações Básicas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Título */}
                 <FormField
                   control={form.control}
                   name="title"
@@ -503,7 +486,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   )}
                 />
 
-                {/* Tipo de Conteúdo */}
                 <FormField
                   control={form.control}
                   name="type"
@@ -533,7 +515,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Categoria (Streaming Service) */}
                   <FormField
                     control={form.control}
                     name="streamingService"
@@ -562,7 +543,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                     )}
                   />
 
-                  {/* Origem (Cinema ou Streaming) */}
                   <FormField
                     control={form.control}
                     name="sourceType"
@@ -590,7 +570,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Classificação Etária */}
                   <FormField
                     control={form.control}
                     name="ageRating"
@@ -619,7 +598,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                     )}
                   />
 
-                  {/* País de Origem */}
                   <FormField
                     control={form.control}
                     name="country"
@@ -650,7 +628,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Conteúdo Gratuito */}
                   <FormField
                     control={form.control}
                     name="isFree"
@@ -672,7 +649,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                     )}
                   />
 
-                  {/* Modo Kids */}
                   <FormField
                     control={form.control}
                     name="isKidsFriendly"
@@ -695,7 +671,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   />
                 </div>
 
-                {/* Descrição */}
                 <FormField
                   control={form.control}
                   name="description"
@@ -718,7 +693,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </Card>
           </TabsContent>
 
-          {/* Tab: Mídia */}
           <TabsContent value="media" className="space-y-4">
             <Card>
               <CardHeader>
@@ -726,7 +700,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Imagem de Retrato */}
                   <div className="space-y-2">
                     <FormLabel>Imagem de Retrato (Formato WebP) *</FormLabel>
                     <div className="flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg h-64 overflow-hidden relative">
@@ -770,7 +743,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                     </p>
                   </div>
                   
-                  {/* Imagem de Paisagem */}
                   <div className="space-y-2">
                     <FormLabel>Imagem de Paisagem (Formato WebP) *</FormLabel>
                     <div className="flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg h-64 overflow-hidden relative">
@@ -818,14 +790,12 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </Card>
           </TabsContent>
 
-          {/* Tab: Detalhes */}
           <TabsContent value="details" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Detalhes do Conteúdo</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Diretor */}
                 <FormField
                   control={form.control}
                   name="director"
@@ -840,7 +810,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   )}
                 />
 
-                {/* Gêneros */}
                 <FormField
                   control={form.control}
                   name="genres"
@@ -900,7 +869,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   )}
                 />
 
-                {/* Elenco */}
                 <FormField
                   control={form.control}
                   name="cast"
@@ -951,7 +919,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   )}
                 />
 
-                {/* Idiomas */}
                 <FormField
                   control={form.control}
                   name="languages"
@@ -1014,7 +981,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
                   )}
                 />
 
-                {/* Tags */}
                 <FormField
                   control={form.control}
                   name="tags"
@@ -1071,8 +1037,7 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </Card>
           </TabsContent>
 
-          {/* Tab: Temporadas e Episódios (apenas para séries) */}
-          {contentType === 'Série' && (
+          {currentContentType === 'Série' && (
             <TabsContent value="seasons" className="space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
