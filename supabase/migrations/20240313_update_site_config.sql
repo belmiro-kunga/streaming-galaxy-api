@@ -1,3 +1,4 @@
+
 -- Adicionar novas colunas para configurações gerais
 alter table public.site_config
 add column if not exists site_name text default 'Streaming Galaxy',
@@ -14,3 +15,30 @@ add column if not exists enable_dark_mode boolean default true,
 add column if not exists enable_mobile_version boolean default true,
 add column if not exists maintenance_mode boolean default false,
 add column if not exists maintenance_message text;
+
+-- Criar bucket para imagens de conteúdo se não existir
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('site-assets', 'site-assets', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Políticas para acesso público ao bucket de imagens
+CREATE POLICY "Public Access" ON storage.objects 
+FOR SELECT USING (bucket_id = 'site-assets');
+
+CREATE POLICY "Insert site-assets by authenticated users" ON storage.objects
+FOR INSERT WITH CHECK (
+  bucket_id = 'site-assets' AND
+  auth.role() = 'authenticated'
+);
+
+CREATE POLICY "Update site-assets by authenticated users" ON storage.objects
+FOR UPDATE USING (
+  bucket_id = 'site-assets' AND
+  auth.role() = 'authenticated'
+);
+
+CREATE POLICY "Delete site-assets by authenticated users" ON storage.objects
+FOR DELETE USING (
+  bucket_id = 'site-assets' AND
+  auth.role() = 'authenticated'
+);
