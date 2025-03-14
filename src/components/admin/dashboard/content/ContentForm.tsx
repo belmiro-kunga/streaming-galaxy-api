@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { 
@@ -1029,3 +1030,414 @@ const ContentForm: React.FC<ContentFormProps> = ({
                             onChange={handleTrailerChange}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Detalhes */}
+          <TabsContent value="details" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhes do Conteúdo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Diretor */}
+                <FormField
+                  control={form.control}
+                  name="director"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Diretor</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome do diretor" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Gêneros */}
+                <FormField
+                  control={form.control}
+                  name="genres"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gêneros</FormLabel>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {field.value?.map((genre: string) => (
+                          <Badge 
+                            key={genre} 
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            {genre}
+                            <button 
+                              type="button" 
+                              onClick={() => handleRemoveGenre(genre)}
+                              className="ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <Select
+                          onValueChange={(value) => {
+                            setNewGenre(value);
+                            setTimeout(() => handleAddGenre(), 10);
+                          }}
+                          value={newGenre}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione ou digite gêneros" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {GENRES.map(genre => (
+                              <SelectItem key={genre} value={genre}>
+                                {genre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          type="button" 
+                          onClick={handleAddGenre} 
+                          variant="outline" 
+                          className="ml-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Elenco */}
+                <FormField
+                  control={form.control}
+                  name="cast"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Elenco</FormLabel>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {field.value?.map((castMember: string) => (
+                          <Badge 
+                            key={castMember} 
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            {castMember}
+                            <button 
+                              type="button" 
+                              onClick={() => handleRemoveCastMember(castMember)}
+                              className="ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <Input 
+                          placeholder="Adicionar pessoa do elenco" 
+                          value={newCastMember}
+                          onChange={(e) => setNewCastMember(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddCastMember();
+                            }
+                          }}
+                        />
+                        <Button 
+                          type="button" 
+                          onClick={handleAddCastMember} 
+                          variant="outline" 
+                          className="ml-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Idiomas */}
+                <FormField
+                  control={form.control}
+                  name="languages"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Idiomas (Dublado/Legendado)</FormLabel>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {field.value?.map((language: string) => (
+                          <Badge 
+                            key={language} 
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            {language}
+                            <button 
+                              type="button" 
+                              onClick={() => handleRemoveLanguage(language)}
+                              className="ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <Select
+                          onValueChange={(value) => {
+                            setNewLanguage(value);
+                            setTimeout(() => handleAddLanguage(), 10);
+                          }}
+                          value={newLanguage}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione um idioma" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {LANGUAGES.map(language => (
+                              <SelectItem key={language} value={language}>
+                                {language}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="Português (Dublado)">Português (Dublado)</SelectItem>
+                            <SelectItem value="Português (Legendado)">Português (Legendado)</SelectItem>
+                            <SelectItem value="Inglês (Legendado)">Inglês (Legendado)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          type="button" 
+                          onClick={handleAddLanguage} 
+                          variant="outline" 
+                          className="ml-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Tags */}
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {field.value?.map((tag: string) => (
+                          <Badge 
+                            key={tag} 
+                            variant="outline"
+                            className="flex items-center gap-1"
+                          >
+                            {tag}
+                            <button 
+                              type="button" 
+                              onClick={() => handleRemoveTag(tag)}
+                              className="ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex">
+                        <Input 
+                          placeholder="Adicionar tag (pressione Enter)" 
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddTag();
+                            }
+                          }}
+                        />
+                        <Button 
+                          type="button" 
+                          onClick={handleAddTag} 
+                          variant="outline" 
+                          className="ml-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <FormDescription>
+                        Digite e pressione Enter para adicionar várias tags
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Temporadas e Episódios (apenas para séries) */}
+          {currentContentType === 'Série' && (
+            <TabsContent value="seasons" className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Temporadas e Episódios</CardTitle>
+                  <Button 
+                    type="button" 
+                    onClick={addSeason}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-4 w-4" /> Adicionar Temporada
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {seasons.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500">
+                      <Tv className="h-12 w-12 mx-auto mb-2" />
+                      <p>Nenhuma temporada adicionada ainda.</p>
+                      <p className="text-sm">Clique no botão acima para adicionar uma temporada.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {seasons.map((season) => (
+                        <div key={season.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-medium">Temporada {season.number}</h3>
+                            <div className="flex gap-2">
+                              <Button 
+                                type="button" 
+                                onClick={() => addEpisode(season.id)}
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-1"
+                              >
+                                <Plus className="h-3 w-3" /> Episódio
+                              </Button>
+                              <Button 
+                                type="button" 
+                                onClick={() => removeSeason(season.id)}
+                                variant="destructive"
+                                size="sm"
+                                className="flex items-center gap-1"
+                              >
+                                <Trash2 className="h-3 w-3" /> Remover
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <Separator className="mb-4" />
+                          
+                          {season.episodes.length === 0 ? (
+                            <div className="text-center py-4 text-gray-500 text-sm">
+                              <p>Nenhum episódio adicionado nesta temporada.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {season.episodes.map((episode) => (
+                                <div key={episode.id} className="border rounded-md p-3 bg-black/20">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <h4 className="font-medium">Episódio {episode.number}</h4>
+                                    <Button 
+                                      type="button" 
+                                      onClick={() => removeEpisode(season.id, episode.id)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <Trash2 className="h-3 w-3 text-gray-500" />
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="text-xs text-gray-500">Título</label>
+                                      <Input 
+                                        placeholder="Título do episódio"
+                                        value={episode.title}
+                                        onChange={(e) => updateEpisode(season.id, episode.id, 'title', e.target.value)}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-gray-500">Duração (minutos)</label>
+                                      <Input 
+                                        type="number"
+                                        placeholder="Duração em minutos"
+                                        value={episode.duration === 0 ? '' : episode.duration}
+                                        onChange={(e) => updateEpisode(season.id, episode.id, 'duration', parseInt(e.target.value) || 0)}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="mt-3">
+                                    <label className="text-xs text-gray-500">Descrição</label>
+                                    <Textarea 
+                                      placeholder="Descrição do episódio"
+                                      value={episode.description}
+                                      onChange={(e) => updateEpisode(season.id, episode.id, 'description', e.target.value)}
+                                      className="mt-1"
+                                      rows={2}
+                                    />
+                                  </div>
+
+                                  <div className="mt-3">
+                                    <label className="text-xs text-gray-500">URL do Vídeo</label>
+                                    <Input 
+                                      placeholder="URL do vídeo do episódio"
+                                      value={episode.videoUrl || ''}
+                                      onChange={(e) => updateEpisode(season.id, episode.id, 'videoUrl', e.target.value)}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
+        
+        <div className="flex justify-end space-x-2">
+          {onCancel && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+            >
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit">
+            {editMode ? 'Atualizar Conteúdo' : 'Adicionar Conteúdo'}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+
+export default ContentForm;
