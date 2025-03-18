@@ -12,7 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { MobileMenu } from './MobileMenu';
 import { BottomNav } from './BottomNav';
-import { mainMenuItems, commonHamburgerItems } from '@/config/menu-items';
+import { mainMenuItems } from '@/config/menu-items';
+import { CollapsibleSidebar } from './CollapsibleSidebar';
 
 export const Header = () => {
   const isMobile = useMobile();
@@ -27,21 +28,18 @@ export const Header = () => {
   const { toast } = useToast();
   const { isAuthenticated, profile, logout } = useUser();
   
-  // Mock search suggestions - this would be replaced with actual API calls
   const mockSuggestions = [
     'Stranger Things', 'The Crown', 'Breaking Bad', 'Game of Thrones',
     'Black Mirror', 'Dark', 'Money Heist', 'Narcos', 'The Witcher'
   ];
   
   useEffect(() => {
-    // Focus the search input when it opens
     if (isSearchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchOpen]);
   
   useEffect(() => {
-    // Filter suggestions based on search query
     if (searchQuery.trim() === '') {
       setSearchSuggestions([]);
       return;
@@ -65,8 +63,7 @@ export const Header = () => {
         title: "Pesquisando",
         description: `Buscando por "${searchQuery}"`,
       });
-      // In a real app, you would navigate to search results page
-      // navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       setIsSearchOpen(false);
       setSearchQuery('');
     }
@@ -77,8 +74,7 @@ export const Header = () => {
       title: "Pesquisando",
       description: `Buscando por "${suggestion}"`,
     });
-    // In a real app, you would navigate to search results page
-    // navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
     setIsSearchOpen(false);
     setSearchQuery('');
   };
@@ -87,10 +83,8 @@ export const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-2 bg-gradient-to-b from-black/90 to-transparent">
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="text-[#E50914] font-bold text-xl">CINEPLAY</Link>
           
-          {/* Desktop Navigation */}
           {!isMobile && (
             <nav className="flex-1 flex justify-center space-x-6">
               {mainMenuItems.map((item) => (
@@ -103,27 +97,9 @@ export const Header = () => {
                   <span>{item.label}</span>
                 </Link>
               ))}
-              <DropdownMenu>
-                <DropdownMenuTrigger className="text-gray-300 hover:text-white transition-colors">
-                  Mais Conteúdos
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-48 bg-gray-900 border-gray-700">
-                  {commonHamburgerItems.map((item) => (
-                    <DropdownMenuItem
-                      key={item.path}
-                      className="text-white hover:bg-white/10"
-                      onClick={() => navigate(item.path)}
-                    >
-                      {item.icon}
-                      <span className="ml-2">{item.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </nav>
           )}
           
-          {/* Right Actions */}
           <div className="flex items-center space-x-3">
             <button 
               className="p-1.5 text-white" 
@@ -201,13 +177,12 @@ export const Header = () => {
         </div>
       </header>
       
-      {/* Mobile Menu */}
+      {!isMobile && <CollapsibleSidebar />}
+      
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       
-      {/* Bottom Navigation for Mobile */}
       {isMobile && <BottomNav />}
       
-      {/* Search Overlay */}
       {isSearchOpen && (
         <div className="fixed inset-0 bg-black/90 z-50 p-4 flex flex-col">
           <div className="flex justify-between items-center mb-6">
