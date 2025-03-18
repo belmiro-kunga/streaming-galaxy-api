@@ -12,16 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SubscriptionPlan } from '@/types/api';
 import { Loader2, AlertTriangle } from 'lucide-react';
+import PlanPriceInput from './components/PlanPriceInput';
+import BillingCycleSelect from './components/BillingCycleSelect';
+import QualitySelect from './components/QualitySelect';
+import PlanLimitsInputs from './components/PlanLimitsInputs';
 
 interface PlanDialogProps {
   isOpen: boolean;
@@ -46,9 +43,8 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
   isLoading = false,
   formError = null
 }) => {
-  // Safety check to ensure component doesn't render without necessary data
   if (!isOpen || !currentPlan) return null;
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!isLoading) {
@@ -87,27 +83,11 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="billing-cycle">Ciclo de Cobrança</Label>
-              <Select 
-                value={currentPlan?.ciclo_cobranca || "mensal"} 
-                onValueChange={(value) => setCurrentPlan({...currentPlan, ciclo_cobranca: value})}
-                disabled={isLoading}
-              >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Selecione o ciclo" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                  <SelectItem value="diário">Diário</SelectItem>
-                  <SelectItem value="semanal">Semanal</SelectItem>
-                  <SelectItem value="quinzenal">Quinzenal</SelectItem>
-                  <SelectItem value="mensal">Mensal</SelectItem>
-                  <SelectItem value="trimestral">Trimestral</SelectItem>
-                  <SelectItem value="semestral">Semestral</SelectItem>
-                  <SelectItem value="anual">Anual</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <BillingCycleSelect
+              value={currentPlan?.ciclo_cobranca || "mensal"}
+              onChange={(value) => setCurrentPlan({...currentPlan, ciclo_cobranca: value})}
+              isLoading={isLoading}
+            />
           </div>
           
           <div className="space-y-2">
@@ -123,83 +103,28 @@ const PlanDialog: React.FC<PlanDialogProps> = ({
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="quality">Qualidade Máxima</Label>
-              <Select 
-                value={currentPlan?.qualidade_maxima || "HD"} 
-                onValueChange={(value) => setCurrentPlan({...currentPlan, qualidade_maxima: value})}
-                disabled={isLoading}
-              >
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Selecione a qualidade" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                  <SelectItem value="SD">SD</SelectItem>
-                  <SelectItem value="HD">HD</SelectItem>
-                  <SelectItem value="Full HD">Full HD</SelectItem>
-                  <SelectItem value="Ultra HD">Ultra HD</SelectItem>
-                  <SelectItem value="4K">4K</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <QualitySelect
+              value={currentPlan?.qualidade_maxima || "HD"}
+              onChange={(value) => setCurrentPlan({...currentPlan, qualidade_maxima: value})}
+              isLoading={isLoading}
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="price">Preço (AOA)</Label>
-              <Input 
-                id="price" 
-                type="number"
-                min="0"
-                value={currentPlan?.precos?.[0]?.preco || 0}
-                onChange={(e) => handlePriceChange(e.target.value)}
-                className="bg-gray-800 border-gray-700 text-white"
-                placeholder="Preço em Kwanzas"
-                disabled={isLoading}
-              />
-            </div>
+            <PlanPriceInput
+              price={currentPlan?.precos?.[0]?.preco || 0}
+              onChange={handlePriceChange}
+              isLoading={isLoading}
+            />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="screens">Telas Simultâneas</Label>
-              <Input 
-                id="screens" 
-                type="number"
-                min="1"
-                max="10"
-                value={currentPlan?.telas_simultaneas || 1}
-                onChange={(e) => setCurrentPlan({...currentPlan, telas_simultaneas: Number(e.target.value) || 1})}
-                className="bg-gray-800 border-gray-700 text-white"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="downloads">Limite de Downloads</Label>
-              <Input 
-                id="downloads" 
-                type="number"
-                min="0"
-                value={currentPlan?.limite_downloads || 0}
-                onChange={(e) => setCurrentPlan({...currentPlan, limite_downloads: Number(e.target.value) || 0})}
-                className="bg-gray-800 border-gray-700 text-white"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="profiles">Limite de Perfis</Label>
-              <Input 
-                id="profiles" 
-                type="number"
-                min="1"
-                max="10"
-                value={currentPlan?.limite_perfis || 1}
-                onChange={(e) => setCurrentPlan({...currentPlan, limite_perfis: Number(e.target.value) || 1})}
-                className="bg-gray-800 border-gray-700 text-white"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
+          <PlanLimitsInputs
+            screens={currentPlan?.telas_simultaneas || 1}
+            downloads={currentPlan?.limite_downloads || 0}
+            profiles={currentPlan?.limite_perfis || 1}
+            onScreensChange={(value) => setCurrentPlan({...currentPlan, telas_simultaneas: value})}
+            onDownloadsChange={(value) => setCurrentPlan({...currentPlan, limite_downloads: value})}
+            onProfilesChange={(value) => setCurrentPlan({...currentPlan, limite_perfis: value})}
+            isLoading={isLoading}
+          />
           
           <div className="flex items-center space-x-2">
             <Switch 
