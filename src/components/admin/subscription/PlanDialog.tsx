@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,18 +18,7 @@ import PlanPriceInput from './components/PlanPriceInput';
 import BillingCycleSelect from './components/BillingCycleSelect';
 import QualitySelect from './components/QualitySelect';
 import PlanLimitsInputs from './components/PlanLimitsInputs';
-
-interface PlanDialogProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  currentPlan: Partial<SubscriptionPlan> | null;
-  setCurrentPlan: React.Dispatch<React.SetStateAction<Partial<SubscriptionPlan> | null>>;
-  dialogMode: "add" | "edit";
-  onSave: () => void;
-  handlePriceChange: (value: string) => void;
-  isLoading?: boolean;
-  formError?: string | null;
-}
+import { PlanDialogProps } from '@/services/plans/types';
 
 const PlanDialog: React.FC<PlanDialogProps> = ({
   isOpen,
