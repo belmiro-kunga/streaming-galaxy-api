@@ -7,10 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { commonHamburgerItems } from '@/config/menu-items';
 import { useNavigate } from 'react-router-dom';
-
-interface CollapsibleSidebarProps {
-  className?: string;
-}
+import { CollapsibleSidebarProps } from '@/types/ui';
 
 export const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);

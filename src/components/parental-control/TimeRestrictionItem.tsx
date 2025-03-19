@@ -2,13 +2,7 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface TimeRestrictionItemProps {
-  dayOfWeekLabel: string;
-  startTime: string;
-  endTime: string;
-  onDelete: () => void;
-}
+import { TimeRestrictionItemProps } from '@/types/ui';
 
 export const TimeRestrictionItem: React.FC<TimeRestrictionItemProps> = ({
   dayOfWeekLabel,

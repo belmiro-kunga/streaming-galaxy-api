@@ -4,14 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserProfile } from '@/contexts/UserContext';
-
-interface MobileMenuUserSectionProps {
-  isAuthenticated: boolean;
-  profile: UserProfile | null;
-  onLogout: () => Promise<void>;
-  onClose: () => void;
-}
+import { MobileMenuUserSectionProps } from '@/types/ui';
 
 export const MobileMenuUserSection: React.FC<MobileMenuUserSectionProps> = ({ 
   isAuthenticated, 

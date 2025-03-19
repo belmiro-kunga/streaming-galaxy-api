@@ -5,22 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip } from '@/components/ui/tooltip';
 import { TimeRestrictionItem } from './TimeRestrictionItem';
 import { AddTimeRestrictionForm } from './AddTimeRestrictionForm';
-
-interface TimeRestriction {
-  dayOfWeek: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface TimeRestrictionsProps {
-  timeRestrictions: TimeRestriction[];
-  newTimeRestriction: TimeRestriction;
-  onTimeRestrictionChange: (field: keyof TimeRestriction, value: string) => void;
-  onAddTimeRestriction: () => void;
-  onRemoveTimeRestriction: (index: number) => void;
-  dayOfWeekOptions: Array<{ value: string; label: string }>;
-  getDayOfWeekLabel: (value: string) => string;
-}
+import { TimeRestrictionsProps } from '@/types/ui';
 
 export const TimeRestrictions: React.FC<TimeRestrictionsProps> = ({
   timeRestrictions,

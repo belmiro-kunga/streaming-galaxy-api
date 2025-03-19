@@ -2,10 +2,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface MobileMenuHeaderProps {
-  onClose: () => void;
-}
+import { MobileMenuHeaderProps } from '@/types/ui';
 
 export const MobileMenuHeader: React.FC<MobileMenuHeaderProps> = ({ onClose }) => {
   return (

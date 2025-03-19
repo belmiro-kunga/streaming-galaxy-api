@@ -7,11 +7,7 @@ import { mobileMenuItems } from '@/config/mobile-menu-items';
 import { MobileMenuHeader } from './mobile-menu/MobileMenuHeader';
 import { MobileMenuItems } from './mobile-menu/MobileMenuItems';
 import { MobileMenuUserSection } from './mobile-menu/MobileMenuUserSection';
-
-interface MobileMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { MobileMenuProps } from '@/types/ui';
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();

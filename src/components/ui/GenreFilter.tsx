@@ -2,13 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Genre } from '@/types/api';
-
-interface GenreFilterProps {
-  genres: Genre[];
-  activeGenres: string[];
-  toggleGenre: (genreId: string) => void;
-}
+import { GenreFilterProps } from '@/types/ui';
 
 export const GenreFilter = ({ genres, activeGenres, toggleGenre }: GenreFilterProps) => {
   return (

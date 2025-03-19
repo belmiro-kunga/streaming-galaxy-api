@@ -10,12 +10,7 @@ import {
   Newspaper, 
   BadgePercent 
 } from 'lucide-react';
-
-export interface MobileMenuItem {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-}
+import { MobileMenuItem } from '@/types/ui';
 
 export const mobileMenuItems: MobileMenuItem[] = [
   { icon: Sparkles, label: 'Conteúdo Grátis', href: '/free-content' },

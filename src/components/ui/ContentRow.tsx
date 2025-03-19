@@ -3,13 +3,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ContentCard } from '@/components/ui/ContentCard';
-import { ContentItem } from '@/types/api';
-
-interface ContentRowProps {
-  title: string;
-  content: ContentItem[];
-  seeAllLink?: string;
-}
+import { ContentRowProps } from '@/types/ui';
 
 export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
   if (!content || content.length === 0) {

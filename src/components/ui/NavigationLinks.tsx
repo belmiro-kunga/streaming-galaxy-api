@@ -1,11 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MenuItem } from '@/config/menu-items';
-
-interface NavigationLinksProps {
-  items: MenuItem[];
-}
+import { NavigationLinksProps } from '@/types/ui';
 
 export const NavigationLinks: React.FC<NavigationLinksProps> = ({ items }) => {
   return (

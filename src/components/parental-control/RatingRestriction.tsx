@@ -4,12 +4,7 @@ import { Shield, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-interface RatingRestrictionProps {
-  maxRating: string;
-  onMaxRatingChange: (value: string) => void;
-  ratingOptions: Array<{ value: string; label: string }>;
-}
+import { RatingRestrictionProps } from '@/types/ui';
 
 export const RatingRestriction: React.FC<RatingRestrictionProps> = ({
   maxRating,

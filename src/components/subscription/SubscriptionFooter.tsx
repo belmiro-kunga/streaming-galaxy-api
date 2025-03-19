@@ -2,13 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-
-interface SubscriptionFooterProps {
-  onSubscribe: () => void;
-  isLoading: boolean;
-  selectedPlan: string | null;
-  isLoggedIn: boolean;
-}
+import { SubscriptionFooterProps } from '@/types/ui';
 
 export const SubscriptionFooter = ({
   onSubscribe,

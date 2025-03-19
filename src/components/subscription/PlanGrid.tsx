@@ -1,14 +1,7 @@
 
 import React from 'react';
 import { PlanCard } from './PlanCard';
-import { SubscriptionPlan } from '@/types/api';
-
-interface PlanGridProps {
-  plans: SubscriptionPlan[];
-  selectedPlan: string | null;
-  onSelectPlan: (planId: string) => void;
-  isLoading: boolean;
-}
+import { PlanGridProps } from '@/types/ui';
 
 export const PlanGrid = ({ plans, selectedPlan, onSelectPlan, isLoading }: PlanGridProps) => {
   if (isLoading) {

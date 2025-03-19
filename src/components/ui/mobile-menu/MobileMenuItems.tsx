@@ -5,17 +5,7 @@ import { LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/contexts/UserContext';
-
-interface MenuItem {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-}
-
-interface MobileMenuItemsProps {
-  menuItems: MenuItem[];
-  onClose: () => void;
-}
+import { MobileMenuItemsProps } from '@/types/ui';
 
 export const MobileMenuItems: React.FC<MobileMenuItemsProps> = ({ menuItems, onClose }) => {
   const navigate = useNavigate();

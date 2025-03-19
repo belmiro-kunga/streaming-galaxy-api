@@ -3,13 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-
-interface StreamingServiceProps {
-  name: string;
-  logo: string;
-  color: string;
-  link: string;
-}
+import { StreamingServiceProps } from '@/types/ui';
 
 export const StreamingServiceCard = ({ name, logo, color, link }: StreamingServiceProps) => {
   // Check if we're in TV mode (larger screens)

@@ -4,14 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CardTitle, CardDescription } from '@/components/ui/card';
-
-interface ProfileHeaderProps {
-  name: string;
-  avatar: string;
-  enabled: boolean;
-  onToggleEnabled: (enabled: boolean) => void;
-  profileId: string;
-}
+import { ProfileHeaderProps } from '@/types/ui';
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   name,
