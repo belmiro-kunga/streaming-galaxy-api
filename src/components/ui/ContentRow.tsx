@@ -15,7 +15,7 @@ export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
         {seeAllLink && (
-          <button className="text-sm text-gray-400 flex items-center">
+          <button className="text-sm text-gray-400 flex items-center hover:text-white transition-colors">
             Ver Todos <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         )}

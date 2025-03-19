@@ -13,12 +13,12 @@ interface ContentCardProps {
 export const ContentCard = ({ item }: ContentCardProps) => {
   const navigate = useNavigate();
 
-  const handleAssistir = (e: React.MouseEvent) => {
+  const handleWatch = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/watch/${item.id}`);
   };
 
-  const handleDetalhes = (e: React.MouseEvent) => {
+  const handleDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/details/${item.id}`);
   };
@@ -69,7 +69,7 @@ export const ContentCard = ({ item }: ContentCardProps) => {
         {/* Botões */}
         <div className="flex gap-1">
           <Button
-            onClick={handleAssistir}
+            onClick={handleWatch}
             className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs h-8"
             size="sm"
           >
@@ -78,7 +78,7 @@ export const ContentCard = ({ item }: ContentCardProps) => {
           </Button>
           
           <Button
-            onClick={handleDetalhes}
+            onClick={handleDetails}
             variant="outline"
             size="sm"
             className="flex-1 bg-black/50 border-gray-500 hover:bg-black/70 text-white text-xs h-8"
@@ -130,7 +130,7 @@ export const ContentCard = ({ item }: ContentCardProps) => {
           {/* Botões no Hover */}
           <div className="flex gap-1 mt-2">
             <Button
-              onClick={handleAssistir}
+              onClick={handleWatch}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs h-8"
               size="sm"
             >
@@ -139,7 +139,7 @@ export const ContentCard = ({ item }: ContentCardProps) => {
             </Button>
             
             <Button
-              onClick={handleDetalhes}
+              onClick={handleDetails}
               variant="outline"
               size="sm"
               className="flex-1 bg-black/50 border-gray-500 hover:bg-black/70 text-white text-xs h-8"

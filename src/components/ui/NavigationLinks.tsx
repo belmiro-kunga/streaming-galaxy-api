@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { NavigationLinksProps } from '@/types/ui';
 
 export const NavigationLinks: React.FC<NavigationLinksProps> = ({ items }) => {
+  const navigate = useNavigate();
+  
   return (
     <nav className="flex-1 flex justify-center space-x-6">
       {items.map((item) => (

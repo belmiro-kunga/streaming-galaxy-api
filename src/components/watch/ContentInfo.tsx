@@ -51,7 +51,7 @@ const ContentInfo: React.FC<ContentInfoProps> = ({ content }) => {
             </span>
             <span>{content.ano_lancamento}</span>
             <span>•</span>
-            <span>{content.duracao}</span>
+            <span>{content.duracao || '2h 15min'}</span>
             <span>•</span>
             <span className="bg-gray-800 px-1.5 py-0.5 rounded text-xs">
               {content.tipo === 'filme' ? 'FILME' : 'SÉRIE'}
@@ -110,7 +110,7 @@ const ContentInfo: React.FC<ContentInfoProps> = ({ content }) => {
           </div>
           <div className="flex items-center gap-2">
             <Clock className="text-gray-400 w-4 h-4" />
-            <span className="text-sm">Duração: {content.duracao}</span>
+            <span className="text-sm">Duração: {content.duracao || '2h 15min'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="text-gray-400 w-4 h-4" />
