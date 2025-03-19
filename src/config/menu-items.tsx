@@ -1,7 +1,15 @@
+
 import { Home, Film, Tv2, Download, Gift, Gamepad2, Theater, Drama, Radio, Dumbbell, Tv } from "lucide-react";
+import React from "react";
+
+export interface MenuItem {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+}
 
 // Menu inferior e superior principal
-export const mainMenuItems = [
+export const mainMenuItems: MenuItem[] = [
   { icon: <Home className="w-5 h-5" />, label: "Início", path: "/home" },
   { icon: <Film className="w-5 h-5" />, label: "Filmes", path: "/movies" },
   { icon: <Tv2 className="w-5 h-5" />, label: "Séries", path: "/series" },
@@ -9,7 +17,7 @@ export const mainMenuItems = [
 ];
 
 // Menu hamburger comum para todas as páginas
-export const commonHamburgerItems = [
+export const commonHamburgerItems: MenuItem[] = [
   { icon: <Gift className="w-5 h-5" />, label: "Conteúdos Grátis", path: "/free" },
   { icon: <Gamepad2 className="w-5 h-5" />, label: "Anime", path: "/anime" },
   { icon: <Theater className="w-5 h-5" />, label: "Animação", path: "/animation" },
@@ -31,4 +39,4 @@ export function getHamburgerItems(currentPath: string) {
     ...mainMenuItems.filter(item => item.path !== currentPath), // Remove o item da página atual
     ...commonHamburgerItems
   ];
-} 
+}
