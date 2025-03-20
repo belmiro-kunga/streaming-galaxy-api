@@ -80,7 +80,10 @@ export default function MediaContentTab() {
     description: '',
     rating: '12',
     duration: 0,
-    isFree: false
+    isFree: false,
+    videoUrl480p: '',
+    videoUrl720p: '',
+    videoUrl1080p: ''
   });
 
   // Add a new content
@@ -96,7 +99,10 @@ export default function MediaContentTab() {
       description: '',
       rating: '12',
       duration: 0,
-      isFree: false
+      isFree: false,
+      videoUrl480p: '',
+      videoUrl720p: '',
+      videoUrl1080p: ''
     });
     setIsDialogOpen(true);
   };
@@ -114,7 +120,10 @@ export default function MediaContentTab() {
       description: '',
       rating: '12',
       duration: 0,
-      isFree: false
+      isFree: false,
+      videoUrl480p: '',
+      videoUrl720p: '',
+      videoUrl1080p: ''
     });
     setIsDialogOpen(true);
   };
@@ -352,6 +361,44 @@ export default function MediaContentTab() {
                   className="bg-gray-800 border-gray-700"
                   rows={3}
                 />
+              </div>
+
+              {/* Video Quality URLs */}
+              <div className="space-y-4 border border-gray-700 rounded-md p-4">
+                <h3 className="text-sm font-medium mb-2">Links de Vídeo por Qualidade</h3>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="videoUrl480p">URL do Vídeo (480p)</Label>
+                  <Input
+                    id="videoUrl480p"
+                    value={contentForm.videoUrl480p}
+                    onChange={(e) => setContentForm({...contentForm, videoUrl480p: e.target.value})}
+                    placeholder="Ex: https://exemplo.com/video-480p.mp4"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="videoUrl720p">URL do Vídeo (720p)</Label>
+                  <Input
+                    id="videoUrl720p"
+                    value={contentForm.videoUrl720p}
+                    onChange={(e) => setContentForm({...contentForm, videoUrl720p: e.target.value})}
+                    placeholder="Ex: https://exemplo.com/video-720p.mp4"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="videoUrl1080p">URL do Vídeo (1080p)</Label>
+                  <Input
+                    id="videoUrl1080p"
+                    value={contentForm.videoUrl1080p}
+                    onChange={(e) => setContentForm({...contentForm, videoUrl1080p: e.target.value})}
+                    placeholder="Ex: https://exemplo.com/video-1080p.mp4"
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
