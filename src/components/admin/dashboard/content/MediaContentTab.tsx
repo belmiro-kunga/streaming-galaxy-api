@@ -12,19 +12,19 @@ import { useToast } from "@/hooks/use-toast";
 
 // Mock content data for demonstration
 const mockMovies = [
-  { id: 1, title: "O Poderoso Chefão", type: "filme", category: "Drama", year: 1972, status: "active" },
-  { id: 2, title: "Cidade de Deus", type: "filme", category: "Drama", year: 2002, status: "active" },
-  { id: 3, title: "Pantera Negra", type: "filme", category: "Ação", year: 2018, status: "active" },
-  { id: 4, title: "Toy Story", type: "filme", category: "Animação", year: 1995, status: "active" },
-  { id: 5, title: "Parasita", type: "filme", category: "Drama", year: 2019, status: "active" },
+  { id: 1, title: "O Poderoso Chefão", type: "filme", category: "Drama", year: 1972, status: "active", videoUrl480p: "https://exemplo.com/poderoso-chefao-480p.mp4", videoUrl720p: "https://exemplo.com/poderoso-chefao-720p.mp4", videoUrl1080p: "https://exemplo.com/poderoso-chefao-1080p.mp4" },
+  { id: 2, title: "Cidade de Deus", type: "filme", category: "Drama", year: 2002, status: "active", videoUrl480p: "https://exemplo.com/cidade-deus-480p.mp4", videoUrl720p: "https://exemplo.com/cidade-deus-720p.mp4", videoUrl1080p: "https://exemplo.com/cidade-deus-1080p.mp4" },
+  { id: 3, title: "Pantera Negra", type: "filme", category: "Ação", year: 2018, status: "active", videoUrl480p: "https://exemplo.com/pantera-negra-480p.mp4", videoUrl720p: "https://exemplo.com/pantera-negra-720p.mp4", videoUrl1080p: "https://exemplo.com/pantera-negra-1080p.mp4" },
+  { id: 4, title: "Toy Story", type: "filme", category: "Animação", year: 1995, status: "active", videoUrl480p: "https://exemplo.com/toy-story-480p.mp4", videoUrl720p: "https://exemplo.com/toy-story-720p.mp4", videoUrl1080p: "https://exemplo.com/toy-story-1080p.mp4" },
+  { id: 5, title: "Parasita", type: "filme", category: "Drama", year: 2019, status: "active", videoUrl480p: "https://exemplo.com/parasita-480p.mp4", videoUrl720p: "https://exemplo.com/parasita-720p.mp4", videoUrl1080p: "https://exemplo.com/parasita-1080p.mp4" },
 ];
 
 const mockSeries = [
-  { id: 1, title: "Breaking Bad", type: "série", category: "Drama", year: 2008, status: "active" },
-  { id: 2, title: "The Boys", type: "série", category: "Ação", year: 2019, status: "active" },
-  { id: 3, title: "Stranger Things", type: "série", category: "Ficção Científica", year: 2016, status: "active" },
-  { id: 4, title: "Game of Thrones", type: "série", category: "Fantasia", year: 2011, status: "active" },
-  { id: 5, title: "The Crown", type: "série", category: "Drama", year: 2016, status: "active" },
+  { id: 1, title: "Breaking Bad", type: "série", category: "Drama", year: 2008, status: "active", videoUrl480p: "https://exemplo.com/breaking-bad-480p.mp4", videoUrl720p: "https://exemplo.com/breaking-bad-720p.mp4", videoUrl1080p: "https://exemplo.com/breaking-bad-1080p.mp4" },
+  { id: 2, title: "The Boys", type: "série", category: "Ação", year: 2019, status: "active", videoUrl480p: "https://exemplo.com/the-boys-480p.mp4", videoUrl720p: "https://exemplo.com/the-boys-720p.mp4", videoUrl1080p: "https://exemplo.com/the-boys-1080p.mp4" },
+  { id: 3, title: "Stranger Things", type: "série", category: "Ficção Científica", year: 2016, status: "active", videoUrl480p: "https://exemplo.com/stranger-things-480p.mp4", videoUrl720p: "https://exemplo.com/stranger-things-720p.mp4", videoUrl1080p: "https://exemplo.com/stranger-things-1080p.mp4" },
+  { id: 4, title: "Game of Thrones", type: "série", category: "Fantasia", year: 2011, status: "active", videoUrl480p: "https://exemplo.com/got-480p.mp4", videoUrl720p: "https://exemplo.com/got-720p.mp4", videoUrl1080p: "https://exemplo.com/got-1080p.mp4" },
+  { id: 5, title: "The Crown", type: "série", category: "Drama", year: 2016, status: "active", videoUrl480p: "https://exemplo.com/the-crown-480p.mp4", videoUrl720p: "https://exemplo.com/the-crown-720p.mp4", videoUrl1080p: "https://exemplo.com/the-crown-1080p.mp4" },
 ];
 
 // Content categories
@@ -62,7 +62,6 @@ const CONTENT_RATINGS = [
 ];
 
 export default function MediaContentTab() {
-  const [activeTab, setActiveTab] = useState("movies");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
@@ -92,7 +91,7 @@ export default function MediaContentTab() {
     setContentForm({
       id: '',
       title: '',
-      type: activeTab === 'movies' ? 'filme' : 'série',
+      type: 'filme',
       category: '',
       year: new Date().getFullYear(),
       status: 'active',
@@ -117,13 +116,13 @@ export default function MediaContentTab() {
       category: content.category,
       year: content.year,
       status: content.status,
-      description: '',
-      rating: '12',
-      duration: 0,
-      isFree: false,
-      videoUrl480p: '',
-      videoUrl720p: '',
-      videoUrl1080p: ''
+      description: content.description || '',
+      rating: content.rating || '12',
+      duration: content.duration || 0,
+      isFree: content.isFree || false,
+      videoUrl480p: content.videoUrl480p || '',
+      videoUrl720p: content.videoUrl720p || '',
+      videoUrl1080p: content.videoUrl1080p || ''
     });
     setIsDialogOpen(true);
   };
@@ -142,6 +141,16 @@ export default function MediaContentTab() {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verifica se pelo menos uma URL de vídeo foi fornecida
+    if (!contentForm.videoUrl480p && !contentForm.videoUrl720p && !contentForm.videoUrl1080p) {
+      toast({
+        title: "URLs de vídeo",
+        description: "Por favor, forneça pelo menos uma URL de vídeo.",
         variant: "destructive",
       });
       return;
@@ -170,10 +179,44 @@ export default function MediaContentTab() {
     setContentToDelete(null);
   };
 
+  // Verifica URLs de vídeo e exibe badge de qualidade
+  const getQualityBadges = (content: any) => {
+    const badges = [];
+    
+    if (content.videoUrl1080p) {
+      badges.push(
+        <span key="1080p" className="ml-1 px-1.5 py-0.5 text-[10px] bg-blue-900 text-blue-300 rounded-sm">
+          1080p
+        </span>
+      );
+    }
+    
+    if (content.videoUrl720p) {
+      badges.push(
+        <span key="720p" className="ml-1 px-1.5 py-0.5 text-[10px] bg-green-900 text-green-300 rounded-sm">
+          720p
+        </span>
+      );
+    }
+    
+    if (content.videoUrl480p) {
+      badges.push(
+        <span key="480p" className="ml-1 px-1.5 py-0.5 text-[10px] bg-gray-700 text-gray-300 rounded-sm">
+          480p
+        </span>
+      );
+    }
+    
+    return badges;
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Filmes e Séries</h2>
+        <Button onClick={addContent} className="bg-primary hover:bg-primary/90">
+          <Plus className="mr-2 h-4 w-4" /> Adicionar Conteúdo
+        </Button>
       </div>
       
       <Card className="bg-gray-900 border-gray-800">
@@ -192,6 +235,7 @@ export default function MediaContentTab() {
                   <th className="px-4 py-3 text-left">Tipo</th>
                   <th className="px-4 py-3 text-left">Categoria</th>
                   <th className="px-4 py-3 text-left">Ano</th>
+                  <th className="px-4 py-3 text-left">Qualidade</th>
                   <th className="px-4 py-3 text-center">Ações</th>
                 </tr>
               </thead>
@@ -216,6 +260,9 @@ export default function MediaContentTab() {
                       </span>
                     </td>
                     <td className="px-4 py-3">{content.year}</td>
+                    <td className="px-4 py-3 flex">
+                      {getQualityBadges(content)}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center space-x-2">
                         <Button 
@@ -363,7 +410,7 @@ export default function MediaContentTab() {
                 />
               </div>
 
-              {/* Video Quality URLs */}
+              {/* Video Quality URLs - Section with border and heading */}
               <div className="space-y-4 border border-gray-700 rounded-md p-4">
                 <h3 className="text-sm font-medium mb-2">Links de Vídeo por Qualidade</h3>
                 
