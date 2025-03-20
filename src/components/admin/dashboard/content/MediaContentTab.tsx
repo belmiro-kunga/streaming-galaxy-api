@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -165,139 +165,75 @@ export default function MediaContentTab() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Filmes e Séries</h2>
-        <Button className="bg-primary dark:bg-violet-600" onClick={addContent}>
-          <Plus className="mr-2 h-4 w-4" /> Adicionar {activeTab === 'movies' ? 'Filme' : 'Série'}
-        </Button>
       </div>
       
-      <Tabs defaultValue="movies" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full bg-gray-800 mb-6">
-          <TabsTrigger value="movies" className="flex-1">Filmes</TabsTrigger>
-          <TabsTrigger value="series" className="flex-1">Séries</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="movies">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle>Filmes Disponíveis</CardTitle>
-              <CardDescription className="text-gray-400">
-                Gerencie os filmes disponíveis na plataforma
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-800">
-                      <th className="px-4 py-3 text-left">Título</th>
-                      <th className="px-4 py-3 text-left">Categoria</th>
-                      <th className="px-4 py-3 text-left">Ano</th>
-                      <th className="px-4 py-3 text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockMovies.map((movie) => (
-                      <tr key={movie.id} className="border-b border-gray-800 hover:bg-gray-800">
-                        <td className="px-4 py-3 flex items-center">
-                          <Film className="mr-2 h-4 w-4 text-blue-400" />
-                          {movie.title}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-1 rounded-full text-xs bg-blue-900 text-blue-400">
-                            {movie.category}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">{movie.year}</td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex justify-center space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/30"
-                              onClick={() => editContent(movie)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/30"
-                              onClick={() => deleteContent(movie)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="series">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle>Séries Disponíveis</CardTitle>
-              <CardDescription className="text-gray-400">
-                Gerencie as séries disponíveis na plataforma
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-800">
-                      <th className="px-4 py-3 text-left">Título</th>
-                      <th className="px-4 py-3 text-left">Categoria</th>
-                      <th className="px-4 py-3 text-left">Ano</th>
-                      <th className="px-4 py-3 text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockSeries.map((serie) => (
-                      <tr key={serie.id} className="border-b border-gray-800 hover:bg-gray-800">
-                        <td className="px-4 py-3 flex items-center">
-                          <Tv className="mr-2 h-4 w-4 text-green-400" />
-                          {serie.title}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-1 rounded-full text-xs bg-green-900 text-green-400">
-                            {serie.category}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">{serie.year}</td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex justify-center space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/30"
-                              onClick={() => editContent(serie)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/30"
-                              onClick={() => deleteContent(serie)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card className="bg-gray-900 border-gray-800">
+        <CardHeader>
+          <CardTitle>Conteúdo Disponível</CardTitle>
+          <CardDescription className="text-gray-400">
+            Gerencie o conteúdo disponível na plataforma
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-800">
+                  <th className="px-4 py-3 text-left">Título</th>
+                  <th className="px-4 py-3 text-left">Tipo</th>
+                  <th className="px-4 py-3 text-left">Categoria</th>
+                  <th className="px-4 py-3 text-left">Ano</th>
+                  <th className="px-4 py-3 text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...mockMovies, ...mockSeries].map((content) => (
+                  <tr key={content.id} className="border-b border-gray-800 hover:bg-gray-800">
+                    <td className="px-4 py-3 flex items-center">
+                      {content.type === 'filme' ? 
+                        <Film className="mr-2 h-4 w-4 text-blue-400" /> : 
+                        <Tv className="mr-2 h-4 w-4 text-green-400" />
+                      }
+                      {content.title}
+                    </td>
+                    <td className="px-4 py-3">
+                      {content.type === 'filme' ? 'Filme' : 'Série'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        content.type === 'filme' ? 'bg-blue-900 text-blue-400' : 'bg-green-900 text-green-400'
+                      }`}>
+                        {content.category}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{content.year}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-900/30"
+                          onClick={() => editContent(content)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                          onClick={() => deleteContent(content)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Add/Edit Content Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -325,6 +261,22 @@ export default function MediaContentTab() {
                   className="bg-gray-800 border-gray-700"
                   required
                 />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="type">Tipo *</Label>
+                <Select
+                  value={contentForm.type}
+                  onValueChange={(value: 'filme' | 'série') => setContentForm({...contentForm, type: value})}
+                >
+                  <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="filme">Filme</SelectItem>
+                    <SelectItem value="série">Série</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="grid gap-2">
