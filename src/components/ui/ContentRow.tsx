@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { ContentRowProps } from '@/types/ui';
@@ -15,9 +16,9 @@ export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
         {seeAllLink && (
-          <button className="text-sm text-gray-400 flex items-center hover:text-white transition-colors">
+          <Link to={seeAllLink} className="text-sm text-gray-400 flex items-center hover:text-white transition-colors">
             Ver Todos <ChevronRight className="w-4 h-4 ml-1" />
-          </button>
+          </Link>
         )}
       </div>
       <ScrollArea className="overflow-x-auto scrollbar-hide">
