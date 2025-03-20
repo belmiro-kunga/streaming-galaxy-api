@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -173,12 +172,8 @@ export default function MediaContentTab() {
       
       <Tabs defaultValue="movies" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full bg-gray-800 mb-6">
-          <TabsTrigger value="movies" className="flex-1">
-            <Film className="mr-2 h-4 w-4" /> Filmes
-          </TabsTrigger>
-          <TabsTrigger value="series" className="flex-1">
-            <Tv className="mr-2 h-4 w-4" /> Séries
-          </TabsTrigger>
+          <TabsTrigger value="movies" className="flex-1">Filmes</TabsTrigger>
+          <TabsTrigger value="series" className="flex-1">Séries</TabsTrigger>
         </TabsList>
         
         <TabsContent value="movies">
