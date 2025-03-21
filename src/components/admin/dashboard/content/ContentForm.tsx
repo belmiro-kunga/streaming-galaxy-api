@@ -57,7 +57,6 @@ const ContentForm: React.FC<ContentFormProps> = ({
     initialData?.generos?.map(g => g.id) || []
   );
 
-  // Fetch genres when component mounts
   React.useEffect(() => {
     const loadGenres = async () => {
       const genres = await contentAPI.getAllGenres();
@@ -91,14 +90,12 @@ const ContentForm: React.FC<ContentFormProps> = ({
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      // Combine form values with any initialData (like ID) for updates
       const contentData = {
         ...initialData,
         ...values,
         generos: selectedGenres
       };
       
-      // Call the API to save the content
       await contentAPI.saveContent(contentData);
       
       toast.success(`${contentType} salvo com sucesso!`);
@@ -115,6 +112,16 @@ const ContentForm: React.FC<ContentFormProps> = ({
     } else {
       setSelectedGenres(selectedGenres.filter(id => id !== genreId));
     }
+  };
+
+  const handlePreviewVideo = (url: string) => {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleVideoUrlChange = (field: string, value: string) => {
+    form.setValue(field as any, value);
   };
 
   return (
@@ -465,40 +472,41 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </TabsContent>
             
             {contentType === 'Série' && (
-            <TabsContent value="episodes">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Episódios</h3>
-                <p className="text-sm text-gray-400">
-                  Gerencie os episódios desta série
-                </p>
-                
-                <EpisodeVideoInputs 
-                  videoUrl480p=""
-                  videoUrl720p=""
-                  videoUrl1080p=""
-                  onVideoUrlChange={() => {}}
-                  onPreviewVideo={() => {}}
-                />
-              </div>
-            </TabsContent>
-          )}
+              <TabsContent value="episodes">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Episódios</h3>
+                  <p className="text-sm text-gray-400">
+                    Gerencie os episódios desta série
+                  </p>
+                  
+                  <EpisodeVideoInputs 
+                    videoUrl480p={form.watch("video_url_480p") || ""}
+                    videoUrl720p={form.watch("video_url_720p") || ""}
+                    videoUrl1080p={form.watch("video_url_1080p") || ""}
+                    onVideoUrlChange={handleVideoUrlChange}
+                    onPreviewVideo={handlePreviewVideo}
+                  />
+                </div>
+              </TabsContent>
+            )}
             
-          <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit">
-              {initialData?.id ? 'Atualizar' : 'Salvar'}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </Tabs>
-  </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">
+                {initialData?.id ? 'Atualizar' : 'Salvar'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </Tabs>
+    </div>
+  );
 };
 
 export default ContentForm;
