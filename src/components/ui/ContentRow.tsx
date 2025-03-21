@@ -4,9 +4,16 @@ import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ContentCard } from '@/components/ui/ContentCard';
-import { ContentRowProps } from '@/types/ui';
+import { ContentItem } from '@/types/api';
 
-export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
+export interface ContentRowProps {
+  title: string;
+  content: ContentItem[];
+  seeAllLink?: string;
+  isPremiumUser?: boolean;
+}
+
+export const ContentRow = ({ title, content, seeAllLink, isPremiumUser = true }: ContentRowProps) => {
   if (!content || content.length === 0) {
     return null;
   }
@@ -24,7 +31,7 @@ export const ContentRow = ({ title, content, seeAllLink }: ContentRowProps) => {
       <ScrollArea className="overflow-x-auto scrollbar-hide">
         <div className="flex space-x-4 pb-4">
           {content.map((item) => (
-            <ContentCard key={item.id} item={item} />
+            <ContentCard key={item.id} item={item} isPremiumUser={isPremiumUser} />
           ))}
         </div>
       </ScrollArea>

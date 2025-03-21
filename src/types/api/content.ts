@@ -18,6 +18,8 @@ export interface ContentItem {
   duracao?: string;
   avaliacao?: number;
   generos?: string[];
+  destaque?: boolean;
+  data_adicao?: string;
 }
 
 export interface Content {
@@ -37,6 +39,13 @@ export interface Content {
   deleted_at: string | null;
   generos?: Genre[];
   traducoes?: ContentTranslation[];
+  video_url_480p?: string;
+  video_url_720p?: string;
+  video_url_1080p?: string;
+  poster_url?: string;
+  backdrop_url?: string;
+  trailer_url?: string;
+  destaque?: boolean;
 }
 
 export interface ContentTranslation {
@@ -61,4 +70,12 @@ export interface Episode {
   duracao: number | null;
   data_estreia: string | null;
   metadata: Record<string, any>;
+}
+
+export interface ContentFilterOptions {
+  genre?: string;
+  year?: number;
+  classification?: string;
+  type?: 'filme' | 'serie';
+  free?: boolean;
 }
