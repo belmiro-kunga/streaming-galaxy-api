@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAdminDashboard } from '@/contexts/admin/AdminDashboardContext';
 import { TabsContent, Tabs } from "@/components/ui/tabs";
 import OverviewTab from './overview/OverviewTab';
@@ -11,7 +11,6 @@ import SettingsTab from './settings/SystemSettings';
 import SubscriptionPlansManager from '@/components/admin/SubscriptionPlansManager';
 import HomeTab from './home/HomeTab';
 import FileStoreForm from './filestore/FileStoreForm';
-import { useNavigate } from 'react-router-dom';
 
 const MainContent = () => {
   const { 
@@ -33,15 +32,6 @@ const MainContent = () => {
     subscriptionPlans,
     setSubscriptionPlans
   } = useAdminDashboard();
-  
-  const navigate = useNavigate();
-
-  // Handle tab changes by updating the URL
-  useEffect(() => {
-    if (activeTab) {
-      navigate(`/admin-dashboard/${activeTab}`, { replace: true });
-    }
-  }, [activeTab, navigate]);
 
   return (
     <main className="flex-1 overflow-y-auto bg-gray-950">

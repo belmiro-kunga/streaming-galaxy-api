@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { planAPI } from '@/services/plans';
 import { supabase } from '@/lib/supabase';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const AdminDashboard = () => {
   return (
@@ -19,25 +19,20 @@ const AdminDashboard = () => {
 const AdminDashboardContent = () => {
   const { setSubscriptionPlans, setUsers, setActiveTab } = useAdminDashboard();
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // Set active tab based on URL
+  // Set active tab based on URL, only once when component mounts or URL path changes
   useEffect(() => {
     const path = location.pathname;
-    
-    // Default to overview if we're at the base admin-dashboard path
-    if (path === '/admin-dashboard') {
-      navigate('/admin-dashboard/overview', { replace: true });
-      return;
-    }
     
     // Extract the tab name from the URL
     const tabName = path.split('/admin-dashboard/')[1];
     
     if (tabName) {
       setActiveTab(tabName);
+    } else {
+      setActiveTab('overview'); // Default to overview if no specific tab
     }
-  }, [location.pathname, setActiveTab, navigate]);
+  }, [location.pathname]);
 
   // Use React Query to fetch subscription plans
   const plansQuery = useQuery({
