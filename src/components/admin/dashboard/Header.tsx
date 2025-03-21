@@ -3,6 +3,7 @@ import React from 'react';
 import { Bell, Menu, Search, Home } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -19,7 +20,9 @@ const Header = ({ sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery, setA
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-full hover:bg-gray-800">
           <Menu className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-bold text-primary">CinePlay Admin</h1>
+        <Link to="/admin-dashboard/overview">
+          <h1 className="text-xl font-bold text-primary cursor-pointer">CinePlay Admin</h1>
+        </Link>
       </div>
       <div className="flex items-center gap-3">
         <div className="relative hidden md:block">

@@ -108,10 +108,49 @@ export const router = createBrowserRouter([
     path: "/payment-upload",
     element: <ProtectedRoute><PaymentUpload /></ProtectedRoute>,
   },
+  
+  // Admin dashboard routes
   {
     path: "/admin-dashboard",
     element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
   },
+  {
+    path: "/admin-dashboard/overview",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/users",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/plans",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/content",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/payments",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/reports",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/settings",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/home",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/filestore",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  
   {
     path: "/animation",
     element: <Animation />,

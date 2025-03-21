@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/admin';
 import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
 import { useQuery } from '@tanstack/react-query';
 import { planAPI } from '@/services/plans';
 import { supabase } from '@/lib/supabase';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   return (
@@ -16,7 +17,27 @@ const AdminDashboard = () => {
 
 // This internal component allows us to use the context hooks
 const AdminDashboardContent = () => {
-  const { setSubscriptionPlans, setUsers } = useAdminDashboard();
+  const { setSubscriptionPlans, setUsers, setActiveTab } = useAdminDashboard();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Set active tab based on URL
+  useEffect(() => {
+    const path = location.pathname;
+    
+    // Default to overview if we're at the base admin-dashboard path
+    if (path === '/admin-dashboard') {
+      navigate('/admin-dashboard/overview', { replace: true });
+      return;
+    }
+    
+    // Extract the tab name from the URL
+    const tabName = path.split('/admin-dashboard/')[1];
+    
+    if (tabName) {
+      setActiveTab(tabName);
+    }
+  }, [location.pathname, setActiveTab, navigate]);
 
   // Use React Query to fetch subscription plans
   const plansQuery = useQuery({

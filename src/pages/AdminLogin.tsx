@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,8 +19,8 @@ const AdminLogin = () => {
     // Salva no localStorage
     localStorage.setItem('user', JSON.stringify(adminUser));
     
-    // Redireciona para o dashboard
-    navigate('/admin-dashboard');
+    // Redireciona para o dashboard com uma rota específica
+    navigate('/admin-dashboard/overview');
   }, [navigate]);
 
   return null;
