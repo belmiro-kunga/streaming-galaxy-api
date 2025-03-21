@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -13,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Content, Genre } from '@/types/api';
-import { contentAPI } from '@/services/content';
+import { contentAPI } from '@/services/content/contentAPI';
 import VideoQualityInputs from './VideoQualityInputs';
 import EpisodeVideoInputs from './EpisodeVideoInputs';
 import { toast } from 'sonner';
@@ -466,37 +465,40 @@ const ContentForm: React.FC<ContentFormProps> = ({
             </TabsContent>
             
             {contentType === 'Série' && (
-              <TabsContent value="episodes">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Episódios</h3>
-                  <p className="text-sm text-gray-400">
-                    Gerencie os episódios desta série
-                  </p>
-                  
-                  <EpisodeVideoInputs 
-                    contentId={initialData?.id}
-                  />
-                </div>
-              </TabsContent>
-            )}
+            <TabsContent value="episodes">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Episódios</h3>
+                <p className="text-sm text-gray-400">
+                  Gerencie os episódios desta série
+                </p>
+                
+                <EpisodeVideoInputs 
+                  videoUrl480p=""
+                  videoUrl720p=""
+                  videoUrl1080p=""
+                  onVideoUrlChange={() => {}}
+                  onPreviewVideo={() => {}}
+                />
+              </div>
+            </TabsContent>
+          )}
             
-            <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onCancel}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit">
-                {initialData?.id ? 'Atualizar' : 'Salvar'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </Tabs>
-    </div>
-  );
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit">
+              {initialData?.id ? 'Atualizar' : 'Salvar'}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </Tabs>
+  </div>
 };
 
 export default ContentForm;

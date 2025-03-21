@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { contentAPI } from '@/services/content';
+import { contentAPI } from '@/services/content/contentAPI';
 import { ContentItem, Genre, ContentFilterOptions } from '@/types/api';
 
 export const useContentFetch = (type?: 'all' | 'trending' | 'recent' | 'top-rated', genreId?: string, limit: number = 10) => {

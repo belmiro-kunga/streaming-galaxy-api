@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 
-interface EpisodeVideoInputsProps {
+export interface EpisodeVideoInputsProps {
   videoUrl480p: string;
   videoUrl720p: string;
   videoUrl1080p: string;

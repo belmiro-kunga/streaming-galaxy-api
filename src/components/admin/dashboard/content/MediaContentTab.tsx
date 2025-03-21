@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Edit, Trash, MoreVertical, Eye, Star, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { ContentItem } from '@/types/api';
+import { ContentItem, Content } from '@/types/api';
 import ContentForm from './ContentForm';
 import { useContentManagement } from '@/hooks/use-content-management';
 
@@ -52,6 +52,32 @@ const MediaContentTab = () => {
     );
   
   const handleEditContent = (item: ContentItem) => {
+    // Convert ContentItem to Content type for the form
+    const contentData: Partial<Content> = {
+      id: item.id,
+      tipo: item.tipo,
+      titulo: item.titulo,
+      descricao: item.descricao,
+      ano_lancamento: item.ano_lancamento,
+      duracao: item.duracao ? parseInt(item.duracao) : null,
+      classificacao_etaria: item.classificacao_etaria,
+      status: 'ativo', // Default status since ContentItem doesn't have it
+      gratuito: item.gratuito,
+      metadata: {},
+      created_at: item.data_adicao || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: null,
+      deleted_at: null,
+      generos: item.generos?.map(g => ({ id: g, nome: g })) || [],
+      poster_url: item.poster_url,
+      backdrop_url: item.backdrop_url,
+      trailer_url: item.trailer_url,
+      video_url_480p: item.video_url_480p,
+      video_url_720p: item.video_url_720p,
+      video_url_1080p: item.video_url_1080p,
+      destaque: item.destaque
+    };
+    
     setSelectedContent(item);
     setIsFormDialogOpen(true);
   };
