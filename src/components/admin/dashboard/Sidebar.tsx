@@ -72,7 +72,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             onClick={() => handleTabChange('users')}
           />
           
-          {/* Seção de Conteúdo */}
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
               Gerenciar Conteúdo
@@ -98,7 +97,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             />
           </div>
           
-          {/* Seção de Pagamentos */}
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
               Gerenciar Pagamentos
