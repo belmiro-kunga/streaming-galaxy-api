@@ -15,7 +15,7 @@ export interface ContentItem {
   trailer_url?: string;
   poster_url?: string;
   backdrop_url?: string;
-  duracao?: string;
+  duracao?: string; // This is a string in ContentItem
   avaliacao?: number;
   generos?: string[];
   destaque?: boolean;
@@ -28,7 +28,7 @@ export interface Content {
   titulo: string;
   descricao: string | null;
   ano_lancamento: number | null;
-  duracao: number | null;
+  duracao: number | null; // This is a number in Content
   classificacao_etaria: string | null;
   status: string;
   gratuito: boolean;

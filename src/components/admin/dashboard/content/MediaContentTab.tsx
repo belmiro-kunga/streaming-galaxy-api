@@ -53,6 +53,7 @@ const MediaContentTab = () => {
   
   const handleEditContent = (item: ContentItem) => {
     // Convert ContentItem to Content type for the form
+    // Converting string duracao to number for Content type
     const contentData: Partial<Content> = {
       id: item.id,
       tipo: item.tipo,

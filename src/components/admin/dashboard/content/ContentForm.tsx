@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -93,7 +94,9 @@ const ContentForm: React.FC<ContentFormProps> = ({
       const contentData = {
         ...initialData,
         ...values,
-        generos: selectedGenres
+        generos: selectedGenres,
+        // Convert duration to string for ContentItem compatibility
+        duracao: values.duracao ? String(values.duracao) : undefined
       };
       
       await contentAPI.saveContent(contentData);
