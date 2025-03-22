@@ -1,123 +1,126 @@
-
 import React from 'react';
-import { motion } from 'framer-motion';
-import { LogOut } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  Tv,
+  Settings,
+  FileText,
+  Clapperboard,
+  Upload
+} from 'lucide-react';
+import { NavItem } from '@/components/ui/nav-item';
+import { useAdminDashboard } from '@/contexts/admin';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   sidebarOpen: boolean;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  handleLogout: () => void;
+  setSidebarOpen: (open: boolean) => void;
 }
 
-const Sidebar = ({ sidebarOpen, activeTab, setActiveTab, handleLogout }: SidebarProps) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+  const { activeTab, setActiveTab } = useAdminDashboard();
   const location = useLocation();
-  
+  const navigate = useNavigate();
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    navigate(`/admin-dashboard/${tab}`);
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
-    <motion.aside 
-      className="bg-gray-900 border-r border-gray-800 w-64 flex-shrink-0 hidden md:block"
-      animate={{ width: sidebarOpen ? 240 : 80 }}
-      transition={{ duration: 0.3 }}
+    <div
+      className={`fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } transition-transform duration-300 ease-in-out md:translate-x-0 md:shadow-none`}
     >
-      <ScrollArea className="h-full py-4">
-        <nav className="px-3 space-y-1">
-          <Link to="/admin-dashboard/overview">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/overview") ? "bg-gray-800" : ""}`}
-            >
-              <span>Visão Geral</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/home">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/home") ? "bg-gray-800" : ""}`}
-            >
-              <span>Home</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/users">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/users") ? "bg-gray-800" : ""}`}
-            >
-              <span>Usuários</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/plans">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/plans") ? "bg-gray-800" : ""}`}
-            >
-              <span>Planos</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/content">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/content") ? "bg-gray-800" : ""}`}
-            >
-              <span>Conteúdos</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/payments">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/payments") ? "bg-gray-800" : ""}`}
-            >
-              <span>Pagamentos</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/reports">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/reports") ? "bg-gray-800" : ""}`}
-            >
-              <span>Relatórios</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/filestore">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/filestore") ? "bg-gray-800" : ""}`}
-            >
-              <span>File Store</span>
-            </Button>
-          </Link>
-          
-          <Link to="/admin-dashboard/settings">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start py-2 px-3 ${location.pathname.includes("/admin-dashboard/settings") ? "bg-gray-800" : ""}`}
-            >
-              <span>Configurações do Sistema</span>
-            </Button>
-          </Link>
-        </nav>
-        
-        <div className="px-3 mt-6 pt-6 border-t border-gray-800">
-          <Button
-            variant="ghost"
-            className="w-full justify-start py-2 px-3 text-red-400 hover:text-red-300 hover:bg-gray-800"
-            onClick={handleLogout}
+      <div className="space-y-4 py-4">
+        <div className="px-6 flex items-center justify-between">
+          <a href="/admin-dashboard" className="flex items-center space-x-2 font-semibold">
+            <FileText className="h-6 w-6 text-primary" />
+            <span>Admin Dashboard</span>
+          </a>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            <LogOut className="h-5 w-5 mr-2" />
-            <span>Sair</span>
-          </Button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      </ScrollArea>
-    </motion.aside>
+        
+        <nav className="space-y-1 px-2">
+          <NavItem
+            icon={<LayoutDashboard size={16} />}
+            label="Visão Geral"
+            active={activeTab === 'overview'}
+            onClick={() => handleTabChange('overview')}
+          />
+          <NavItem
+            icon={<Users size={16} />}
+            label="Usuários"
+            active={activeTab === 'users'}
+            onClick={() => handleTabChange('users')}
+          />
+          
+          {/* Seção de Conteúdo */}
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+              Gerenciar Conteúdo
+            </p>
+            
+            <NavItem
+              icon={<Clapperboard size={16} />}
+              label="Filmes e Séries"
+              active={activeTab === 'media-content'}
+              onClick={() => handleTabChange('media-content')}
+            />
+            <NavItem
+              icon={<Upload size={16} />}
+              label="Importar Conteúdo"
+              active={activeTab === 'content-import'}
+              onClick={() => handleTabChange('content-import')}
+            />
+            <NavItem
+              icon={<Tv size={16} />}
+              label="Canais de TV"
+              active={activeTab === 'tv-channels'}
+              onClick={() => handleTabChange('tv-channels')}
+            />
+          </div>
+          
+          {/* Seção de Pagamentos */}
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+              Gerenciar Pagamentos
+            </p>
+            
+            <NavItem
+              icon={<Tv size={16} />}
+              label="Pagamentos"
+              active={activeTab === 'payments'}
+              onClick={() => handleTabChange('payments')}
+            />
+          </div>
+
+          <NavItem
+            icon={<Settings size={16} />}
+            label="Configurações"
+            active={activeTab === 'settings'}
+            onClick={() => handleTabChange('settings')}
+          />
+        </nav>
+      </div>
+    </div>
   );
 };
 

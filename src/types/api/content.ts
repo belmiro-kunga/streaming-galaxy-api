@@ -20,6 +20,24 @@ export interface ContentItem {
   generos?: string[];
   destaque?: boolean;
   data_adicao?: string;
+  status?: string; // Campo adicional para status (pendente, aprovado, rejeitado)
+  metadata?: {
+    diretorio?: string; // Netflix, Prime Video, etc.
+    titulo_original?: string;
+    origem?: string;
+    diretor?: string;
+    elenco?: string;
+    temporada?: number;
+    episodio?: number;
+    total_temporadas?: number;
+    titulo_episodio?: string;
+    episodios?: Array<{
+      numero_temporada: number;
+      numero_episodio: number;
+      titulo: string;
+      duracao?: string;
+    }>;
+  };
 }
 
 export interface Content {

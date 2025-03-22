@@ -1,55 +1,41 @@
-
 import React from 'react';
-import { useAdminDashboard } from '@/contexts/admin';
-import Header from './Header';
 import Sidebar from './Sidebar';
+import Header from './Header';
 import MainContent from './MainContent';
+import OverviewTab from './overview/OverviewTab';
+import UsersTab from './users/UsersTab';
+import ReportsTab from './ReportsTab';
+import SettingsTab from './SettingsTab';
+import ContentManagerTab from './content/ContentManagerTab';
+import MediaContentTab from './content/MediaContentTab';
+import TVChannelsTab from './content/TVChannelsTab';
+import PaymentsTab from './payments/PaymentsTab';
+import ImportContentTab from './content/ImportContentTab';
 import DialogContainer from './DialogContainer';
+import { useAdminDashboard } from '@/contexts/admin';
 
 const DashboardLayout = () => {
-  const {
-    sidebarOpen,
-    setSidebarOpen,
-    searchQuery,
-    setSearchQuery,
-    activeTab,
-    setActiveTab,
-    handleLogout
-  } = useAdminDashboard();
+  const { activeTab, sidebarOpen, setSidebarOpen } = useAdminDashboard();
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* Top header */}
-      <Header 
-        sidebarOpen={sidebarOpen} 
-        setSidebarOpen={setSidebarOpen} 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery}
-        setActiveTab={setActiveTab}
-      />
-      
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar 
-          sidebarOpen={sidebarOpen} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          handleLogout={handleLogout} 
-        />
-        
-        {/* Mobile sidebar overlay */}
-        {!sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-10 md:hidden" 
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-        
-        {/* Main content */}
-        <MainContent />
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="mx-auto max-w-7xl">
+            {activeTab === 'overview' && <OverviewTab />}
+            {activeTab === 'users' && <UsersTab />}
+            {activeTab === 'reports' && <ReportsTab />}
+            {activeTab === 'settings' && <SettingsTab />}
+            {activeTab === 'content-manager' && <ContentManagerTab />}
+            {activeTab === 'media-content' && <MediaContentTab />}
+            {activeTab === 'tv-channels' && <TVChannelsTab />}
+            {activeTab === 'payments' && <PaymentsTab />}
+            {activeTab === 'content-import' && <ImportContentTab />}
+          </div>
+        </main>
       </div>
-      
-      {/* Dialogs */}
       <DialogContainer />
     </div>
   );

@@ -26,7 +26,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Edit, Trash, MoreVertical, Eye, Star, Loader2 } from 'lucide-react';
+import { Edit, Trash, MoreVertical, Eye, Star, Loader2, Check, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { ContentItem, Content } from '@/types/api';
 import ContentForm from './ContentForm';
@@ -34,18 +34,34 @@ import { useContentManagement } from '@/hooks/use-content-management';
 
 const MediaContentTab = () => {
   const { toast } = useToast();
-  const { content, loading, error, fetchContent, deleteContent, toggleFeatured } = useContentManagement();
+  const { content, loading, error, fetchContent, deleteContent, toggleFeatured, updateContentStatus } = useContentManagement();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'filme' | 'serie'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pendente' | 'aprovado' | 'rejeitado'>('all');
+  const [filterDirectory, setFilterDirectory] = useState<string>('all');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+  
+  const directories = [
+    'Netflix',
+    'Prime Video',
+    'Disney Plus',
+    'Max',
+    'Paramount Plus',
+    'Globoplay',
+    'Hulu',
+    'Crunchyroll',
+    'Cinema',
+  ];
   
   // Filter and search content
   const filteredContent = content
     .filter(item => 
       (filterType === 'all' || item.tipo === filterType) &&
+      (filterStatus === 'all' || item.status === filterStatus) &&
+      (filterDirectory === 'all' || item.metadata?.diretorio === filterDirectory) &&
       (searchTerm === '' || 
         item.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.descricao?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -62,9 +78,9 @@ const MediaContentTab = () => {
       ano_lancamento: item.ano_lancamento,
       duracao: item.duracao ? parseInt(item.duracao) : null,
       classificacao_etaria: item.classificacao_etaria,
-      status: 'ativo', // Default status since ContentItem doesn't have it
+      status: item.status || 'pendente',
       gratuito: item.gratuito,
-      metadata: {},
+      metadata: item.metadata || {},
       created_at: item.data_adicao || new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: null,
@@ -133,6 +149,35 @@ const MediaContentTab = () => {
     }
   };
   
+  const handleStatusChange = async (item: ContentItem, status: 'pendente' | 'aprovado' | 'rejeitado') => {
+    const success = await updateContentStatus(item.id, status);
+    
+    if (success) {
+      toast({
+        title: `Status atualizado para ${status}`,
+        description: `${item.titulo} foi ${status === 'aprovado' ? 'aprovado' : status === 'rejeitado' ? 'rejeitado' : 'marcado como pendente'}.`,
+      });
+    } else {
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o status. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const getStatusBadge = (status?: string) => {
+    switch(status) {
+      case 'aprovado':
+        return <Badge className="bg-green-600 hover:bg-green-700">Aprovado</Badge>;
+      case 'rejeitado':
+        return <Badge className="bg-red-600 hover:bg-red-700">Rejeitado</Badge>;
+      case 'pendente':
+      default:
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Pendente</Badge>;
+    }
+  };
+  
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center p-10">
@@ -170,6 +215,30 @@ const MediaContentTab = () => {
               <SelectItem value="serie">Apenas Séries</SelectItem>
             </SelectContent>
           </Select>
+          
+          <Select value={filterStatus} onValueChange={(value: 'all' | 'pendente' | 'aprovado' | 'rejeitado') => setFilterStatus(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="aprovado">Aprovado</SelectItem>
+              <SelectItem value="rejeitado">Rejeitado</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={filterDirectory} onValueChange={(value) => setFilterDirectory(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrar por diretório" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os diretórios</SelectItem>
+              {directories.map(dir => (
+                <SelectItem key={dir} value={dir}>{dir}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       
@@ -191,6 +260,7 @@ const MediaContentTab = () => {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>Classificação</TableHead>
+                <TableHead>Diretório</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Destaque</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -213,13 +283,10 @@ const MediaContentTab = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={
-                      item.gratuito 
-                        ? "bg-green-600 hover:bg-green-700" 
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }>
-                      {item.gratuito ? 'Gratuito' : 'Premium'}
-                    </Badge>
+                    {item.metadata?.diretorio || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(item.status)}
                   </TableCell>
                   <TableCell>
                     <Badge variant={item.destaque ? "default" : "outline"} 
@@ -238,6 +305,14 @@ const MediaContentTab = () => {
                         <DropdownMenuItem onClick={() => handleEditContent(item)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusChange(item, 'aprovado')}>
+                          <Check className="mr-2 h-4 w-4 text-green-600" />
+                          Aprovar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusChange(item, 'rejeitado')}>
+                          <X className="mr-2 h-4 w-4 text-red-600" />
+                          Rejeitar
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleToggleFeatured(item)}>
                           <Star className="mr-2 h-4 w-4" />

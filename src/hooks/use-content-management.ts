@@ -245,6 +245,32 @@ export const useContentManagement = () => {
     }
   };
   
+  const updateContentStatus = async (contentId: string, status: 'pendente' | 'aprovado' | 'rejeitado') => {
+    try {
+      setLoading(true);
+      
+      const contentItem = content.find(item => item.id === contentId);
+      if (!contentItem) {
+        throw new Error('Conteúdo não encontrado');
+      }
+      
+      await contentAPI.saveContent({
+        ...contentItem,
+        status
+      });
+      
+      // Refresh content list
+      await fetchContent();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Erro ao atualizar status'));
+      console.error('Error updating content status:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return { 
     content, 
     loading, 
@@ -252,6 +278,7 @@ export const useContentManagement = () => {
     fetchContent, 
     saveContent, 
     deleteContent, 
-    toggleFeatured 
+    toggleFeatured,
+    updateContentStatus
   };
 };
