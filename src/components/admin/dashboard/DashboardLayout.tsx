@@ -1,8 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import MainContent from './MainContent';
 import OverviewTab from './overview/OverviewTab';
 import UsersTab from './users/UsersTab';
 import ReportsTab from './ReportsTab';
@@ -14,10 +13,25 @@ import PaymentsTab from './payments/PaymentsTab';
 import ImportContentTab from './content/ImportContentTab';
 import DialogContainer from './DialogContainer';
 import { useAdminDashboard } from '@/contexts/admin';
-import { useState } from 'react';
 
 const DashboardLayout = () => {
-  const { activeTab, sidebarOpen, setSidebarOpen } = useAdminDashboard();
+  const { 
+    activeTab, 
+    sidebarOpen, 
+    setSidebarOpen, 
+    userStats, 
+    contentStats, 
+    pendingPayments, 
+    users, 
+    filteredUsers,
+    approvePayment, 
+    rejectPayment,
+    addUser,
+    editUser,
+    deleteUser,
+    manageSubscription
+  } = useAdminDashboard();
+  
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -32,14 +46,39 @@ const DashboardLayout = () => {
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="mx-auto max-w-7xl">
-            {activeTab === 'overview' && <OverviewTab />}
-            {activeTab === 'users' && <UsersTab />}
+            {activeTab === 'overview' && (
+              <OverviewTab 
+                userStats={userStats} 
+                contentStats={contentStats}
+                pendingPayments={pendingPayments}
+                users={users}
+                approvePayment={approvePayment}
+                rejectPayment={rejectPayment}
+              />
+            )}
+            {activeTab === 'users' && (
+              <UsersTab 
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filteredUsers={filteredUsers}
+                addUser={addUser}
+                editUser={editUser}
+                deleteUser={deleteUser}
+                manageSubscription={manageSubscription}
+              />
+            )}
             {activeTab === 'reports' && <ReportsTab />}
             {activeTab === 'settings' && <SettingsTab />}
             {activeTab === 'content-manager' && <ContentManagerTab />}
             {activeTab === 'media-content' && <MediaContentTab />}
             {activeTab === 'tv-channels' && <TVChannelsTab />}
-            {activeTab === 'payments' && <PaymentsTab />}
+            {activeTab === 'payments' && (
+              <PaymentsTab 
+                pendingPayments={pendingPayments}
+                approvePayment={approvePayment}
+                rejectPayment={rejectPayment}
+              />
+            )}
             {activeTab === 'content-import' && <ImportContentTab />}
           </div>
         </main>

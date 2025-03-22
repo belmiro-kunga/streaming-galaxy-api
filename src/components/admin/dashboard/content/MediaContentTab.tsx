@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -56,7 +55,6 @@ const MediaContentTab = () => {
     'Cinema',
   ];
   
-  // Filter and search content
   const filteredContent = content
     .filter(item => 
       (filterType === 'all' || item.tipo === filterType) &&
@@ -68,15 +66,14 @@ const MediaContentTab = () => {
     );
   
   const handleEditContent = (item: ContentItem) => {
-    // Convert ContentItem to Content type for the form
-    // Converting string duracao to number for Content type
     const contentData: Partial<Content> = {
       id: item.id,
       tipo: item.tipo,
       titulo: item.titulo,
       descricao: item.descricao,
       ano_lancamento: item.ano_lancamento,
-      duracao: item.duracao ? parseInt(item.duracao) : null,
+      duracao: item.duracao ? 
+        parseInt(item.duracao.replace(/[^0-9]/g, '')) || null : null,
       classificacao_etaria: item.classificacao_etaria,
       status: item.status || 'pendente',
       gratuito: item.gratuito,
@@ -332,7 +329,6 @@ const MediaContentTab = () => {
         </div>
       )}
       
-      {/* Form Dialog */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="max-w-6xl bg-gray-900 border-gray-800 p-0">
           <ContentForm 
@@ -347,7 +343,6 @@ const MediaContentTab = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

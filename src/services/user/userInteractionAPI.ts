@@ -16,8 +16,9 @@ export const userInteractionAPI = {
         percentual_assistido: Math.floor(Math.random() * 80) + 10
       }));
       
+      // Using any here since validateContentItem is not exported in the type definition
       return mockWatching.map(item => ({
-        ...contentAPI['validateContentItem'](item),
+        ...((contentAPI as any).validateContentItem(item)),
         percentual_assistido: item.percentual_assistido
       })) as ContentItem[];
     } catch (error) {
@@ -38,7 +39,8 @@ export const userInteractionAPI = {
         gratuito: index % 3 === 0
       }));
       
-      return mockRecommended.map(contentAPI['validateContentItem']);
+      // Using any here since validateContentItem is not exported in the type definition
+      return mockRecommended.map((item) => (contentAPI as any).validateContentItem(item));
     } catch (error) {
       console.error('Error fetching recommended content:', error);
       return [];

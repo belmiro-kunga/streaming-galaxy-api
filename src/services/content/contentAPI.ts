@@ -1,5 +1,5 @@
 
-import { ContentItem } from '@/types/api/content';
+import { ContentItem, Genre } from '@/types/api/content';
 
 // Helper function to ensure content items have the correct structure
 const validateContentItem = (item: any): ContentItem => {
@@ -89,12 +89,47 @@ const mockContent: ContentItem[] = [
   }
 ];
 
+// Mock genres
+const mockGenres: Genre[] = [
+  { id: 'genre-1', nome: 'Ação' },
+  { id: 'genre-2', nome: 'Drama' },
+  { id: 'genre-3', nome: 'Comédia' },
+  { id: 'genre-4', nome: 'Ficção Científica' },
+  { id: 'genre-5', nome: 'Terror' },
+  { id: 'genre-6', nome: 'Romance' },
+  { id: 'genre-7', nome: 'Documentário' },
+  { id: 'genre-8', nome: 'Animação' },
+  { id: 'genre-9', nome: 'Crime' }
+];
+
 // Content API functions
 export const contentAPI = {
-  getAllContent: async (): Promise<ContentItem[]> => {
+  getAllContent: async (filters?: any): Promise<ContentItem[]> => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    return [...mockContent];
+    
+    let filteredContent = [...mockContent];
+    
+    // Apply filters if they exist
+    if (filters) {
+      if (filters.genre) {
+        filteredContent = filteredContent.filter(item => 
+          item.generos?.includes(filters.genre)
+        );
+      }
+      if (filters.year) {
+        filteredContent = filteredContent.filter(item => 
+          item.ano_lancamento === filters.year
+        );
+      }
+      if (filters.type) {
+        filteredContent = filteredContent.filter(item => 
+          item.tipo === filters.type
+        );
+      }
+    }
+    
+    return filteredContent;
   },
   
   getContentById: async (id: string): Promise<ContentItem | null> => {
@@ -199,5 +234,91 @@ export const contentAPI = {
       imported,
       total: items.length
     };
-  }
+  },
+  
+  // Added missing functions
+  getFeatureContent: async (): Promise<ContentItem> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return a random featured content
+    const featuredContent = mockContent.filter(item => item.destaque);
+    if (featuredContent.length > 0) {
+      return featuredContent[Math.floor(Math.random() * featuredContent.length)];
+    }
+    
+    // Default content if no featured items
+    return mockContent[0];
+  },
+  
+  getTrendingContent: async (limit: number = 10): Promise<ContentItem[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return random content as trending (in real app would be based on views)
+    const shuffled = [...mockContent].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, limit);
+  },
+  
+  getRecentContent: async (limit: number = 10): Promise<ContentItem[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Sort by data_adicao (desc) and limit
+    return [...mockContent]
+      .sort((a, b) => new Date(b.data_adicao || '').getTime() - new Date(a.data_adicao || '').getTime())
+      .slice(0, limit);
+  },
+  
+  getTopRatedContent: async (limit: number = 10): Promise<ContentItem[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return content sorted by avaliacao (descending)
+    return [...mockContent]
+      .sort((a, b) => (b.avaliacao || 0) - (a.avaliacao || 0))
+      .slice(0, limit);
+  },
+  
+  getAllGenres: async (): Promise<Genre[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    return [...mockGenres];
+  },
+  
+  getContentByGenre: async (genreId: string, limit: number = 10): Promise<ContentItem[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Find genre by id
+    const genre = mockGenres.find(g => g.id === genreId);
+    
+    if (!genre) return [];
+    
+    // Filter content by genre and limit
+    const filtered = mockContent.filter(item => 
+      item.generos?.includes(genre.nome)
+    ).slice(0, limit);
+    
+    return filtered;
+  },
+  
+  toggleFeatured: async (contentId: string, featured: boolean): Promise<boolean> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const index = mockContent.findIndex(item => item.id === contentId);
+    
+    if (index >= 0) {
+      mockContent[index].destaque = featured;
+      return true;
+    }
+    
+    return false;
+  },
 };
+
+// Make the validateContentItem function visible for unit tests
+// @ts-expect-error - This is for testing purposes
+contentAPI.validateContentItem = validateContentItem;

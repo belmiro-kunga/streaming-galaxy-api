@@ -1,270 +1,203 @@
 
 import { useState } from 'react';
 import Papa from 'papaparse';
-import { contentAPI } from '@/services/content/contentAPI';
-import { ContentItem } from '@/types/api/content';
+import { contentAPI } from '@/services/api';
+import { ContentItem } from '@/types/api';
 
-// Definição de tipos para os dados do CSV
-interface FilmeCSV {
-  Título: string;
-  'Título Original': string;
-  Ano: string;
-  Gênero: string;
-  Origem: string;
-  Duração: string;
-  Diretor: string;
-  Elenco: string;
-  Idade: string;
-  Diretório: string;
-  Thumbnail?: string;
-  Link_480p?: string;
-  Link_720p?: string;
-  Link_1080p?: string;
-}
-
-interface SerieCSV {
-  'Título Série': string;
-  'Título Original': string;
-  Ano: string;
-  Gênero: string;
-  Origem: string;
-  Diretor: string;
-  Elenco: string;
-  Idade: string;
-  Temporada: string;
-  'Número Temporadas': string;
-  Episódio: string;
-  'Título Episódio': string;
-  Duração: string;
-  Diretório: string;
-  Thumbnail?: string;
-  Link_480p?: string;
-  Link_720p?: string;
-  Link_1080p?: string;
-}
-
-type ConteudoCSV = FilmeCSV | SerieCSV;
+type ImportStats = {
+  success: boolean;
+  message: string;
+  imported?: number;
+  total?: number;
+};
 
 export const useCSVImport = () => {
   const [isImporting, setIsImporting] = useState(false);
-  const [importStats, setImportStats] = useState<{
-    success: boolean;
-    message: string;
-    imported: number;
-    total: number;
-  } | null>(null);
+  const [importStats, setImportStats] = useState<ImportStats | null>(null);
   const [importErrors, setImportErrors] = useState<string[]>([]);
 
-  // Função para validar os dados do CSV
-  const validateCSVData = (data: Record<string, unknown>[]): { 
-    valid: boolean; 
-    errors: string[] 
-  } => {
-    const errors: string[] = [];
-    
-    if (data.length === 0) {
-      errors.push('O arquivo CSV está vazio.');
-      return { valid: false, errors };
-    }
+  const resetImport = () => {
+    setImportStats(null);
+    setImportErrors([]);
+  };
 
-    // Verificar se as colunas obrigatórias estão presentes para cada tipo
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-      
-      // É uma série ou um filme?
-      const isSerie = isSerieCsv(row);
-      
-      if (isSerie) {
-        const serie = row as unknown as SerieCSV;
-        // Validação para séries
-        if (!serie['Título Série']) {
-          errors.push(`Linha ${i + 1}: Campo 'Título Série' é obrigatório para séries.`);
+  const convertCSVToContentItems = (results: Papa.ParseResult<Record<string, unknown>>): ContentItem[] => {
+    const contentItems: ContentItem[] = [];
+    const errors: string[] = [];
+
+    results.data.forEach((row, index) => {
+      try {
+        // Skip empty rows or header row if it's not data
+        if (Object.keys(row).length === 0 || 
+            (index === 0 && row['Título'] === 'Título')) {
+          return;
         }
-        if (!serie.Temporada) {
-          errors.push(`Linha ${i + 1}: Campo 'Temporada' é obrigatório para séries.`);
+
+        // Check if this is a movie or series by looking for series-specific fields
+        const isSeries = row['Temporada'] !== undefined && 
+                         row['Número Temporadas'] !== undefined && 
+                         row['Episódio'] !== undefined;
+        
+        // Validate required fields
+        const titulo = row['Título'] as string;
+        const diretorio = row['Diretório'] as string;
+
+        if (!titulo) {
+          errors.push(`Linha ${index + 1}: Campo 'Título' é obrigatório`);
+          return;
         }
-        if (!serie['Número Temporadas']) {
-          errors.push(`Linha ${i + 1}: Campo 'Número Temporadas' é obrigatório para séries.`);
+
+        if (!diretorio) {
+          errors.push(`Linha ${index + 1}: Campo 'Diretório' é obrigatório`);
+          return;
         }
-        if (!serie.Episódio) {
-          errors.push(`Linha ${i + 1}: Campo 'Episódio' é obrigatório para séries.`);
-        }
-        if (!serie['Título Episódio']) {
-          errors.push(`Linha ${i + 1}: Campo 'Título Episódio' é obrigatório para séries.`);
-        }
-      } else {
-        const filme = row as unknown as FilmeCSV;
-        // Validação para filmes
-        if (!filme.Título) {
-          errors.push(`Linha ${i + 1}: Campo 'Título' é obrigatório para filmes.`);
-        }
-      }
-      
-      // Validação comum para ambos tipos
-      const comum = row as unknown as ConteudoCSV;
-      if (!comum.Diretório) {
-        errors.push(`Linha ${i + 1}: Campo 'Diretório' é obrigatório.`);
-      } else {
-        // Verificar se o diretório é válido
-        const diretoriosValidos = [
-          'Netflix', 'Prime Video', 'Disney Plus', 'Max', 'Paramount Plus', 
-          'Globoplay', 'Hulu', 'Crunchyroll', 'Cinema'
+
+        // Check if directory is valid
+        const validDirectories = [
+          'Netflix', 'Prime Video', 'Disney Plus', 'Max', 
+          'Paramount Plus', 'Globoplay', 'Hulu', 'Crunchyroll', 'Cinema'
         ];
         
-        if (!diretoriosValidos.includes(comum.Diretório)) {
-          errors.push(`Linha ${i + 1}: Diretório '${comum.Diretório}' não é válido. Diretórios válidos: ${diretoriosValidos.join(', ')}.`);
+        if (!validDirectories.includes(diretorio)) {
+          errors.push(`Linha ${index + 1}: Diretório '${diretorio}' inválido. Use um dos seguintes: ${validDirectories.join(', ')}`);
+          return;
         }
-      }
-    }
-    
-    return {
-      valid: errors.length === 0,
-      errors
-    };
-  };
 
-  // Função para verificar se uma linha representa uma série
-  const isSerieCsv = (row: any): boolean => {
-    const tseries = row as unknown as SerieCSV;
-    return !!(tseries['Título Série'] && tseries.Temporada && tseries['Número Temporadas']);
-  };
+        // Base content item for both movies and series
+        const contentItem: Partial<ContentItem> = {
+          titulo: titulo,
+          tipo: isSeries ? 'serie' : 'filme',
+          descricao: (row['Sinopse'] || row['Descrição']) as string || '',
+          ano_lancamento: parseInt(row['Ano'] as string) || new Date().getFullYear(),
+          classificacao_etaria: (row['Idade'] || row['Classificação']) as string || '12',
+          status: 'pendente',
+          gratuito: row['Gratuito'] === 'sim' || row['Gratuito'] === 'true' || false,
+          generos: row['Gênero'] ? (row['Gênero'] as string).split(',').map(g => g.trim()) : [],
+          poster_url: row['Thumbnail'] as string || '',
+          video_url_480p: row['Link_480p'] as string || '',
+          video_url_720p: row['Link_720p'] as string || '',
+          video_url_1080p: row['Link_1080p'] as string || '',
+          metadata: {
+            diretorio: diretorio,
+            titulo_original: row['Título Original'] as string || titulo,
+            origem: row['Origem'] as string || '',
+            diretor: row['Diretor'] as string || '',
+            elenco: row['Elenco'] as string || ''
+          }
+        };
 
-  // Função para processar o CSV e transformar em ContentItem[]
-  const processCSVData = (data: Record<string, unknown>[]): ContentItem[] => {
-    const contentItems: ContentItem[] = [];
-    
-    for (const row of data) {
-      if (isSerieCsv(row)) {
-        // Processar série
-        const serie = row as unknown as SerieCSV;
-        contentItems.push({
-          id: `import-${Math.random().toString(36).substr(2, 9)}`,
-          tipo: 'serie',
-          titulo: serie['Título Série'],
-          descricao: `Série: ${serie['Título Série']}`,
-          ano_lancamento: parseInt(serie.Ano, 10) || new Date().getFullYear(),
-          classificacao_etaria: serie.Idade.replace('+', ''),
-          gratuito: false,
-          duracao: serie.Duração || `${serie['Número Temporadas']} temporadas`,
-          poster_url: serie.Thumbnail || '',
-          backdrop_url: '',
-          video_url: '',
-          video_url_480p: serie.Link_480p || '',
-          video_url_720p: serie.Link_720p || '',
-          video_url_1080p: serie.Link_1080p || '',
-          destaque: false,
-          status: 'pendente',
-          generos: serie.Gênero.split(',').map(g => g.trim()),
-          data_adicao: new Date().toISOString(),
-          metadata: {
-            diretorio: serie.Diretório,
-            titulo_original: serie['Título Original'],
-            origem: serie.Origem,
-            diretor: serie.Diretor,
-            elenco: serie.Elenco,
-            temporada: parseInt(serie.Temporada, 10) || 1,
-            episodio: parseInt(serie.Episódio, 10) || 1,
-            total_temporadas: parseInt(serie['Número Temporadas'], 10) || 1,
-            titulo_episodio: serie['Título Episódio'],
-            episodios: [
-              {
-                numero_temporada: parseInt(serie.Temporada, 10) || 1,
-                numero_episodio: parseInt(serie.Episódio, 10) || 1,
-                titulo: serie['Título Episódio'],
-                duracao: serie.Duração
-              }
-            ]
-          }
-        });
-      } else {
-        // Processar filme
-        const filme = row as unknown as FilmeCSV;
-        contentItems.push({
-          id: `import-${Math.random().toString(36).substr(2, 9)}`,
-          tipo: 'filme',
-          titulo: filme.Título,
-          descricao: `Filme: ${filme.Título}`,
-          ano_lancamento: parseInt(filme.Ano, 10) || new Date().getFullYear(),
-          classificacao_etaria: filme.Idade.replace('+', ''),
-          gratuito: false,
-          duracao: filme.Duração,
-          poster_url: filme.Thumbnail || '',
-          backdrop_url: '',
-          video_url: '',
-          video_url_480p: filme.Link_480p || '',
-          video_url_720p: filme.Link_720p || '',
-          video_url_1080p: filme.Link_1080p || '',
-          destaque: false,
-          status: 'pendente',
-          generos: filme.Gênero.split(',').map(g => g.trim()),
-          data_adicao: new Date().toISOString(),
-          metadata: {
-            diretorio: filme.Diretório,
-            titulo_original: filme['Título Original'],
-            origem: filme.Origem,
-            diretor: filme.Diretor,
-            elenco: filme.Elenco
-          }
-        });
+        // Add series-specific fields
+        if (isSeries) {
+          const temporada = parseInt(row['Temporada'] as string) || 1;
+          const totalTemporadas = parseInt(row['Número Temporadas'] as string) || 1;
+          const episodio = parseInt(row['Episódio'] as string) || 1;
+          const tituloEpisodio = row['Título Episódio'] as string || `Episódio ${episodio}`;
+          const duracao = row['Duração'] as string || '45min';
+          
+          contentItem.duracao = `${totalTemporadas} temporadas`;
+          contentItem.metadata = {
+            ...contentItem.metadata,
+            temporada: temporada,
+            episodio: episodio,
+            total_temporadas: totalTemporadas,
+            titulo_episodio: tituloEpisodio,
+            episodios: [{
+              numero_temporada: temporada,
+              numero_episodio: episodio,
+              titulo: tituloEpisodio,
+              duracao: duracao
+            }]
+          };
+        } else {
+          // Movie duration
+          contentItem.duracao = row['Duração'] as string || '2h';
+        }
+
+        contentItems.push(contentItem as ContentItem);
+      } catch (error) {
+        console.error('Error processing row:', row, error);
+        errors.push(`Linha ${index + 1}: Erro ao processar - ${(error as Error).message}`);
       }
-    }
-    
+    });
+
+    setImportErrors(errors);
     return contentItems;
   };
 
-  // Função principal para importar o CSV
-  const importCSV = async (file: File): Promise<boolean> => {
-    setIsImporting(true);
-    setImportErrors([]);
-    setImportStats(null);
-    
+  const importCSV = async (file: File) => {
     try {
-      // Parsear o arquivo CSV
-      const parseResult = await new Promise<Papa.ParseResult<Record<string, unknown>>>((resolve, reject) => {
-        Papa.parse(file, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => resolve(results),
-          error: (error) => reject(error)
-        });
+      setIsImporting(true);
+      setImportErrors([]);
+      setImportStats(null);
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async (results: Papa.ParseResult<Record<string, unknown>>) => {
+          try {
+            if (results.errors && results.errors.length > 0) {
+              setImportErrors(results.errors.map(error => 
+                `Erro na linha ${error.row}: ${error.message}`
+              ));
+              setImportStats({
+                success: false,
+                message: 'Falha ao processar o arquivo CSV. Verifique os erros.',
+              });
+              return;
+            }
+
+            if (!results.data || results.data.length === 0) {
+              setImportErrors(['CSV não contém dados válidos.']);
+              setImportStats({
+                success: false,
+                message: 'Arquivo CSV vazio ou inválido.',
+              });
+              return;
+            }
+
+            // Convert CSV data to content items
+            const contentItems = convertCSVToContentItems(results);
+            
+            if (contentItems.length === 0) {
+              setImportStats({
+                success: false,
+                message: 'Nenhum conteúdo válido para importar.',
+              });
+              return;
+            }
+
+            // Send to API
+            const result = await contentAPI.importContentFromCSV(contentItems);
+            setImportStats(result);
+          } catch (error) {
+            console.error('Error processing CSV:', error);
+            setImportErrors([`Erro ao processar CSV: ${(error as Error).message}`]);
+            setImportStats({
+              success: false,
+              message: 'Erro ao processar dados. Verifique o formato do arquivo.',
+            });
+          } finally {
+            setIsImporting(false);
+          }
+        },
+        error: (error) => {
+          console.error('CSV parsing error:', error);
+          setImportErrors([`Erro ao analisar CSV: ${error.message}`]);
+          setImportStats({
+            success: false,
+            message: 'Falha ao analisar o arquivo CSV.',
+          });
+          setIsImporting(false);
+        }
       });
-      
-      // Validar os dados do CSV
-      const { valid, errors } = validateCSVData(parseResult.data);
-      
-      if (!valid) {
-        setImportErrors(errors);
-        setImportStats({
-          success: false,
-          message: 'Falha na validação do CSV.',
-          imported: 0,
-          total: parseResult.data.length
-        });
-        setIsImporting(false);
-        return false;
-      }
-      
-      // Processar os dados do CSV para o formato ContentItem
-      const contentItems = processCSVData(parseResult.data);
-      
-      // Chamar a API para importar os conteúdos
-      const result = await contentAPI.importContentFromCSV(contentItems);
-      
-      setImportStats(result);
-      setIsImporting(false);
-      return result.success;
-      
     } catch (error) {
-      console.error('Erro ao importar CSV:', error);
-      setImportErrors([`Erro ao processar arquivo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`]);
+      console.error('CSV import error:', error);
+      setImportErrors([`Erro: ${(error as Error).message}`]);
       setImportStats({
         success: false,
-        message: 'Falha ao processar o arquivo CSV.',
-        imported: 0,
-        total: 0
+        message: 'Falha ao importar o arquivo CSV.',
       });
       setIsImporting(false);
-      return false;
     }
   };
 
@@ -273,11 +206,6 @@ export const useCSVImport = () => {
     isImporting,
     importStats,
     importErrors,
-    resetImport: () => {
-      setImportErrors([]);
-      setImportStats(null);
-    }
+    resetImport,
   };
 };
-
-export default useCSVImport;
