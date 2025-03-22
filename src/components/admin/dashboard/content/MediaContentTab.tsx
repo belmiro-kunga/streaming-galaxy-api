@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -66,14 +67,24 @@ const MediaContentTab = () => {
     );
   
   const handleEditContent = (item: ContentItem) => {
+    // Convert item.duracao (string) to a number or null for Content type
+    let durationNumber: number | null = null;
+    
+    if (item.duracao) {
+      // Extract numbers from string like "2h 30min" or "5 temporadas"
+      const durationMatch = item.duracao.match(/\d+/g);
+      if (durationMatch && durationMatch.length > 0) {
+        durationNumber = parseInt(durationMatch[0]);
+      }
+    }
+    
     const contentData: Partial<Content> = {
       id: item.id,
       tipo: item.tipo,
       titulo: item.titulo,
       descricao: item.descricao,
       ano_lancamento: item.ano_lancamento,
-      duracao: item.duracao ? 
-        parseInt(item.duracao.replace(/[^0-9]/g, '')) || null : null,
+      duracao: durationNumber, // Now correctly typed as number | null
       classificacao_etaria: item.classificacao_etaria,
       status: item.status || 'pendente',
       gratuito: item.gratuito,
