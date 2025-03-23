@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { AdminDashboardProvider, useAdminDashboard } from '@/contexts/admin';
 import DashboardLayout from '@/components/admin/dashboard/DashboardLayout';
@@ -28,11 +27,20 @@ const AdminDashboardContent = () => {
     const tabName = path.split('/admin-dashboard/')[1];
     
     if (tabName) {
-      setActiveTab(tabName);
+      // Map URL paths to the actual tab values as needed
+      const tabMapping: Record<string, string> = {
+        'media-content': 'media-content',
+        'tv-channels': 'tv-channels',
+        'content-import': 'content-import',
+        'content': 'content-manager',
+        // Add other mappings as needed
+      };
+      
+      setActiveTab(tabMapping[tabName] || tabName);
     } else {
       setActiveTab('overview'); // Default to overview if no specific tab
     }
-  }, [location.pathname]);
+  }, [location.pathname, setActiveTab]);
 
   // Use React Query to fetch subscription plans
   const plansQuery = useQuery({

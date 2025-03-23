@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import Home from "@/pages/Home";
 import { Animation } from "@/pages/Animation";
@@ -128,6 +127,18 @@ export const router = createBrowserRouter([
   },
   {
     path: "/admin-dashboard/content",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/media-content",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/tv-channels",
+    element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/admin-dashboard/content-import",
     element: <ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>,
   },
   {

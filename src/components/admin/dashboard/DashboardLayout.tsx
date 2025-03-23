@@ -5,7 +5,7 @@ import Header from './Header';
 import OverviewTab from './overview/OverviewTab';
 import UsersTab from './users/UsersTab';
 import ReportsTab from './ReportsTab';
-import SettingsTab from './SettingsTab';
+import SettingsTab from './settings/SystemSettings';
 import ContentManagerTab from './content/ContentManagerTab';
 import MediaContentTab from './content/MediaContentTab';
 import TVChannelsTab from './content/TVChannelsTab';
@@ -72,6 +72,7 @@ const DashboardLayout = () => {
             {activeTab === 'content-manager' && <ContentManagerTab />}
             {activeTab === 'media-content' && <MediaContentTab />}
             {activeTab === 'tv-channels' && <TVChannelsTab />}
+            {activeTab === 'content-import' && <ImportContentTab />}
             {activeTab === 'payments' && (
               <PaymentsTab 
                 pendingPayments={pendingPayments}
@@ -79,7 +80,6 @@ const DashboardLayout = () => {
                 rejectPayment={rejectPayment}
               />
             )}
-            {activeTab === 'content-import' && <ImportContentTab />}
           </div>
         </main>
       </div>
