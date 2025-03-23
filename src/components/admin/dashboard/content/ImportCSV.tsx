@@ -1,10 +1,10 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Upload, FileCheck, AlertCircle, Check } from 'lucide-react';
+import { Upload, FileCheck, AlertCircle, Check, FileWarning } from 'lucide-react';
 import { useCSVImport } from '@/hooks/use-csv-import';
 
 const ImportCSV = () => {
@@ -60,18 +60,11 @@ const ImportCSV = () => {
   };
 
   return (
-    <Card className="w-full shadow-md">
-      <CardHeader>
-        <CardTitle>Importar Conteúdo</CardTitle>
-        <CardDescription>
-          Faça upload de um arquivo CSV contendo filmes e séries para adicionar ao catálogo
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent>
+    <Card className="w-full shadow-sm border">
+      <CardContent className="p-6">
         <div 
-          className={`border-2 border-dashed rounded-lg p-6 text-center ${
-            dragActive ? 'border-primary bg-primary/10' : 'border-gray-300'
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            dragActive ? 'border-primary bg-primary/5' : 'border-border'
           }`}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
@@ -87,41 +80,41 @@ const ImportCSV = () => {
           />
           
           {!selectedFile ? (
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="rounded-full bg-gray-100 p-3">
-                <Upload className="h-6 w-6 text-gray-500" />
+            <div className="flex flex-col items-center justify-center space-y-4 py-8">
+              <div className="rounded-full bg-primary/10 p-4">
+                <Upload className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium">
-                  Arraste e solte um arquivo CSV aqui ou
+                <p className="text-lg font-medium">
+                  Arraste e solte um arquivo CSV aqui
                 </p>
-                <p className="text-xs text-gray-500">
-                  CSV com os detalhes de filmes e séries
+                <p className="text-sm text-muted-foreground mt-1">
+                  ou clique para selecionar um arquivo
                 </p>
               </div>
-              <Button onClick={handleButtonClick} variant="outline" size="sm">
+              <Button onClick={handleButtonClick} variant="secondary" size="lg" className="mt-4">
                 Selecionar Arquivo
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="rounded-full bg-green-100 p-3">
-                <FileCheck className="h-6 w-6 text-green-500" />
+            <div className="flex flex-col items-center justify-center space-y-4 py-8">
+              <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-4">
+                <FileCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm font-medium">{selectedFile.name}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-lg font-medium">{selectedFile.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   {(selectedFile.size / 1024).toFixed(2)} KB
                 </p>
               </div>
-              <div className="flex space-x-2">
-                <Button onClick={handleButtonClick} variant="outline" size="sm">
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <Button onClick={handleButtonClick} variant="outline">
                   Alterar Arquivo
                 </Button>
                 <Button 
                   onClick={handleImport} 
-                  disabled={isImporting} 
-                  size="sm"
+                  disabled={isImporting}
+                  className="sm:ml-2"
                 >
                   {isImporting ? 'Importando...' : 'Importar Dados'}
                 </Button>
@@ -131,45 +124,44 @@ const ImportCSV = () => {
         </div>
         
         {isImporting && (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm text-center">Processando arquivo...</p>
-            <Progress value={50} className="h-2" />
+          <div className="mt-6 space-y-3">
+            <p className="text-center font-medium">Processando arquivo...</p>
+            <Progress value={importStats?.progress || 50} className="h-2" />
+            <p className="text-center text-sm text-muted-foreground">
+              Isso pode levar alguns segundos dependendo do tamanho do arquivo
+            </p>
           </div>
         )}
         
         {importErrors.length > 0 && (
-          <Alert className="mt-4" variant="destructive">
+          <Alert className="mt-6" variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erros na importação</AlertTitle>
+            <AlertTitle className="flex items-center gap-2">
+              <FileWarning className="h-4 w-4" />
+              Erros na importação
+            </AlertTitle>
             <AlertDescription>
-              <ul className="mt-2 list-disc pl-5 text-sm">
-                {importErrors.map((error, i) => (
-                  <li key={i}>{error}</li>
-                ))}
-              </ul>
+              <div className="mt-2 max-h-48 overflow-y-auto">
+                <ul className="list-disc pl-5 text-sm space-y-1">
+                  {importErrors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
+              </div>
             </AlertDescription>
           </Alert>
         )}
         
         {importStats && importStats.success && (
-          <Alert className="mt-4" variant="default">
+          <Alert className="mt-6" variant="default">
             <Check className="h-4 w-4" />
-            <AlertTitle>Importação concluída</AlertTitle>
+            <AlertTitle className="text-green-600 dark:text-green-400">Importação concluída</AlertTitle>
             <AlertDescription>
               {importStats.message}
             </AlertDescription>
           </Alert>
         )}
       </CardContent>
-      
-      <CardFooter className="text-sm text-gray-500 flex-col items-start">
-        <p>Instruções:</p>
-        <ul className="list-disc pl-5 mt-2 space-y-1">
-          <li>Certifique-se de que o CSV possui as colunas corretas para filmes e séries</li>
-          <li>O campo Diretório deve ser um dos seguintes: Netflix, Prime Video, Disney Plus, Max, Paramount Plus, Globoplay, Hulu, Crunchyroll, Cinema</li>
-          <li>Após importação, o status dos itens será "pendente", e você poderá aprová-los ou rejeitá-los na tela de Filmes e Séries</li>
-        </ul>
-      </CardFooter>
     </Card>
   );
 };

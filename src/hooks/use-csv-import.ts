@@ -9,6 +9,7 @@ type ImportStats = {
   message: string;
   imported?: number;
   total?: number;
+  progress?: number;
 };
 
 export const useCSVImport = () => {
@@ -128,13 +129,23 @@ export const useCSVImport = () => {
     try {
       setIsImporting(true);
       setImportErrors([]);
-      setImportStats(null);
+      setImportStats({
+        success: false,
+        message: 'Iniciando importação...',
+        progress: 5
+      });
 
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: async (results: Papa.ParseResult<Record<string, unknown>>) => {
           try {
+            setImportStats(prev => ({
+              ...prev!,
+              message: 'Validando arquivo CSV...',
+              progress: 20
+            }));
+            
             if (results.errors && results.errors.length > 0) {
               setImportErrors(results.errors.map(error => 
                 `Erro na linha ${error.row}: ${error.message}`
@@ -142,6 +153,7 @@ export const useCSVImport = () => {
               setImportStats({
                 success: false,
                 message: 'Falha ao processar o arquivo CSV. Verifique os erros.',
+                progress: 100
               });
               return;
             }
@@ -151,30 +163,50 @@ export const useCSVImport = () => {
               setImportStats({
                 success: false,
                 message: 'Arquivo CSV vazio ou inválido.',
+                progress: 100
               });
               return;
             }
 
             // Convert CSV data to content items
+            setImportStats(prev => ({
+              ...prev!,
+              message: 'Convertendo dados...',
+              progress: 40
+            }));
+            
             const contentItems = convertCSVToContentItems(results);
             
             if (contentItems.length === 0) {
               setImportStats({
                 success: false,
                 message: 'Nenhum conteúdo válido para importar.',
+                progress: 100
               });
               return;
             }
 
             // Send to API
+            setImportStats(prev => ({
+              ...prev!,
+              message: 'Enviando para o servidor...',
+              progress: 70,
+              total: contentItems.length
+            }));
+            
             const result = await contentAPI.importContentFromCSV(contentItems);
-            setImportStats(result);
+            
+            setImportStats({
+              ...result,
+              progress: 100
+            });
           } catch (error) {
             console.error('Error processing CSV:', error);
             setImportErrors([`Erro ao processar CSV: ${(error as Error).message}`]);
             setImportStats({
               success: false,
               message: 'Erro ao processar dados. Verifique o formato do arquivo.',
+              progress: 100
             });
           } finally {
             setIsImporting(false);
@@ -186,6 +218,7 @@ export const useCSVImport = () => {
           setImportStats({
             success: false,
             message: 'Falha ao analisar o arquivo CSV.',
+            progress: 100
           });
           setIsImporting(false);
         }
@@ -196,6 +229,7 @@ export const useCSVImport = () => {
       setImportStats({
         success: false,
         message: 'Falha ao importar o arquivo CSV.',
+        progress: 100
       });
       setIsImporting(false);
     }

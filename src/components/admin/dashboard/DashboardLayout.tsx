@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import OverviewTab from './overview/OverviewTab';
@@ -32,10 +32,10 @@ const DashboardLayout = () => {
     manageSubscription
   } = useAdminDashboard();
   
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header 
@@ -44,8 +44,8 @@ const DashboardLayout = () => {
           searchQuery={searchQuery} 
           setSearchQuery={setSearchQuery} 
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mx-auto max-w-7xl">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/30">
+          <div className="container mx-auto max-w-7xl pb-10">
             {activeTab === 'overview' && (
               <OverviewTab 
                 userStats={userStats} 
