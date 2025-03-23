@@ -75,32 +75,12 @@ const MediaContentTab = () => {
       }
     }
     
-    const contentData: Partial<Content> = {
-      id: item.id,
-      tipo: item.tipo,
-      titulo: item.titulo,
-      descricao: item.descricao,
-      ano_lancamento: item.ano_lancamento,
+    const contentToEdit: ContentItem = {
+      ...item,
       duracao: durationNumber,
-      classificacao_etaria: item.classificacao_etaria,
-      status: item.status || 'pendente',
-      gratuito: item.gratuito,
-      metadata: item.metadata || {},
-      created_at: item.data_adicao || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: null,
-      deleted_at: null,
-      generos: item.generos?.map(g => ({ id: g, nome: g })) || [],
-      poster_url: item.poster_url,
-      backdrop_url: item.backdrop_url,
-      trailer_url: item.trailer_url,
-      video_url_480p: item.video_url_480p,
-      video_url_720p: item.video_url_720p,
-      video_url_1080p: item.video_url_1080p,
-      destaque: item.destaque
     };
     
-    setSelectedContent(contentData as ContentItem);
+    setSelectedContent(contentToEdit);
     setIsFormDialogOpen(true);
   };
   
@@ -341,7 +321,7 @@ const MediaContentTab = () => {
         <DialogContent className="max-w-6xl bg-gray-900 border-gray-800 p-0">
           <ContentForm 
             contentType={selectedContent?.tipo === 'serie' ? 'Série' : 'Filme'}
-            initialData={selectedContent || undefined}
+            initialData={selectedContent}
             onCancel={() => {
               setIsFormDialogOpen(false);
               setSelectedContent(null);
