@@ -1,16 +1,22 @@
+
 import React from 'react';
 import {
   LayoutDashboard,
   Users,
-  Tv,
-  Settings,
   FileText,
-  Clapperboard,
-  Upload
+  Settings,
+  Television,
+  Film,
+  Upload,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
 } from 'lucide-react';
-import { NavItem } from '@/components/ui/nav-item';
 import { useAdminDashboard } from '@/contexts/admin';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -30,95 +36,165 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     }
   };
 
+  const NavItem = ({ 
+    icon, 
+    label, 
+    tabName, 
+    badge 
+  }: { 
+    icon: React.ReactNode; 
+    label: string; 
+    tabName: string;
+    badge?: number | string;
+  }) => {
+    const isActive = activeTab === tabName;
+    
+    return (
+      <button
+        onClick={() => handleTabChange(tabName)}
+        className={cn(
+          "flex items-center w-full px-3 py-2 text-sm rounded-md transition-colors mb-1",
+          isActive 
+            ? "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-foreground font-medium" 
+            : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+        )}
+      >
+        <span className="mr-3 text-lg">{icon}</span>
+        <span className="flex-1">{label}</span>
+        {badge && (
+          <span className={cn(
+            "rounded-full px-2 py-0.5 text-xs font-medium",
+            isActive 
+              ? "bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary-foreground" 
+              : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+          )}>
+            {badge}
+          </span>
+        )}
+      </button>
+    );
+  };
+
   return (
-    <div
-      className={`fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out md:translate-x-0 md:shadow-none`}
-    >
-      <div className="space-y-4 py-4">
-        <div className="px-6 flex items-center justify-between">
-          <a href="/admin-dashboard" className="flex items-center space-x-2 font-semibold">
+    <>
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "flex flex-col fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out lg:relative lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-2">
             <FileText className="h-6 w-6 text-primary" />
-            <span>Admin Dashboard</span>
-          </a>
+            <span className="text-lg font-semibold dark:text-white">CinePlay</span>
+          </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <ChevronLeft className="h-5 w-5" />
           </button>
         </div>
         
-        <nav className="space-y-1 px-2">
-          <NavItem
-            icon={<LayoutDashboard size={16} />}
-            label="Visão Geral"
-            active={activeTab === 'overview'}
-            onClick={() => handleTabChange('overview')}
-          />
-          <NavItem
-            icon={<Users size={16} />}
-            label="Usuários"
-            active={activeTab === 'users'}
-            onClick={() => handleTabChange('users')}
-          />
+        <div className="flex-1 overflow-y-auto py-4 px-3">
+          <nav className="space-y-1">
+            <NavItem 
+              icon={<LayoutDashboard size={18} />} 
+              label="Visão Geral" 
+              tabName="overview" 
+            />
+            <NavItem 
+              icon={<Users size={18} />} 
+              label="Usuários" 
+              tabName="users" 
+            />
+            <NavItem 
+              icon={<BarChart3 size={18} />} 
+              label="Relatórios" 
+              tabName="reports" 
+            />
+          </nav>
           
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+          <Separator className="my-4 dark:bg-gray-700" />
+          
+          <div className="mb-2">
+            <h3 className="px-3 text-xs uppercase font-semibold text-gray-500 dark:text-gray-400">
               Gerenciar Conteúdo
-            </p>
-            
-            <NavItem
-              icon={<Clapperboard size={16} />}
-              label="Filmes e Séries"
-              active={activeTab === 'media-content'}
-              onClick={() => handleTabChange('media-content')}
-            />
-            <NavItem
-              icon={<Upload size={16} />}
-              label="Importar Conteúdo"
-              active={activeTab === 'content-import'}
-              onClick={() => handleTabChange('content-import')}
-            />
-            <NavItem
-              icon={<Tv size={16} />}
-              label="Canais de TV"
-              active={activeTab === 'tv-channels'}
-              onClick={() => handleTabChange('tv-channels')}
-            />
+            </h3>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <p className="px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-              Gerenciar Pagamentos
-            </p>
-            
-            <NavItem
-              icon={<Tv size={16} />}
-              label="Pagamentos"
-              active={activeTab === 'payments'}
-              onClick={() => handleTabChange('payments')}
+          <nav className="space-y-1">
+            <NavItem 
+              icon={<Film size={18} />} 
+              label="Filmes e Séries" 
+              tabName="media-content" 
             />
+            <NavItem 
+              icon={<Upload size={18} />} 
+              label="Importar Conteúdo" 
+              tabName="content-import" 
+            />
+            <NavItem 
+              icon={<Television size={18} />} 
+              label="Canais de TV" 
+              tabName="tv-channels" 
+            />
+          </nav>
+          
+          <Separator className="my-4 dark:bg-gray-700" />
+          
+          <div className="mb-2">
+            <h3 className="px-3 text-xs uppercase font-semibold text-gray-500 dark:text-gray-400">
+              Gerenciar Pagamentos
+            </h3>
           </div>
-
-          <NavItem
-            icon={<Settings size={16} />}
-            label="Configurações"
-            active={activeTab === 'settings'}
-            onClick={() => handleTabChange('settings')}
-          />
-        </nav>
+          
+          <nav className="space-y-1">
+            <NavItem 
+              icon={<CreditCard size={18} />} 
+              label="Pagamentos" 
+              tabName="payments"
+              badge={pendingPayments?.length || 0}
+            />
+          </nav>
+          
+          <Separator className="my-4 dark:bg-gray-700" />
+          
+          <nav className="space-y-1">
+            <NavItem 
+              icon={<Settings size={18} />} 
+              label="Configurações" 
+              tabName="settings" 
+            />
+          </nav>
+        </div>
+        
+        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hidden lg:flex items-center justify-center w-full p-2 text-sm text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {sidebarOpen ? (
+              <>
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                <span>Recolher</span>
+              </>
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

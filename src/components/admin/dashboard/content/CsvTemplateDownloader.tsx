@@ -1,8 +1,14 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 const CsvTemplateDownloader = () => {
   const { toast } = useToast();
@@ -60,32 +66,28 @@ const CsvTemplateDownloader = () => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
-      <Button 
-        variant="default" 
-        onClick={() => downloadTemplate('combined')}
-        className="gap-2"
-      >
-        <Download className="h-4 w-4" />
-        Baixar Template CSV
-      </Button>
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => downloadTemplate('movie')}
-        >
-          Filmes
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="default" className="gap-2">
+          <Download className="h-4 w-4" />
+          Baixar Template CSV
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => downloadTemplate('series')}
-        >
-          Séries
-        </Button>
-      </div>
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem onClick={() => downloadTemplate('combined')}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span>Template Completo</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => downloadTemplate('movie')}>
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          <span>Template para Filmes</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => downloadTemplate('series')}>
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          <span>Template para Séries</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

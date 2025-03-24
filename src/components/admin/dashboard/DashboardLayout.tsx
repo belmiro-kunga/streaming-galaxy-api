@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import OverviewTab from './overview/OverviewTab';
@@ -13,6 +13,7 @@ import PaymentsTab from './payments/PaymentsTab';
 import ImportContentTab from './content/ImportContentTab';
 import DialogContainer from './DialogContainer';
 import { useAdminDashboard } from '@/contexts/admin';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const DashboardLayout = () => {
   const { 
@@ -34,18 +35,32 @@ const DashboardLayout = () => {
   
   const [searchQuery, setSearchQuery] = React.useState('');
 
+  // Set body class for better theming
+  useEffect(() => {
+    document.body.classList.add('admin-dashboard');
+    return () => {
+      document.body.classList.remove('admin-dashboard');
+    };
+  }, []);
+
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="flex flex-col flex-1 overflow-hidden">
+      
+      <div className="flex flex-col flex-1 w-0 overflow-hidden">
         <Header 
           sidebarOpen={sidebarOpen} 
           setSidebarOpen={setSidebarOpen} 
           searchQuery={searchQuery} 
           setSearchQuery={setSearchQuery} 
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/30">
-          <div className="container mx-auto max-w-7xl pb-10">
+        
+        <main className="relative flex-1 overflow-y-auto focus:outline-none bg-gray-50 dark:bg-gray-900 p-4 md:p-6 transition-colors duration-200">
+          <div className="max-w-7xl mx-auto">
+            <div className="absolute top-4 right-4 z-10">
+              <ThemeToggle />
+            </div>
+            
             {activeTab === 'overview' && (
               <OverviewTab 
                 userStats={userStats} 

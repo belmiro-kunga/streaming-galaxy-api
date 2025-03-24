@@ -121,12 +121,30 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
 }
 
 .animate-slide-up {
   animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-out forwards;
 }
 
 /* Glass effect */
@@ -153,6 +171,44 @@
 
 .dark .mono-dark-button {
   @apply bg-violet-500 text-white hover:bg-violet-600;
+}
+
+/* Admin Dashboard Specific Styles */
+.admin-dashboard {
+  @apply bg-gray-50 dark:bg-gray-900;
+}
+
+.admin-dashboard-card {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-all hover:shadow-md;
+}
+
+.admin-dashboard-card-hover {
+  @apply hover:border-primary/30 dark:hover:border-primary/30 transition-colors;
+}
+
+.admin-dashboard-stats-card {
+  @apply bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-6;
+}
+
+/* Responsive Tables */
+.responsive-table {
+  @apply w-full text-sm text-left;
+}
+
+.responsive-table th {
+  @apply px-6 py-3 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium uppercase tracking-wider;
+}
+
+.responsive-table td {
+  @apply px-6 py-4 whitespace-nowrap;
+}
+
+.responsive-table tr {
+  @apply border-b border-gray-200 dark:border-gray-700;
+}
+
+.responsive-table tbody tr:hover {
+  @apply bg-gray-50 dark:bg-gray-800/50;
 }
 
 /* Smooth theme transition */
