@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { UniversalVideoPlayer } from './UniversalVideoPlayer';
 import { useVideoSource } from '@/hooks/use-video-source';
-import { Loader2, Info, Subtitles, Film } from 'lucide-react';
+import { Loader2, Info, Subtitles, Film, Play } from 'lucide-react';
 import { Card, CardContent } from './card';
 import { Badge } from './badge';
 import { Skeleton } from './skeleton';
@@ -26,7 +25,6 @@ export function VideoContentDisplay({
   const [selectedTab, setSelectedTab] = useState<string>('video');
   const [watchTime, setWatchTime] = useState<number>(0);
   
-  // Determine video URL based on content
   const videoUrl = 
     content.video_url_1080p || 
     content.video_url_720p || 
@@ -42,7 +40,6 @@ export function VideoContentDisplay({
   
   const playerOptions = getPlayerOptions();
   
-  // Format content type for display
   const formatContentType = (type: string) => {
     switch (type) {
       case 'filme':
@@ -56,7 +53,6 @@ export function VideoContentDisplay({
     }
   };
   
-  // Handle watch progress
   const handleProgress = (state: { 
     played: number; 
     playedSeconds: number; 
@@ -65,14 +61,12 @@ export function VideoContentDisplay({
   }) => {
     setWatchTime(state.playedSeconds);
     
-    // You would typically save this to your backend
     if (state.played > 0.1 && state.played % 0.1 < 0.01) {
       console.log(`Progress update: ${Math.round(state.played * 100)}% - ${Math.round(state.playedSeconds)}s`);
       // Save to backend here
     }
   };
   
-  // When content ends
   const handleEnded = () => {
     console.log("Content playback ended");
     // You could automatically play the next episode/related content here
@@ -80,7 +74,6 @@ export function VideoContentDisplay({
   
   return (
     <div className="flex flex-col w-full">
-      {/* Video Player Section */}
       <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
@@ -123,7 +116,6 @@ export function VideoContentDisplay({
         )}
       </div>
       
-      {/* Content Information Tabs */}
       <Tabs defaultValue="info" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="info">Informações</TabsTrigger>
@@ -133,11 +125,9 @@ export function VideoContentDisplay({
           <TabsTrigger value="related">Recomendados</TabsTrigger>
         </TabsList>
         
-        {/* Info Tab */}
         <TabsContent value="info" className="py-4">
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-start gap-6">
-              {/* Poster Image */}
               <div className="w-40 flex-shrink-0">
                 {content.poster_url ? (
                   <img 
@@ -150,7 +140,6 @@ export function VideoContentDisplay({
                 )}
               </div>
               
-              {/* Content Details */}
               <div className="flex-grow">
                 <h1 className="text-2xl font-bold mb-2">{content.titulo}</h1>
                 
@@ -172,7 +161,6 @@ export function VideoContentDisplay({
                   )}
                 </div>
                 
-                {/* Genres */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {content.generos?.map((genero, index) => (
                     <Badge 
@@ -185,10 +173,8 @@ export function VideoContentDisplay({
                   ))}
                 </div>
                 
-                {/* Description */}
                 <p className="text-gray-300 mb-4">{content.descricao}</p>
                 
-                {/* Metadata */}
                 {content.metadata && (
                   <div className="space-y-2 text-sm text-gray-400">
                     {content.metadata.diretor && (
@@ -213,7 +199,6 @@ export function VideoContentDisplay({
           </div>
         </TabsContent>
         
-        {/* Episodes Tab */}
         <TabsContent value="episodes" className="py-4">
           {content.tipo === 'serie' && content.metadata?.episodios?.length ? (
             <div className="space-y-4">
@@ -252,7 +237,6 @@ export function VideoContentDisplay({
           )}
         </TabsContent>
         
-        {/* Related Content Tab */}
         <TabsContent value="related" className="py-4">
           {relatedContent.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { EnhancedContentForm } from './EnhancedContentForm';
-import { ContentItem } from '@/types/api';
+import { ContentItem, Content } from '@/types/api';
 import { useToast } from '@/hooks/use-toast';
 import { contentAPI } from '@/services/content/contentAPI';
 
 interface ContentFormProps {
   contentType: 'Filme' | 'Série' | 'Documentário';
-  initialData?: Partial<ContentItem>;
+  initialData?: Partial<ContentItem> | Partial<Content>;
   onCancel: () => void;
   onSubmit: (data: ContentItem) => void;
 }
@@ -19,6 +19,15 @@ const ContentForm = ({
   onSubmit 
 }: ContentFormProps) => {
   const { toast } = useToast();
+
+  // Convert the initialData to ensure duracao is treated as a string for ContentItem
+  const processedInitialData: Partial<ContentItem> = initialData ? {
+    ...initialData,
+    // Convert the duration to string if it's a number (from Content type)
+    duracao: initialData.duracao !== undefined ? 
+      (typeof initialData.duracao === 'number' ? 
+        `${initialData.duracao} min` : initialData.duracao) : undefined
+  } : {};
 
   const handleSubmit = async (data: Partial<ContentItem>) => {
     try {
@@ -46,7 +55,7 @@ const ContentForm = ({
   return (
     <EnhancedContentForm
       contentType={contentType}
-      initialData={initialData}
+      initialData={processedInitialData}
       onSubmit={handleSubmit}
       onCancel={onCancel}
     />

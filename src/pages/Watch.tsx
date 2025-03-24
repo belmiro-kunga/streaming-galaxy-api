@@ -35,10 +35,12 @@ const Watch = () => {
         let related: ContentItem[] = [];
         
         if (genre) {
-          // If genre is a string, find its ID
+          // If genre is a string, find its ID 
           const genreId = typeof genre === 'string' 
             ? (await contentAPI.getAllGenres()).find(g => g.nome === genre)?.id
-            : genre.id;
+            : typeof genre === 'object' && genre !== null && 'id' in genre 
+              ? genre.id 
+              : undefined;
             
           if (genreId) {
             related = await contentAPI.getContentByGenre(genreId, 6);

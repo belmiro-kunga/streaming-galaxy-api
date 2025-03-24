@@ -321,7 +321,7 @@ const MediaContentTab = () => {
         <DialogContent className="max-w-6xl bg-gray-900 border-gray-800 p-0">
           <ContentForm 
             contentType={selectedContent?.tipo === 'serie' ? 'Série' : 'Filme'}
-            initialData={selectedContent as unknown as Partial<Content>}
+            initialData={selectedContent}
             onCancel={() => {
               setIsFormDialogOpen(false);
               setSelectedContent(null);
