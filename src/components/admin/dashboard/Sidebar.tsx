@@ -5,7 +5,7 @@ import {
   Users,
   FileText,
   Settings,
-  Television,
+  Tv,
   Film,
   Upload,
   CreditCard,
@@ -24,7 +24,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const { activeTab, setActiveTab } = useAdminDashboard();
+  const { activeTab, setActiveTab, pendingPayments } = useAdminDashboard();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -144,7 +144,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               tabName="content-import" 
             />
             <NavItem 
-              icon={<Television size={18} />} 
+              icon={<Tv size={18} />} 
               label="Canais de TV" 
               tabName="tv-channels" 
             />
